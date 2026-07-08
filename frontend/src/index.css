@@ -1,0 +1,126 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-bg: #0B0B0F;
+  --color-card: #12121A;
+  --color-border: #1F1F2E;
+  --color-text: #F3F4F6;
+  --color-muted: #9CA3AF;
+  --color-heading: #FFFFFF;
+}
+
+html.light {
+  --color-bg: #F3F4F6;
+  --color-card: #FFFFFF;
+  --color-border: #E5E7EB;
+  --color-text: #374151;
+  --color-muted: #6B7280;
+  --color-heading: #111827;
+}
+
+@layer base {
+  html, body, #root {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    font-family: 'Inter', sans-serif;
+    overflow-x: hidden;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+}
+
+/* Light mode styling adjustments */
+html.light h1,
+html.light h2,
+html.light h3,
+html.light h4,
+html.light h5,
+html.light h6 {
+  color: var(--color-heading) !important;
+}
+
+html.light p.text-dark-muted,
+html.light span.text-dark-muted,
+html.light div.text-dark-muted,
+html.light a.text-dark-muted,
+html.light svg.text-dark-muted,
+html.light span.text-dark-muted {
+  color: var(--color-muted) !important;
+}
+
+html.light .bg-dark-card {
+  background-color: var(--color-card) !important;
+}
+
+html.light .bg-dark-card\/60 {
+  background-color: rgba(255, 255, 255, 0.6) !important;
+}
+
+html.light .border-dark-border {
+  border-color: var(--color-border) !important;
+}
+
+html.light .border-dark-border\/60 {
+  border-color: rgba(229, 231, 235, 0.6) !important;
+}
+
+html.light .bg-dark\/60 {
+  background-color: rgba(243, 244, 246, 0.6) !important;
+}
+
+html.light .bg-dark\/40 {
+  background-color: rgba(243, 244, 246, 0.4) !important;
+}
+
+html.light .bg-dark\/80 {
+  background-color: rgba(243, 244, 246, 0.8) !important;
+}
+
+html.light input,
+html.light select,
+html.light textarea {
+  background-color: #FFFFFF !important;
+  color: #111827 !important;
+  border-color: var(--color-border) !important;
+}
+
+html.light input::placeholder,
+html.light textarea::placeholder {
+  color: #9CA3AF !important;
+}
+
+html.light nav span.text-white,
+html.light nav a:not(.bg-gradient-to-r) {
+  color: var(--color-heading) !important;
+}
+
+html.light nav button span {
+  color: var(--color-heading) !important;
+}
+
+
+/* Custom premium scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0B0B0F;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1F1F2E;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #2E2E42;
+}
