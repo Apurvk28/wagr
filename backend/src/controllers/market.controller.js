@@ -1,6 +1,7 @@
 import Market from '../models/market.model.js';
 import Position from '../models/position.model.js';
 import User from '../models/user.model.js';
+import { createAndSendNotification } from '../services/notification.service.js';
 
 /**
  * @desc    Get all prediction markets (with search/filters)
@@ -399,7 +400,8 @@ export const resolveMarket = async (req, res, next) => {
       status: 'Open',
     });
 
-    // 3. Process settlements for each participant
+    // 3. Process settlements for each participant and send notifications
+    const notifiedUsers = new Set();
     for (const position of openPositions) {
       if (position.outcome === outcome) {
         // Winning positions receive payout based on 100% target settlement
@@ -425,6 +427,20 @@ export const resolveMarket = async (req, res, next) => {
         position.profitLoss = -position.investedAmount;
         position.closedAt = new Date();
         await position.save();
+      }
+
+      // Send notification once per unique participant
+      const uid = position.userId.toString();
+      if (!notifiedUsers.has(uid)) {
+        notifiedUsers.add(uid);
+        const won = position.outcome === outcome;
+        await createAndSendNotification({
+          userId: position.userId,
+          title: `Market Resolved: ${outcome}`,
+          message: `"${market.title}" has been resolved ${outcome}. You ${won ? 'won' : 'lost'} this prediction.`,
+          type: 'Market Resolved',
+          redirectUrl: `/markets/${market._id}`,
+        });
       }
     }
 
@@ -483,7 +499,8 @@ export const cancelMarket = async (req, res, next) => {
       status: 'Open',
     });
 
-    // 3. Issue full refunds to all participants
+    // 3. Issue full refunds to all participants and send notifications
+    const cancelNotifiedUsers = new Set();
     for (const position of openPositions) {
       const participant = await User.findById(position.userId);
       if (participant) {
@@ -497,6 +514,19 @@ export const cancelMarket = async (req, res, next) => {
       position.profitLoss = 0;
       position.closedAt = new Date();
       await position.save();
+
+      // Send notification once per unique participant
+      const uid = position.userId.toString();
+      if (!cancelNotifiedUsers.has(uid)) {
+        cancelNotifiedUsers.add(uid);
+        await createAndSendNotification({
+          userId: position.userId,
+          title: 'Market Cancelled',
+          message: `"${market.title}" was cancelled. Your investment of ${position.investedAmount} MXP has been fully refunded.`,
+          type: 'Market Cancelled',
+          redirectUrl: `/markets/${market._id}`,
+        });
+      }
     }
 
     // 4. Emit Socket.IO cancellation event
@@ -533,6 +563,140 @@ export const getUserPositionInMarket = async (req, res, next) => {
     res.status(200).json({
       success: true,
       data: positions,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * @desc    Toggle follow/watch a prediction market
+ * @route   POST /api/v1/markets/:id/follow
+ * @access  Private
+ */
+export const toggleFollowMarket = async (req, res, next) => {
+  try {
+    const marketId = req.params.id;
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found.' });
+    }
+
+    const market = await Market.findById(marketId);
+    if (!market) {
+      return res.status(404).json({ success: false, message: 'Market not found.' });
+    }
+
+    const isFollowing = user.followedMarkets.some(id => id.toString() === marketId.toString());
+
+    if (isFollowing) {
+      user.followedMarkets = user.followedMarkets.filter(id => id.toString() !== marketId.toString());
+    } else {
+      user.followedMarkets.push(marketId);
+    }
+
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: isFollowing ? 'Market unfollowed.' : 'Market followed. You will be notified of updates.',
+      data: { isFollowing: !isFollowing },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * @desc    Approve a pending market (Admin Only) — sets status to Live and notifies submitter & category followers
+ * @route   POST /api/v1/markets/:id/approve
+ * @access  Private/Admin
+ */
+export const approveMarket = async (req, res, next) => {
+  try {
+    const market = await Market.findById(req.params.id);
+    if (!market) {
+      return res.status(404).json({ success: false, message: 'Market not found.' });
+    }
+    if (market.status !== 'Pending Approval') {
+      return res.status(400).json({ success: false, message: 'Only pending markets can be approved.' });
+    }
+
+    market.status = 'Live';
+    await market.save();
+
+    // Notify market submitter
+    if (market.createdBy) {
+      await createAndSendNotification({
+        userId: market.createdBy,
+        title: 'Market Approved',
+        message: `Your submitted market "${market.title}" has been approved and is now live!`,
+        type: 'Admin Announcement',
+        redirectUrl: `/markets/${market._id}`,
+      });
+    }
+
+    // Notify users following this category
+    const categoryFollowers = await User.find({
+      followedCategories: market.category,
+      _id: { $ne: market.createdBy },
+    }).select('_id');
+
+    for (const follower of categoryFollowers) {
+      await createAndSendNotification({
+        userId: follower._id,
+        title: 'New Market in Your Category',
+        message: `A new prediction market is live in ${market.category}: "${market.title}"`,
+        type: 'New Market',
+        redirectUrl: `/markets/${market._id}`,
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Market approved and published successfully.',
+      data: market,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * @desc    Reject a pending market (Admin Only) — sets status to Archived and notifies submitter
+ * @route   POST /api/v1/markets/:id/reject
+ * @access  Private/Admin
+ */
+export const rejectMarket = async (req, res, next) => {
+  try {
+    const { reason } = req.body;
+    const market = await Market.findById(req.params.id);
+    if (!market) {
+      return res.status(404).json({ success: false, message: 'Market not found.' });
+    }
+    if (market.status !== 'Pending Approval') {
+      return res.status(400).json({ success: false, message: 'Only pending markets can be rejected.' });
+    }
+
+    market.status = 'Archived';
+    await market.save();
+
+    // Notify market submitter
+    if (market.createdBy) {
+      await createAndSendNotification({
+        userId: market.createdBy,
+        title: 'Market Submission Rejected',
+        message: `Your submitted market "${market.title}" was not approved.${reason ? ` Reason: ${reason}` : ''}`,
+        type: 'Admin Announcement',
+        redirectUrl: `/markets`,
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Market rejected and archived.',
+      data: market,
     });
   } catch (error) {
     next(error);

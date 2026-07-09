@@ -79,6 +79,37 @@ export interface News {
   createdAt: string;
 }
 
+export type NotificationType =
+  | 'New Follower'
+  | 'New Market'
+  | 'Market Resolved'
+  | 'Market Cancelled'
+  | 'Followed Market Updated'
+  | 'Admin Announcement'
+  | 'Like'
+  | 'Comment'
+  | 'Reply'
+  | 'Mention'
+  | 'Verification'
+  | 'Security';
+
+export interface Notification {
+  _id: string;
+  userId: string;
+  sender?: {
+    _id: string;
+    fullName: string;
+    username: string;
+  };
+  title: string;
+  message: string;
+  type: NotificationType;
+  isRead: boolean;
+  redirectUrl?: string;
+  createdAt: string;
+}
+
+
 export interface Post {
   _id: string;
   userId: string | User; // Populated User

@@ -72,3 +72,19 @@ export const getUserPositionInMarket = async (marketId: string): Promise<any> =>
   const res = await api.get(`/markets/${marketId}/position`);
   return res.data.data;
 };
+
+export const toggleFollowMarket = async (marketId: string): Promise<{ isFollowing: boolean }> => {
+  const res = await api.post(`/markets/${marketId}/follow`);
+  return res.data.data;
+};
+
+export const approveMarket = async (marketId: string): Promise<Market> => {
+  const res = await api.post(`/markets/${marketId}/approve`);
+  return res.data.data;
+};
+
+export const rejectMarket = async (marketId: string, reason?: string): Promise<Market> => {
+  const res = await api.post(`/markets/${marketId}/reject`, { reason });
+  return res.data.data;
+};
+

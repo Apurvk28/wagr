@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { formatMXP } from '../utils';
 import api from '../services/api';
 import { Menu, X, Wallet, User as UserIcon, LogOut, ChevronDown } from 'lucide-react';
+import NotificationBell from './NotificationBell';
 
 const Navbar: React.FC = () => {
   const { user, isAuthenticated, logout, reloadProfile } = useAuth();
@@ -56,7 +57,9 @@ const Navbar: React.FC = () => {
           {/* User Controls / Auth Controls */}
           <div className="hidden md:flex items-center space-x-4">
             {isAuthenticated && user ? (
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-3">
+                {/* Notification Bell */}
+                <NotificationBell />
                 {/* Wallet Balance Display */}
                 {user.role === 'Admin' ? (
                   <div className="relative">

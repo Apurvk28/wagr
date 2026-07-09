@@ -59,6 +59,17 @@ const userSchema = new mongoose.Schema(
         ref: 'User',
       },
     ],
+    followedMarkets: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Market',
+      },
+    ],
+    followedCategories: [
+      {
+        type: String,
+      },
+    ],
     role: {
       type: String,
       enum: ['User', 'Admin'],

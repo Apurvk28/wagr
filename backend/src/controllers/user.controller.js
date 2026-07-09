@@ -1,6 +1,7 @@
 import User from '../models/user.model.js';
 import Post from '../models/post.model.js';
 import Position from '../models/position.model.js';
+import { createAndSendNotification } from '../services/notification.service.js';
 
 /**
  * @desc    Get current user profile
@@ -216,6 +217,16 @@ export const toggleFollowUser = async (req, res, next) => {
       // Follow
       currentUser.following.push(targetUserId);
       targetUser.followers.push(currentUserId);
+
+      // Trigger follow notification
+      await createAndSendNotification({
+        userId: targetUserId,
+        sender: currentUserId,
+        title: 'New Follower',
+        message: `${currentUser.fullName} (@${currentUser.username}) started following you.`,
+        type: 'Follow',
+        redirectUrl: `/user/${currentUser.username}`,
+      });
     }
 
     await currentUser.save();
@@ -227,6 +238,54 @@ export const toggleFollowUser = async (req, res, next) => {
       data: {
         isFollowing: !isFollowing,
         followersCount: targetUser.followers.length,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * @desc    Toggle follow a market category
+ * @route   POST /api/v1/users/categories/follow
+ * @access  Private
+ */
+export const toggleFollowCategory = async (req, res, next) => {
+  try {
+    const { category } = req.body;
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found.',
+      });
+    }
+
+    if (!category || category.trim() === '') {
+      return res.status(400).json({
+        success: false,
+        message: 'Category is required.',
+      });
+    }
+
+    const cleanCategory = category.trim();
+    const isFollowing = user.followedCategories.includes(cleanCategory);
+
+    if (isFollowing) {
+      user.followedCategories = user.followedCategories.filter(cat => cat !== cleanCategory);
+    } else {
+      user.followedCategories.push(cleanCategory);
+    }
+
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: isFollowing ? `Unfollowed category "${cleanCategory}" successfully.` : `Followed category "${cleanCategory}" successfully.`,
+      data: {
+        isFollowing: !isFollowing,
+        followedCategories: user.followedCategories,
       },
     });
   } catch (error) {

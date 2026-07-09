@@ -8,6 +8,9 @@ import {
   resolveMarket,
   cancelMarket,
   getUserPositionInMarket,
+  toggleFollowMarket,
+  approveMarket,
+  rejectMarket,
 } from '../controllers/market.controller.js';
 import { protect, authorize } from '../middleware/auth.middleware.js';
 import { getTrendingMarkets, getActiveMarkets } from '../controllers/homepage.controller.js';
@@ -25,9 +28,13 @@ router.post('/', protect, createMarket);
 router.post('/:id/trade', protect, openTrade);
 router.post('/:id/close', protect, closeTrade);
 router.get('/:id/position', protect, getUserPositionInMarket);
+router.post('/:id/follow', protect, toggleFollowMarket);
 
 // Administrative routes (Requires admin authorization)
 router.post('/:id/resolve', protect, authorize('Admin'), resolveMarket);
 router.post('/:id/cancel', protect, authorize('Admin'), cancelMarket);
+router.post('/:id/approve', protect, authorize('Admin'), approveMarket);
+router.post('/:id/reject', protect, authorize('Admin'), rejectMarket);
 
 export default router;
+

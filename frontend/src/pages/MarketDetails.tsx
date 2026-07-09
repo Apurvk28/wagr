@@ -11,6 +11,7 @@ import {
   getUserPositionInMarket,
   resolveMarket,
   cancelMarket,
+  toggleFollowMarket,
 } from '../services/marketService';
 import type { Market } from '../types';
 import { formatDate, formatMXP, formatProbability } from '../utils';
@@ -26,6 +27,8 @@ import {
   XCircle,
   HelpCircle,
   Clock,
+  Bookmark,
+  BookmarkCheck,
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -60,6 +63,10 @@ const MarketDetails: React.FC = () => {
   const [resolutionSource, setResolutionSource] = useState('');
   const [adminLoading, setAdminLoading] = useState(false);
   const [adminError, setAdminError] = useState<string | null>(null);
+
+  // Follow state
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [followLoading, setFollowLoading] = useState(false);
 
   // Linked news & posts
   const [linkedNews, setLinkedNews] = useState<any[]>([]);
@@ -236,6 +243,21 @@ const MarketDetails: React.FC = () => {
     }
   };
 
+  // 7. Toggle market follow
+  const handleToggleFollow = async () => {
+    if (!isAuthenticated) return;
+    setFollowLoading(true);
+    try {
+      if (!id) return;
+      const result = await toggleFollowMarket(id);
+      setIsFollowing(result.isFollowing);
+    } catch (err: any) {
+      console.error('Follow toggle failed:', err);
+    } finally {
+      setFollowLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-dark flex flex-col justify-between">
@@ -313,13 +335,31 @@ const MarketDetails: React.FC = () => {
                 <span className="text-[10px] font-bold bg-brand-purple/10 text-brand-purple border border-brand-purple/20 px-2.5 py-0.5 rounded uppercase tracking-wider">
                   {market.category}
                 </span>
-                <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded border ${
-                  market.status === 'Live' ? 'bg-brand-purple/10 border-brand-purple/25 text-brand-purple' :
-                  market.status === 'Resolved' ? 'bg-brand-success/10 border-brand-success/25 text-brand-success' :
-                  'bg-dark-border text-dark-muted border-dark-border/60'
-                }`}>
-                  {market.status}
-                </span>
+                <div className="flex items-center space-x-2">
+                  {isAuthenticated && (
+                    <button
+                      id="market-follow-btn"
+                      onClick={handleToggleFollow}
+                      disabled={followLoading}
+                      title={isFollowing ? 'Unfollow market' : 'Follow market for updates'}
+                      className={`flex items-center space-x-1.5 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border transition-all disabled:opacity-50 ${
+                        isFollowing
+                          ? 'bg-brand-purple/15 border-brand-purple text-brand-purple'
+                          : 'bg-dark/40 border-dark-border/60 text-dark-muted hover:border-brand-purple/50 hover:text-brand-purple'
+                      }`}
+                    >
+                      {isFollowing ? <BookmarkCheck size={12} /> : <Bookmark size={12} />}
+                      <span>{isFollowing ? 'Following' : 'Follow'}</span>
+                    </button>
+                  )}
+                  <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded border ${
+                    market.status === 'Live' ? 'bg-brand-purple/10 border-brand-purple/25 text-brand-purple' :
+                    market.status === 'Resolved' ? 'bg-brand-success/10 border-brand-success/25 text-brand-success' :
+                    'bg-dark-border text-dark-muted border-dark-border/60'
+                  }`}>
+                    {market.status}
+                  </span>
+                </div>
               </div>
 
               <h1 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight leading-snug mb-4">

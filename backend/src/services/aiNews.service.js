@@ -1,5 +1,7 @@
 import Market from '../models/market.model.js';
 import News from '../models/news.model.js';
+import User from '../models/user.model.js';
+import { createAndSendNotification } from './notification.service.js';
 
 /**
  * Generate mock news fallback in case Groq call fails or key is missing
@@ -173,6 +175,25 @@ const insertNewsSafely = async (articles) => {
       if (!existing) {
         const created = await News.create(article);
         insertedArticles.push(created);
+
+        // Notify users who follow this market
+        if (article.relatedMarket) {
+          const marketFollowers = await User.find({
+            followedMarkets: article.relatedMarket,
+          }).select('_id');
+
+          const market = await Market.findById(article.relatedMarket).select('title');
+
+          for (const follower of marketFollowers) {
+            await createAndSendNotification({
+              userId: follower._id,
+              title: 'Market Update: New News',
+              message: `New article published for a market you follow${market ? `: "${market.title}"` : ''}: ${article.headline}`,
+              type: 'Followed Market Updated',
+              redirectUrl: `/news`,
+            });
+          }
+        }
       }
     } catch (err) {
       // Ignore validation errors (e.g. duplicate key index)
@@ -183,3 +204,4 @@ const insertNewsSafely = async (articles) => {
   console.log(`📰 Dynamic AI News Sync completed: saved ${insertedArticles.length} new articles.`);
   return insertedArticles;
 };
+

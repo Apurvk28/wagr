@@ -14,8 +14,10 @@ import homepageRoutes from './routes/homepage.routes.js';
 import marketRoutes from './routes/market.routes.js';
 import newsRoutes from './routes/news.routes.js';
 import communityRoutes from './routes/community.routes.js';
+import notificationRoutes from './routes/notification.routes.js';
 
 const app = express();
+
 
 // Security HTTP headers
 app.use(helmet());
@@ -59,6 +61,7 @@ app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/markets', marketRoutes);
 app.use('/api/v1/news', newsRoutes);
 app.use('/api/v1/community', communityRoutes);
+app.use('/api/v1/notifications', notificationRoutes);
 app.use('/api/v1', homepageRoutes);
 
 // Health check endpoint

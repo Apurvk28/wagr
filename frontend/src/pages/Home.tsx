@@ -99,7 +99,7 @@ const Home: React.FC = () => {
               className="inline-flex items-center space-x-2 bg-dark-card border border-dark-border/80 text-dark-muted px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider mb-6 shadow-inner"
             >
               <span className="w-2 h-2 rounded-full bg-brand-purple"></span>
-              <span>Predict Future Events with MXP Virtual Currency</span>
+              <span>Predict Future Events with MXP </span>
             </motion.div>
 
             <motion.h1

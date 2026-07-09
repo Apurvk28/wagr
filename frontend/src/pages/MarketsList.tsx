@@ -3,8 +3,9 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import MarketCard from '../components/MarketCard';
 import { getMarkets } from '../services/marketService';
+import { toggleFollowCategory } from '../services/communityService';
 import type { Market } from '../types';
-import { Search, SlidersHorizontal, Plus } from 'lucide-react';
+import { Search, SlidersHorizontal, Plus, Bell, BellOff } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
@@ -29,6 +30,9 @@ const MarketsList: React.FC = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [marketType, setMarketType] = useState<'All' | 'Regular' | '24-Hour'>('All');
   const [sortBy, setSortBy] = useState<'newest' | 'volume'>('newest');
+
+  // Category follow state
+  const [followedCategories, setFollowedCategories] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     const fetchMarkets = async () => {
@@ -55,6 +59,24 @@ const MarketsList: React.FC = () => {
 
     return () => clearTimeout(delayDebounce);
   }, [searchTerm, selectedCategory]);
+
+  const handleToggleCategoryFollow = async (category: string) => {
+    if (!isAuthenticated || category === 'All') return;
+    try {
+      const result = await toggleFollowCategory(category);
+      setFollowedCategories(prev => {
+        const next = new Set(prev);
+        if (result.isFollowing) {
+          next.add(category);
+        } else {
+          next.delete(category);
+        }
+        return next;
+      });
+    } catch (err) {
+      console.error('Category follow toggle failed:', err);
+    }
+  };
 
   const SkeletonLoader = () => (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -217,18 +239,34 @@ const MarketsList: React.FC = () => {
                 <div className="flex flex-wrap gap-2">
                   {Categories.map((category) => {
                     const active = selectedCategory === category;
+                    const isFollowingCat = followedCategories.has(category);
                     return (
-                      <button
-                        key={category}
-                        onClick={() => setSelectedCategory(category)}
-                        className={`text-xs font-semibold px-4 py-2 rounded-xl border transition-all duration-200 ${
-                          active
-                            ? 'bg-brand-purple/20 border-brand-purple/60 text-brand-purple'
-                            : 'bg-dark/40 border-dark-border/60 text-dark-muted hover:text-white hover:border-dark-border'
-                        }`}
-                      >
-                        {category}
-                      </button>
+                      <div key={category} className="flex items-center gap-1">
+                        <button
+                          onClick={() => setSelectedCategory(category)}
+                          className={`text-xs font-semibold px-4 py-2 rounded-xl border transition-all duration-200 ${
+                            active
+                              ? 'bg-brand-purple/20 border-brand-purple/60 text-brand-purple'
+                              : 'bg-dark/40 border-dark-border/60 text-dark-muted hover:text-white hover:border-dark-border'
+                          }`}
+                        >
+                          {category}
+                        </button>
+                        {isAuthenticated && category !== 'All' && (
+                          <button
+                            id={`follow-cat-${category.replace(/\s+/g, '-').toLowerCase()}`}
+                            onClick={() => handleToggleCategoryFollow(category)}
+                            title={isFollowingCat ? `Unfollow ${category}` : `Follow ${category} for new market alerts`}
+                            className={`p-1.5 rounded-lg border transition-all ${
+                              isFollowingCat
+                                ? 'bg-brand-purple/15 border-brand-purple/50 text-brand-purple'
+                                : 'bg-dark/40 border-dark-border/60 text-dark-muted hover:text-brand-purple hover:border-brand-purple/40'
+                            }`}
+                          >
+                            {isFollowingCat ? <BellOff size={11} /> : <Bell size={11} />}
+                          </button>
+                        )}
+                      </div>
                     );
                   })}
                 </div>

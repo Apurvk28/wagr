@@ -2,6 +2,24 @@ import Post from '../models/post.model.js';
 import Comment from '../models/comment.model.js';
 import Market from '../models/market.model.js';
 import User from '../models/user.model.js';
+import { createAndSendNotification } from '../services/notification.service.js';
+
+/**
+ * Helper: extract all @username mentions from text and return unique user docs
+ */
+const extractMentionedUsers = async (text, excludeUserIds = []) => {
+  const usernameMatches = text.match(/@([a-zA-Z0-9_]+)/g);
+  if (!usernameMatches) return [];
+
+  const usernames = [...new Set(usernameMatches.map(m => m.slice(1).toLowerCase()))];
+  const excludeStrings = excludeUserIds.map(id => id.toString());
+
+  const users = await User.find({
+    username: { $in: usernames },
+  }).select('_id username');
+
+  return users.filter(u => !excludeStrings.includes(u._id.toString()));
+};
 
 /**
  * @desc    Create a new community post
@@ -49,6 +67,19 @@ export const createPost = async (req, res, next) => {
     const populatedPost = await Post.findById(post._id)
       .populate('userId', 'fullName username')
       .populate('linkedMarket', 'title status');
+
+    // Notify @mentioned users (excluding the post author)
+    const mentionedUsers = await extractMentionedUsers(content, [req.user._id]);
+    for (const mentionedUser of mentionedUsers) {
+      await createAndSendNotification({
+        userId: mentionedUser._id,
+        sender: req.user._id,
+        title: 'You Were Mentioned',
+        message: `@${req.user.username} mentioned you in a post.`,
+        type: 'Mention',
+        redirectUrl: `/community`,
+      });
+    }
 
     res.status(201).json({
       success: true,
@@ -142,6 +173,18 @@ export const toggleLikePost = async (req, res, next) => {
       post.likes = post.likes.filter(id => id.toString() !== req.user._id.toString());
     } else {
       post.likes.push(req.user._id);
+
+      // Notify post author if they're not the liker
+      if (post.userId.toString() !== req.user._id.toString()) {
+        await createAndSendNotification({
+          userId: post.userId,
+          sender: req.user._id,
+          title: 'Someone Liked Your Post',
+          message: `@${req.user.username} liked your post.`,
+          type: 'Like',
+          redirectUrl: `/community`,
+        });
+      }
     }
 
     await post.save();
@@ -184,9 +227,10 @@ export const createComment = async (req, res, next) => {
       });
     }
 
+    let parentComment = null;
     // Verify parent comment if it is a nested reply
     if (parentId) {
-      const parentComment = await Comment.findById(parentId);
+      parentComment = await Comment.findById(parentId);
       if (!parentComment) {
         return res.status(404).json({
           success: false,
@@ -208,6 +252,52 @@ export const createComment = async (req, res, next) => {
 
     const populatedComment = await Comment.findById(comment._id)
       .populate('userId', 'fullName username');
+
+    // Track who gets which notifications to avoid duplicates
+    const alreadyNotified = new Set([req.user._id.toString()]);
+
+    if (parentId && parentComment) {
+      // Notify parent comment author (Reply notification)
+      const parentAuthorId = parentComment.userId.toString();
+      if (!alreadyNotified.has(parentAuthorId)) {
+        alreadyNotified.add(parentAuthorId);
+        await createAndSendNotification({
+          userId: parentComment.userId,
+          sender: req.user._id,
+          title: 'Reply to Your Comment',
+          message: `@${req.user.username} replied to your comment.`,
+          type: 'Reply',
+          redirectUrl: `/community`,
+        });
+      }
+    }
+
+    // Notify post author (Comment notification) — skip if already notified as reply recipient
+    const postAuthorId = post.userId.toString();
+    if (!alreadyNotified.has(postAuthorId)) {
+      alreadyNotified.add(postAuthorId);
+      await createAndSendNotification({
+        userId: post.userId,
+        sender: req.user._id,
+        title: 'New Comment on Your Post',
+        message: `@${req.user.username} commented on your post.`,
+        type: 'Comment',
+        redirectUrl: `/community`,
+      });
+    }
+
+    // Notify @mentioned users (excluding already notified)
+    const mentionedUsers = await extractMentionedUsers(content, [...alreadyNotified]);
+    for (const mentionedUser of mentionedUsers) {
+      await createAndSendNotification({
+        userId: mentionedUser._id,
+        sender: req.user._id,
+        title: 'You Were Mentioned',
+        message: `@${req.user.username} mentioned you in a comment.`,
+        type: 'Mention',
+        redirectUrl: `/community`,
+      });
+    }
 
     res.status(201).json({
       success: true,

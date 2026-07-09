@@ -92,3 +92,9 @@ export const toggleFollowUser = async (userId: string): Promise<{ isFollowing: b
   const res = await api.post(`/users/${userId}/follow`);
   return res.data.data;
 };
+
+export const toggleFollowCategory = async (category: string): Promise<{ isFollowing: boolean }> => {
+  const res = await api.post('/users/follow-category', { category });
+  return res.data.data;
+};
+

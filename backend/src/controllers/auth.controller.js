@@ -1,5 +1,6 @@
 import crypto from 'crypto';
 import User from '../models/user.model.js';
+import { createAndSendNotification } from '../services/notification.service.js';
 
 // Password Validation Regex
 // Minimum 8 characters, at least 1 uppercase letter, 1 lowercase letter, 1 number, and 1 special character
@@ -125,6 +126,15 @@ export const verifyEmail = async (req, res, next) => {
 
     // Generate authenticated JWT
     const jwtToken = user.generateJWT();
+
+    // Send verification success notification
+    await createAndSendNotification({
+      userId: user._id,
+      title: 'Email Verified Successfully',
+      message: 'Your email has been verified and 500 MXP has been credited to your wallet. Welcome to Wagr!',
+      type: 'Verification',
+      redirectUrl: '/markets',
+    });
 
     res.status(200).json({
       success: true,
@@ -304,6 +314,15 @@ export const resetPassword = async (req, res, next) => {
     user.resetPasswordExpire = undefined;
 
     await user.save();
+
+    // Send security notification
+    await createAndSendNotification({
+      userId: user._id,
+      title: 'Password Changed',
+      message: 'Your Wagr password has been successfully reset. If you did not request this change, contact support immediately.',
+      type: 'Security',
+      redirectUrl: '/login',
+    });
 
     res.status(200).json({
       success: true,

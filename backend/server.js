@@ -3,6 +3,7 @@ import http from 'http';
 import { Server } from 'socket.io';
 import app from './src/app.js';
 import connectDB from './src/config/db.js';
+import { initSocket } from './src/services/socket.service.js';
 
 // Load environment variables
 dotenv.config();
@@ -22,14 +23,8 @@ const io = new Server(server, {
   },
 });
 
-// Basic Socket connection handler
-io.on('connection', (socket) => {
-  console.log(`User connected: ${socket.id}`);
-
-  socket.on('disconnect', () => {
-    console.log(`User disconnected: ${socket.id}`);
-  });
-});
+// Initialize socket service room management
+initSocket(io);
 
 // Set global Socket.io instance for routes/services usage
 app.set('io', io);
