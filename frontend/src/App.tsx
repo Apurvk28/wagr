@@ -4,7 +4,9 @@ import { AuthProvider } from './context/AuthContext';
 import { SocketProvider } from './context/SocketContext';
 import ProtectedRoute from './components/guards/ProtectedRoute';
 import GuestRoute from './components/guards/GuestRoute';
+import AdminRoute from './components/guards/AdminRoute';
 import AuthLayout from './layouts/AuthLayout';
+import ToastNotification from './components/ToastNotification';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import VerifyEmail from './pages/VerifyEmail';
@@ -18,45 +20,62 @@ import CreateMarket from './pages/CreateMarket';
 import NewsHub from './pages/NewsHub';
 import Community from './pages/Community';
 import UserProfile from './pages/UserProfile';
+import AdminPanel from './pages/AdminPanel';
+import Leaderboard from './pages/Leaderboard';
 
 function App() {
   return (
     <AuthProvider>
       <SocketProvider>
-      <BrowserRouter>
-        <Routes>
-          {/* Public Homepage accessible to guests and registered users */}
-          <Route path="/" element={<Home />} />
-          <Route path="/markets" element={<MarketsList />} />
-          <Route path="/markets/:id" element={<MarketDetails />} />
-          <Route path="/news" element={<NewsHub />} />
-          <Route path="/community" element={<Community />} />
-          <Route path="/user/:username" element={<UserProfile />} />
+        <BrowserRouter>
+          {/* Global toast notification overlay — fires on socket events */}
+          <ToastNotification />
 
-          {/* Guest-only Auth routes */}
-          <Route element={<GuestRoute />}>
-            <Route element={<AuthLayout />}>
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/forgot-password" element={<ForgotPassword />} />
-              <Route path="/reset-password" element={<ResetPassword />} />
-              <Route path="/verify-email" element={<VerifyEmail />} />
+          <Routes>
+            {/* Public routes */}
+            <Route path="/" element={<Home />} />
+            <Route path="/markets" element={<MarketsList />} />
+            <Route path="/markets/:id" element={<MarketDetails />} />
+            <Route path="/news" element={<NewsHub />} />
+            <Route path="/community" element={<Community />} />
+            <Route path="/user/:username" element={<UserProfile />} />
+            <Route path="/leaderboard" element={<Leaderboard />} />
+
+            {/* Guest-only Auth routes */}
+            <Route element={<GuestRoute />}>
+              <Route element={<AuthLayout />}>
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
+                <Route path="/verify-email" element={<VerifyEmail />} />
+              </Route>
             </Route>
-          </Route>
 
-          {/* Protected Main Dashboard */}
-          <Route element={<ProtectedRoute />}>
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/markets/create" element={<CreateMarket />} />
-          </Route>
+            {/* Protected Main Dashboard */}
+            <Route element={<ProtectedRoute />}>
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/markets/create" element={<CreateMarket />} />
+            </Route>
 
-          {/* Fallback redirect */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </BrowserRouter>
+            {/* Admin-only Panel */}
+            <Route
+              path="/admin"
+              element={
+                <AdminRoute>
+                  <AdminPanel />
+                </AdminRoute>
+              }
+            />
+
+            {/* Fallback redirect */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </BrowserRouter>
       </SocketProvider>
     </AuthProvider>
   );
 }
 
 export default App;
+

@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { formatMXP } from '../utils';
 import api from '../services/api';
-import { Menu, X, Wallet, User as UserIcon, LogOut, ChevronDown } from 'lucide-react';
+import { globalSearch, type SearchResults } from '../services/searchService';
+import { Menu, X, Wallet, User as UserIcon, LogOut, ChevronDown, Search, ShieldAlert } from 'lucide-react';
 import NotificationBell from './NotificationBell';
 
 const Navbar: React.FC = () => {
@@ -12,7 +13,49 @@ const Navbar: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [showBalanceControls, setShowBalanceControls] = useState(false);
-  
+
+  // Global Search state
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<SearchResults | null>(null);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  // Debounced search
+  useEffect(() => {
+    if (!searchOpen) return;
+    if (searchQuery.trim().length < 2) {
+      setSearchResults(null);
+      return;
+    }
+    const delay = setTimeout(async () => {
+      setSearchLoading(true);
+      try {
+        const data = await globalSearch(searchQuery.trim());
+        setSearchResults(data);
+      } catch { /* ignore */ }
+      finally { setSearchLoading(false); }
+    }, 300);
+    return () => clearTimeout(delay);
+  }, [searchQuery, searchOpen]);
+
+  // Auto-focus search input when modal opens
+  useEffect(() => {
+    if (searchOpen) {
+      setTimeout(() => searchInputRef.current?.focus(), 80);
+    } else {
+      setSearchQuery('');
+      setSearchResults(null);
+    }
+  }, [searchOpen]);
+
+  const closeSearch = () => setSearchOpen(false);
+
+  const handleSearchNavigate = (url: string) => {
+    closeSearch();
+    navigate(url);
+  };
+
   const handleAdjustBalance = async (amount: number) => {
     try {
       await api.post('/users/admin/balance', { amount });
@@ -22,6 +65,7 @@ const Navbar: React.FC = () => {
       console.error('Failed to adjust balance:', err);
     }
   };
+
 
   const toggleDropdown = () => setProfileDropdownOpen(!profileDropdownOpen);
 
@@ -51,6 +95,9 @@ const Navbar: React.FC = () => {
               <Link to="/community" className="hover:text-white transition-colors duration-150 py-2">
                 Community
               </Link>
+              <Link to="/leaderboard" className="hover:text-white transition-colors duration-150 py-2">
+                Leaderboard
+              </Link>
             </div>
           </div>
 
@@ -58,6 +105,16 @@ const Navbar: React.FC = () => {
           <div className="hidden md:flex items-center space-x-4">
             {isAuthenticated && user ? (
               <div className="flex items-center space-x-3">
+                {/* Global Search Button */}
+                <button
+                  id="global-search-btn"
+                  onClick={() => setSearchOpen(true)}
+                  className="w-8 h-8 flex items-center justify-center rounded-lg text-dark-muted hover:text-white hover:bg-dark-card border border-transparent hover:border-dark-border/60 transition-all"
+                  title="Search markets, users, news..."
+                >
+                  <Search size={15} />
+                </button>
+
                 {/* Notification Bell */}
                 <NotificationBell />
                 {/* Wallet Balance Display */}
@@ -124,6 +181,16 @@ const Navbar: React.FC = () => {
                         <UserIcon size={13} />
                         <span>My Portfolio</span>
                       </Link>
+                      {user.role === 'Admin' && (
+                        <Link
+                          to="/admin"
+                          onClick={() => setProfileDropdownOpen(false)}
+                          className="flex items-center space-x-2 px-4 py-2 text-xs text-brand-danger/90 hover:bg-dark/45 hover:text-brand-danger transition-colors"
+                        >
+                          <ShieldAlert size={13} />
+                          <span>Admin Panel</span>
+                        </Link>
+                      )}
                       <button
                         onClick={() => {
                           setProfileDropdownOpen(false);
@@ -193,6 +260,13 @@ const Navbar: React.FC = () => {
           >
             Community
           </Link>
+          <Link
+            to="/leaderboard"
+            onClick={() => setMobileMenuOpen(false)}
+            className="block text-sm text-dark-muted hover:text-white font-medium py-1"
+          >
+            Leaderboard
+          </Link>
 
           {/* Guest or User actions for Mobile */}
           <div className="border-t border-dark-border/40 pt-3.5 space-y-2">
@@ -261,6 +335,146 @@ const Navbar: React.FC = () => {
                 </Link>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Global Search Modal */}
+      {searchOpen && (
+        <div
+          className="fixed inset-0 bg-dark/80 backdrop-blur-sm z-[9998] flex items-start justify-center pt-24 px-4"
+          onClick={closeSearch}
+        >
+          <div
+            className="w-full max-w-xl bg-dark-card border border-dark-border/60 rounded-2xl shadow-2xl overflow-hidden animate-fade-in"
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Search Input */}
+            <div className="flex items-center space-x-3 px-4 py-3 border-b border-dark-border/40">
+              <Search size={16} className="text-dark-muted shrink-0" />
+              <input
+                ref={searchInputRef}
+                type="text"
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                placeholder="Search markets, users, news, posts..."
+                className="flex-1 bg-transparent text-sm text-white placeholder-dark-muted focus:outline-none"
+              />
+              {searchQuery && (
+                <button onClick={() => setSearchQuery('')} className="text-dark-muted hover:text-white">
+                  <X size={14} />
+                </button>
+              )}
+              <button onClick={closeSearch} className="text-dark-muted hover:text-white ml-1">
+                <kbd className="text-[9px] border border-dark-border rounded px-1.5 py-0.5 text-dark-muted">ESC</kbd>
+              </button>
+            </div>
+
+            {/* Results */}
+            <div className="max-h-[420px] overflow-y-auto">
+              {searchLoading && (
+                <div className="flex items-center justify-center py-10 text-xs text-dark-muted">
+                  <div className="w-5 h-5 rounded-full border-2 border-brand-purple/20 border-t-brand-purple animate-spin mr-2" />
+                  Searching...
+                </div>
+              )}
+
+              {!searchLoading && searchResults && (
+                <div className="divide-y divide-dark-border/20">
+                  {/* Markets */}
+                  {searchResults.markets.length > 0 && (
+                    <div className="py-2 px-4">
+                      <p className="text-[9px] font-bold text-dark-muted uppercase tracking-widest mb-2">Markets</p>
+                      {searchResults.markets.map((m: any) => (
+                        <button
+                          key={m._id}
+                          onClick={() => handleSearchNavigate(`/markets/${m._id}`)}
+                          className="w-full text-left flex items-center justify-between py-2 px-2 rounded-xl hover:bg-dark/40 transition-colors group"
+                        >
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-semibold text-white truncate">{m.title}</p>
+                            <p className="text-[10px] text-dark-muted">{m.category}</p>
+                          </div>
+                          <span className={`text-[9px] font-bold px-2 py-0.5 rounded uppercase tracking-wider shrink-0 ml-2 ${
+                            m.status === 'Live' ? 'bg-brand-purple/10 text-brand-purple border border-brand-purple/20' : 'bg-dark-border text-dark-muted border border-dark-border'
+                          }`}>{m.status}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Users */}
+                  {searchResults.users.length > 0 && (
+                    <div className="py-2 px-4">
+                      <p className="text-[9px] font-bold text-dark-muted uppercase tracking-widest mb-2">Users</p>
+                      {searchResults.users.map((u: any) => (
+                        <button
+                          key={u._id}
+                          onClick={() => handleSearchNavigate(`/user/${u.username}`)}
+                          className="w-full text-left flex items-center space-x-3 py-2 px-2 rounded-xl hover:bg-dark/40 transition-colors"
+                        >
+                          <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-brand-purple to-brand-blue flex items-center justify-center text-white text-[10px] font-black shrink-0">
+                            {u.fullName?.charAt(0)}
+                          </div>
+                          <div>
+                            <p className="text-xs font-semibold text-white">{u.fullName}</p>
+                            <p className="text-[10px] text-dark-muted">@{u.username}</p>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* News */}
+                  {searchResults.news.length > 0 && (
+                    <div className="py-2 px-4">
+                      <p className="text-[9px] font-bold text-dark-muted uppercase tracking-widest mb-2">News</p>
+                      {searchResults.news.map((n: any) => (
+                        <button
+                          key={n._id}
+                          onClick={() => handleSearchNavigate('/news')}
+                          className="w-full text-left py-2 px-2 rounded-xl hover:bg-dark/40 transition-colors"
+                        >
+                          <p className="text-xs font-semibold text-white truncate">{n.headline}</p>
+                          <p className="text-[10px] text-dark-muted">{n.source} &middot; {n.category}</p>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Posts */}
+                  {searchResults.posts.length > 0 && (
+                    <div className="py-2 px-4">
+                      <p className="text-[9px] font-bold text-dark-muted uppercase tracking-widest mb-2">Community Posts</p>
+                      {searchResults.posts.map((p: any) => (
+                        <button
+                          key={p._id}
+                          onClick={() => handleSearchNavigate('/community')}
+                          className="w-full text-left py-2 px-2 rounded-xl hover:bg-dark/40 transition-colors"
+                        >
+                          <p className="text-[10px] text-dark-muted mb-0.5">@{p.userId?.username}</p>
+                          <p className="text-xs text-white truncate">{p.content}</p>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* No results */}
+                  {searchResults.total === 0 && (
+                    <div className="py-10 text-center">
+                      <p className="text-xs text-dark-muted">No results found for &ldquo;{searchResults.query}&rdquo;</p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Hint */}
+              {!searchLoading && !searchResults && searchQuery.length < 2 && (
+                <div className="py-8 text-center text-xs text-dark-muted">
+                  Type at least 2 characters to search
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
