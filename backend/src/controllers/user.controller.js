@@ -2,6 +2,7 @@ import User from '../models/user.model.js';
 import Post from '../models/post.model.js';
 import Position from '../models/position.model.js';
 import { createAndSendNotification } from '../services/notification.service.js';
+import { updateUserStatsAndCheckAchievements } from '../services/achievement.service.js';
 
 /**
  * @desc    Get current user profile
@@ -232,6 +233,11 @@ export const toggleFollowUser = async (req, res, next) => {
     await currentUser.save();
     await targetUser.save();
 
+    // Trigger achievement checks for target user asynchronously
+    if (!isFollowing) {
+      updateUserStatsAndCheckAchievements(targetUserId, 'FOLLOW').catch(console.error);
+    }
+
     res.status(200).json({
       success: true,
       message: isFollowing ? 'Unfollowed user successfully.' : 'Followed user successfully.',
@@ -293,3 +299,97 @@ export const toggleFollowCategory = async (req, res, next) => {
   }
 };
 
+/**
+ * @desc    Get current user's full portfolio (open positions + live P&L)
+ * @route   GET /api/v1/users/portfolio
+ * @access  Private
+ */
+export const getPortfolio = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+
+    // Fetch all open positions with populated market data
+    const openPositions = await Position.find({ userId, status: 'Open' })
+      .populate('marketId', 'title category yesProbability noProbability status resolutionDate')
+      .sort({ createdAt: -1 });
+
+    // Calculate live P&L for each open position
+    const positionsWithPnL = openPositions.map(pos => {
+      const market = pos.marketId;
+      let currentProbability = pos.outcome === 'YES'
+        ? (market?.yesProbability ?? pos.entryProbability)
+        : (market?.noProbability ?? pos.entryProbability);
+
+      const currentValue = Math.round(pos.investedAmount * (currentProbability / pos.entryProbability));
+      const unrealizedPnL = currentValue - pos.investedAmount;
+
+      return {
+        _id: pos._id,
+        market: market
+          ? { _id: market._id, title: market.title, category: market.category, status: market.status, resolutionDate: market.resolutionDate }
+          : null,
+        outcome: pos.outcome,
+        investedAmount: pos.investedAmount,
+        entryProbability: pos.entryProbability,
+        currentValue,
+        unrealizedPnL,
+        status: pos.status,
+        createdAt: pos.createdAt,
+      };
+    });
+
+    // Compute aggregate stats from resolved positions
+    const resolvedPositions = await Position.find({ userId, status: 'Resolved' });
+    const wins = resolvedPositions.filter(p => p.profitLoss > 0).length;
+    const totalResolved = resolvedPositions.length;
+    const winRate = totalResolved > 0 ? Math.round((wins / totalResolved) * 100) : 0;
+
+    const totalUnrealizedPnL = positionsWithPnL.reduce((sum, p) => sum + p.unrealizedPnL, 0);
+
+    // Ensure achievements are loaded
+    const userDoc = await User.findById(userId).select('achievements');
+
+    res.status(200).json({
+      success: true,
+      data: {
+        mxpBalance: req.user.mxpBalance,
+        portfolioValue: req.user.portfolioValue,
+        predictionAccuracy: req.user.predictionAccuracy,
+        winRate,
+        totalResolved,
+        wins,
+        openPositionsCount: openPositions.length,
+        totalUnrealizedPnL,
+        achievements: userDoc?.achievements || [],
+        openPositions: positionsWithPnL,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * @desc    Get current user's complete trade history (closed + resolved)
+ * @route   GET /api/v1/users/trades
+ * @access  Private
+ */
+export const getTradingHistory = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+
+    const trades = await Position.find({
+      userId,
+      status: { $in: ['Closed', 'Resolved'] },
+    })
+      .populate('marketId', 'title category status resolvedOutcome')
+      .sort({ closedAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      data: trades,
+    });
+  } catch (error) {
+    next(error);
+  }
+};

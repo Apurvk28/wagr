@@ -79,6 +79,18 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    achievements: [
+      {
+        code: {
+          type: String,
+          required: true,
+        },
+        unlockedAt: {
+          type: Date,
+          default: Date.now,
+        },
+      },
+    ],
     verificationToken: String,
     resetPasswordToken: String,
     resetPasswordExpire: Date,

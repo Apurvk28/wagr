@@ -2,6 +2,7 @@ import Market from '../models/market.model.js';
 import Position from '../models/position.model.js';
 import User from '../models/user.model.js';
 import { createAndSendNotification } from '../services/notification.service.js';
+import { updateUserStatsAndCheckAchievements } from '../services/achievement.service.js';
 
 /**
  * @desc    Get all prediction markets (with search/filters)
@@ -235,6 +236,9 @@ export const openTrade = async (req, res, next) => {
       });
     }
 
+    // Recalculate stats and check achievements asynchronously
+    updateUserStatsAndCheckAchievements(user._id, 'TRADE_OPEN').catch(console.error);
+
     res.status(200).json({
       success: true,
       message: 'Trade executed successfully.',
@@ -337,6 +341,9 @@ export const closeTrade = async (req, res, next) => {
       });
     }
 
+    // Recalculate stats and check achievements asynchronously
+    updateUserStatsAndCheckAchievements(user._id, 'PORTFOLIO_UPDATE').catch(console.error);
+
     res.status(200).json({
       success: true,
       message: 'Position closed successfully.',
@@ -434,6 +441,8 @@ export const resolveMarket = async (req, res, next) => {
       if (!notifiedUsers.has(uid)) {
         notifiedUsers.add(uid);
         const won = position.outcome === outcome;
+        
+        // Notify user about resolution
         await createAndSendNotification({
           userId: position.userId,
           title: `Market Resolved: ${outcome}`,
@@ -441,6 +450,9 @@ export const resolveMarket = async (req, res, next) => {
           type: 'Market Resolved',
           redirectUrl: `/markets/${market._id}`,
         });
+
+        // Asynchronously update stats and check achievements
+        updateUserStatsAndCheckAchievements(position.userId, 'TRADE_RESOLVE').catch(console.error);
       }
     }
 
@@ -635,6 +647,9 @@ export const approveMarket = async (req, res, next) => {
         type: 'Admin Announcement',
         redirectUrl: `/markets/${market._id}`,
       });
+
+      // Asynchronously trigger achievement check
+      updateUserStatsAndCheckAchievements(market.createdBy, 'MARKET_APPROVE').catch(console.error);
     }
 
     // Notify users following this category

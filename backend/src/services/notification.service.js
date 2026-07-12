@@ -39,6 +39,7 @@ export const createAndSendNotification = async (data) => {
     const io = getIo();
     if (io) {
       io.to(userId.toString()).emit('notification', populatedNotification);
+      io.to(userId.toString()).emit('new_notification', populatedNotification);
     } else {
       console.warn('⚠️ Socket.io instance not initialized in notification service.');
     }

@@ -1,5 +1,14 @@
 import express from 'express';
-import { getProfile, updateProfile, adjustAdminBalance, getUserProfile, toggleFollowUser, toggleFollowCategory } from '../controllers/user.controller.js';
+import {
+  getProfile,
+  updateProfile,
+  adjustAdminBalance,
+  getUserProfile,
+  toggleFollowUser,
+  toggleFollowCategory,
+  getPortfolio,
+  getTradingHistory,
+} from '../controllers/user.controller.js';
 import { protect, optional } from '../middleware/auth.middleware.js';
 
 const router = express.Router();
@@ -11,7 +20,11 @@ router.route('/profile')
 router.post('/admin/balance', protect, adjustAdminBalance);
 router.post('/categories/follow', protect, toggleFollowCategory);
 
+router.get('/portfolio', protect, getPortfolio);
+router.get('/trades', protect, getTradingHistory);
+
 router.get('/profile/:username', optional, getUserProfile);
 router.post('/:id/follow', protect, toggleFollowUser);
 
 export default router;
+
