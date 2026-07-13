@@ -38,6 +38,7 @@ const seedDatabase = async () => {
         const { _id, participants, ...rest } = m;
         return {
           ...rest,
+          marketType: 'Long-Term',
           createdBy: admin._id,
           participants: [], // Initialize database participants as empty array
           // Seed some history points for recharts graphing
@@ -48,11 +49,12 @@ const seedDatabase = async () => {
           ]
         };
       }),
-      // 24-Hour Daily Markets
+      // Short-Term Daily Markets
       {
         title: 'Will the S&P 500 close green today?',
-        description: 'Resolves to YES if the S&P 500 Index closes higher than yesterday\'s close today. This market will be closed today itself.',
+        description: 'Resolves to YES if the S&P 500 Index closes higher than yesterday\'s close today. This market will lock and archive at the end of the day.',
         category: 'Finance',
+        marketType: 'Short-Term',
         yesProbability: 51,
         noProbability: 49,
         volume: 32400,
@@ -67,8 +69,9 @@ const seedDatabase = async () => {
       },
       {
         title: 'Will Google announce a new Gemini update today?',
-        description: 'Resolves to YES if Google officially announces or releases an update to the Gemini model family today. This market will be closed today itself.',
+        description: 'Resolves to YES if Google officially announces or releases an update to the Gemini model family today. This market will lock and archive at the end of the day.',
         category: 'Artificial Intelligence',
+        marketType: 'Short-Term',
         yesProbability: 45,
         noProbability: 55,
         volume: 18900,

@@ -22,6 +22,10 @@ import Community from './pages/Community';
 import UserProfile from './pages/UserProfile';
 import AdminPanel from './pages/AdminPanel';
 import Leaderboard from './pages/Leaderboard';
+import AboutUs from './pages/AboutUs';
+import ContactSupport from './pages/ContactSupport';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import TermsConditions from './pages/TermsConditions';
 
 function App() {
   return (
@@ -40,6 +44,10 @@ function App() {
             <Route path="/community" element={<Community />} />
             <Route path="/user/:username" element={<UserProfile />} />
             <Route path="/leaderboard" element={<Leaderboard />} />
+            <Route path="/about" element={<AboutUs />} />
+            <Route path="/support" element={<ContactSupport />} />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
+            <Route path="/terms" element={<TermsConditions />} />
 
             {/* Guest-only Auth routes */}
             <Route element={<GuestRoute />}>

@@ -28,6 +28,7 @@ export interface Market {
   volume: number;
   participants: number;
   status: MarketStatus;
+  marketType?: 'Long-Term' | 'Short-Term';
   resolutionDate: string;
   resolvedOutcome?: 'YES' | 'NO';
   createdBy: string; // User ID

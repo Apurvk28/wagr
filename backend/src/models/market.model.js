@@ -17,6 +17,12 @@ const marketSchema = new mongoose.Schema(
       trim: true,
       index: true,
     },
+    marketType: {
+      type: String,
+      enum: ['Long-Term', 'Short-Term'],
+      default: 'Long-Term',
+      index: true,
+    },
     status: {
       type: String,
       enum: ['Draft', 'Pending Approval', 'Live', 'Resolved', 'Cancelled', 'Archived'],

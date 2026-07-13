@@ -29,16 +29,16 @@ const Footer: React.FC = () => {
             <h3 className="text-xs font-bold text-white uppercase tracking-wider mb-4">Company</h3>
             <ul className="space-y-2 text-xs">
               <li>
-                <Link to="/" className="hover:text-white transition-colors duration-150">About Us</Link>
+                <Link to="/about" className="hover:text-white transition-colors duration-150">About Us</Link>
               </li>
               <li>
-                <Link to="/" className="hover:text-white transition-colors duration-150">Contact Support</Link>
+                <Link to="/support" className="hover:text-white transition-colors duration-150">Contact Support</Link>
               </li>
               <li>
-                <Link to="/" className="hover:text-white transition-colors duration-150">Privacy Policy</Link>
+                <Link to="/privacy" className="hover:text-white transition-colors duration-150">Privacy Policy</Link>
               </li>
               <li>
-                <Link to="/" className="hover:text-white transition-colors duration-150">Terms & Conditions</Link>
+                <Link to="/terms" className="hover:text-white transition-colors duration-150">Terms & Conditions</Link>
               </li>
             </ul>
           </div>

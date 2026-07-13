@@ -28,7 +28,7 @@ const MarketsList: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [showFilters, setShowFilters] = useState(false);
-  const [marketType, setMarketType] = useState<'All' | 'Regular' | '24-Hour'>('All');
+  const [marketType, setMarketType] = useState<'All' | 'Long-Term' | 'Short-Term'>('All');
   const [sortBy, setSortBy] = useState<'newest' | 'volume'>('newest');
 
   // Category follow state
@@ -42,6 +42,7 @@ const MarketsList: React.FC = () => {
         const params: any = {};
         if (searchTerm) params.search = searchTerm;
         if (selectedCategory !== 'All') params.category = selectedCategory;
+        if (marketType !== 'All') params.marketType = marketType;
 
         const data = await getMarkets(params);
         setMarkets(data);
@@ -58,7 +59,7 @@ const MarketsList: React.FC = () => {
     }, 300); // 300ms debounce on keystrokes
 
     return () => clearTimeout(delayDebounce);
-  }, [searchTerm, selectedCategory]);
+  }, [searchTerm, selectedCategory, marketType]);
 
   const handleToggleCategoryFollow = async (category: string) => {
     if (!isAuthenticated || category === 'All') return;
@@ -208,24 +209,24 @@ const MarketsList: React.FC = () => {
                       All
                     </button>
                     <button
-                      onClick={() => setMarketType('Regular')}
+                      onClick={() => setMarketType('Long-Term')}
                       className={`text-xs font-semibold px-4 py-2 rounded-xl border transition-all ${
-                        marketType === 'Regular'
+                        marketType === 'Long-Term'
                           ? 'bg-brand-purple/10 border-brand-purple/45 text-brand-purple'
                           : 'bg-dark/40 border-dark-border/60 text-dark-muted hover:text-white'
                       }`}
                     >
-                      Regular Markets
+                      Long-Term
                     </button>
                     <button
-                      onClick={() => setMarketType('24-Hour')}
+                      onClick={() => setMarketType('Short-Term')}
                       className={`text-xs font-semibold px-4 py-2 rounded-xl border transition-all ${
-                        marketType === '24-Hour'
+                        marketType === 'Short-Term'
                           ? 'bg-brand-purple/10 border-brand-purple/45 text-brand-purple'
                           : 'bg-dark/40 border-dark-border/60 text-dark-muted hover:text-white'
                       }`}
                     >
-                      24-Hour Markets
+                      Short-Term
                     </button>
                   </div>
                 </div>
@@ -298,52 +299,49 @@ const MarketsList: React.FC = () => {
             });
 
             // 2. Partition markets
-            const todayStr = new Date().toDateString();
-            const daily = sortedMarkets.filter(m => {
-              const resDate = new Date(m.resolutionDate);
-              const isToday = resDate.toDateString() === todayStr;
-              const descMatch = m.description.toLowerCase().includes('closed today itself') || m.title.toLowerCase().includes('today');
-              return isToday || descMatch;
-            });
-            const regular = sortedMarkets.filter(m => !daily.includes(m));
+            const shortTerm = sortedMarkets.filter(m => m.marketType === 'Short-Term');
+            const longTerm = sortedMarkets.filter(m => m.marketType === 'Long-Term' || !m.marketType);
 
             // 3. Apply Market Type filters
-            const showDaily = marketType === 'All' || marketType === '24-Hour';
-            const showRegular = marketType === 'All' || marketType === 'Regular';
+            const showShortTerm = marketType === 'All' || marketType === 'Short-Term';
+            const showLongTerm = marketType === 'All' || marketType === 'Long-Term';
 
             return (
               <div className="space-y-12 animate-fade-in">
-                {/* 24-Hour Daily Markets Section */}
-                {showDaily && daily.length > 0 && (
+                {/* Short-Term Markets Section */}
+                {showShortTerm && shortTerm.length > 0 && (
                   <div className="space-y-5">
                     <div className="flex items-center space-x-2 border-b border-dark-border/20 pb-2">
                       <span className="text-xl">⚡</span>
                       <h2 className="text-base font-extrabold text-white tracking-tight leading-none uppercase">
-                        24-Hour Daily Markets
+                        Short-Term Markets
                       </h2>
                       <span className="text-[10px] bg-brand-danger/10 border border-brand-danger/35 text-brand-danger font-bold uppercase tracking-wider px-2 py-0.5 rounded">
-                        closes today
+                        closes in 24h
                       </span>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                      {daily.map((market) => (
+                      {shortTerm.map((market) => (
                         <MarketCard key={market._id} market={market} isDailyFlash={true} />
                       ))}
                     </div>
                   </div>
                 )}
 
-                {/* Regular Markets Section */}
-                {showRegular && regular.length > 0 && (
+                {/* Long-Term Markets Section */}
+                {showLongTerm && longTerm.length > 0 && (
                   <div className="space-y-5">
                     <div className="flex items-center space-x-2 border-b border-dark-border/20 pb-2">
                       <span className="text-xl">🌐</span>
                       <h2 className="text-base font-extrabold text-white tracking-tight leading-none uppercase">
-                        Prediction Contracts
+                        Long-Term Markets
                       </h2>
+                      <span className="text-[10px] bg-brand-purple/10 border border-brand-purple/35 text-brand-purple font-bold uppercase tracking-wider px-2 py-0.5 rounded">
+                        strategic
+                      </span>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                      {regular.map((market) => (
+                      {longTerm.map((market) => (
                         <MarketCard key={market._id} market={market} />
                       ))}
                     </div>
@@ -351,8 +349,8 @@ const MarketsList: React.FC = () => {
                 )}
 
                 {/* Empty State after filter */}
-                {((marketType === '24-Hour' && daily.length === 0) || 
-                  (marketType === 'Regular' && regular.length === 0)) && (
+                {((marketType === 'Short-Term' && shortTerm.length === 0) || 
+                  (marketType === 'Long-Term' && longTerm.length === 0)) && (
                   <div className="bg-dark-card/30 border border-dark-border/40 rounded-2xl py-14 text-center">
                     <p className="text-sm text-white font-bold mb-1">No markets in this category</p>
                     <p className="text-xs text-dark-muted">No contracts match your chosen type filter.</p>

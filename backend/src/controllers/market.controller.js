@@ -11,9 +11,14 @@ import { updateUserStatsAndCheckAchievements } from '../services/achievement.ser
  */
 export const getMarkets = async (req, res, next) => {
   try {
-    const { search, category, status } = req.query;
+    const { search, category, status, marketType } = req.query;
 
     const query = {};
+
+    // Filter by marketType
+    if (marketType) {
+      query.marketType = marketType;
+    }
 
     // Filter by search keyword
     if (search) {

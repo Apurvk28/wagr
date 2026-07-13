@@ -26,6 +26,10 @@ const io = new Server(server, {
 // Initialize socket service room management
 initSocket(io);
 
+// Start node-cron background jobs
+import { startCronJobs } from './src/services/cron.service.js';
+startCronJobs();
+
 // Set global Socket.io instance for routes/services usage
 app.set('io', io);
 
