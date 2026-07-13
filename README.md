@@ -4,11 +4,47 @@ Wagr.io is a modern fintech prediction exchange platform that enables users to f
 
 ---
 
-## 🏗️ Architecture Design & System Flow
+## 🌟 Core Features
 
-Wagr.io is structured around a decoupled **MERN client-server architecture** with web socket channels enabling live event streaming. The diagram below illustrates the comprehensive flow of a user request down to the database:
+- **Prediction Markets**: Multi-category binary event forecasting with real-time probability recalculations.
+- **News Hub**: AI-summarized news feed linking real-world events to prediction contracts.
+- **Community Forum**: Discussion board containing text-based posts, comments, nested replies, likes, user follows, and inline market links.
+- **AI Engine**: Automated discovery of new events, draft market proposal drafting, duplicate check, and content safety moderation.
+- **Wallet & Portfolio**: Interactive dashboards for tracking MXP balance, position value, profit/loss, and accuracy metrics.
+- **Global Leaderboards**: Climbs ranks among top profit-makers and prediction accuracy traders.
+- **Gamified Achievements**: Level up, earn profile badges, and unlock rewards through trades, follows, and approvals.
+
+---
+
+## 🏆 What Makes Wagr.io Unique? (Highlights)
+
+Wagr.io bridges fintech prediction mechanisms, AI news feeds, and social interaction, creating a gamified forecasting community.
+
+1. **AI-Driven Event Scrapers:** Wagr automatically identifies prediction-worthy events by monitoring real-world headlines, building draft contracts for review.
+2. **Linked News Context:** Traders see news updates side-by-side with market details, with an AI analysis detailing the likely impact on YES/NO contract probabilities.
+3. **No Financial Barriers:** Utilizing virtual MXP points removes the regulatory hurdles and risks of real-money gambling, making the platform accessible to a broad audience looking to test their forecasting skills.
+4. **Gamification & Social Interaction:** Blending a community forum with achievements and badges ensures users can communicate insights and track accomplishments together.
+
+---
+
+## ⚔️ Competitive Comparison (Wagr vs. Competition)
+
+| Feature | Wagr.io | Polymarket | Kalshi |
+| :--- | :---: | :---: | :---: |
+| **Asset Class** | **Virtual MXP Economy** (Risk-Free) | Cryptocurrency (USDC) | Fiat Currency (USD) |
+| **Market Creation** | **AI-Assisted Event Scraper** | Manual Analyst Drafting | Manual Exchange Listing |
+| **Linked News briefs** | **AI Impact Analyst Summaries** | Static links only | No integrated news feed |
+| **Community Feed** | **Native Social Forum** | Limited external channels | None |
+| **Gamification** | **Badges & Achievements** | Leaderboard only | None |
+| **Accessibility** | **Instant Sandbox Play** | Requires Web3 Wallets | Requires Bank wire details |
+
+---
+
+## 🏗️ System Design & Architecture Design Flow
 
 ### 1. High-Level Architecture Components
+
+Wagr.io is structured around a decoupled **MERN client-server architecture** with web socket channels enabling live event streaming.
 
 ```mermaid
 graph TD
@@ -25,37 +61,26 @@ graph TD
     AI <-->|Seed / Fetch Briefings| Server
 ```
 
-### 2. Request Lifecycle & Data Pipeline Flow
+### 2. Request Lifecycle & Pipeline Flow
+
+The chart below shows how a trader request traverses the stack down to the database and broadcasts updates:
 
 ```mermaid
-sequenceDiagram
-    autonumber
-    actor User as Trader (Vite UI)
-    participant Client as React Client (Axios)
-    participant Server as Express Server
-    participant Middleware as Auth & Validation
-    participant Controller as Market Controller
-    participant Engine as Probability Engine
-    participant DB as MongoDB Atlas
-    participant Socket as Socket.IO Broker
-
-    User->>Client: Clicks "Buy YES" (Wager 1,000 MXP)
-    Client->>Server: HTTP POST /api/v1/markets/:id/trade (Include body & JWT Auth Token)
-    Server->>Middleware: intercept token and body fields
-    Note over Middleware: protect checks JWT validity<br/>validation schema checks amount > 0
-    Middleware->>Controller: Passes user object & validated payload
-    Controller->>DB: Query User wallet balance & Market validity
-    DB-->>Controller: Return records
-    Note over Controller: Verifies mxpBalance >= 1000 MXP<br/>Verifies Market is Live
-    Controller->>Engine: Re-evaluate odds based on added stake
-    Note over Engine: Recompute YES & NO pools<br/>Generate probabilityHistory point
-    Controller->>DB: Atomically update models (save user balance, create position, update market pools)
-    DB-->>Controller: Confirm transaction saves
-    Controller->>Socket: Emit real-time broadcasts
-    Socket-->>User: Socket event "market_update" updates UI charts
-    Socket-->>User: Socket event "new_notification" triggers overlay toast
-    Controller-->>Client: Returns JSON Response (200 OK + Position & Balance data)
-    Client-->>User: React state updates, re-rendering wallet & position history lists
+graph TD
+    User([User Action: Buy YES]) -->|1. Wager stake| Client[React Client / Axios]
+    Client -->|2. POST /api/v1/markets/:id/trade| Express[Express Server]
+    Express -->|3. Route check| Auth[Auth Middleware]
+    Auth -->|4. Verify JWT token| Controller[Market Controller]
+    Controller -->|5. Query balance & status| DB[(MongoDB Atlas)]
+    DB -.->|6. Return record states| Controller
+    Controller -->|7. Recompute pools| Engine[Probability Engine]
+    Engine -->|8. Generate odds| DBWrite[(MongoDB Atlas Write)]
+    DBWrite -.->|9. Confirm DB changes| Controller
+    Controller -->|10. Dispatch Socket updates| Socket[Socket.IO Broker]
+    Socket -->|11. Event: market_update| Chart[UI Recharts Graphs]
+    Socket -->|12. Event: new_notification| Toast[Framer Toast Alerts]
+    Controller -->|13. Return JSON 200 OK| Client
+    Client -->|14. Re-render state| View[Trader Dashboard & Balance UI]
 ```
 
 ---
@@ -218,13 +243,13 @@ Stores briefings connected to active markets.
 
 ## ⚡ Core Computational Mechanics & Probability Engine
 
-### 1. Simplifying the Probability Engine
+### 1. Probability Engine & P2P Liquidity Pools
 
 Rather than relying on set odds, Wagr.io uses **peer-to-peer liquidity pools** to generate odds dynamically. Market probabilities adapt in real time as user participation changes.
 
-* **The YES Pool:** The total sum of all MXP virtual points staked by traders predicting the outcome will be **YES**.
-* **The NO Pool:** The total sum of all MXP virtual points staked by traders predicting the outcome will be **NO**.
-* **Virtual Liquidity Buffer ($1000$ MXP):** Added to both pools at the initialization step to prevent a division-by-zero error and ensure newly proposed markets start at neutral, balanced $50\% - 50\%$ odds.
+- **The YES Pool:** The total sum of all MXP virtual points staked by traders predicting the outcome will be **YES**.
+- **The NO Pool:** The total sum of all MXP virtual points staked by traders predicting the outcome will be **NO**.
+- **Virtual Liquidity Buffer ($1000$ MXP):** Added to both pools at the initialization step to prevent a division-by-zero error and ensure newly proposed markets start at neutral, balanced $50\% - 50\%$ odds.
 
 #### The Mathematical Equation:
 
@@ -236,11 +261,11 @@ $$\text{NO Probability} = 100 - \text{YES Probability}$$
 1. **Initial State (New Market):**
    * $\text{YES Pool} = 0$, $\text{NO Pool} = 0$.
    * $\text{YES Probability} = \frac{0 + 1000}{0 + 0 + 2000} \times 100 = 50\%$.
-2. **Trader A bets 3,000 MXP on YES:**
+2. **Trader A wagers 3,000 MXP on YES:**
    * $\text{YES Pool} = 3000$, $\text{NO Pool} = 0$.
    * $\text{YES Probability} = \frac{3000 + 1000}{3000 + 0 + 2000} \times 100 = \frac{4000}{5000} \times 100 = 80\%$.
    * $\text{NO Probability}$ automatically becomes $20\%$.
-3. **Trader B bets 1,000 MXP on NO:**
+3. **Trader B wagers 1,000 MXP on NO:**
    * $\text{YES Pool} = 3000$, $\text{NO Pool} = 1000$.
    * $\text{YES Probability} = \frac{3000 + 1000}{3000 + 1000 + 2000} \times 100 = \frac{4000}{6000} \times 100 = 67\%$.
    * $\text{NO Probability}$ becomes $33\%$.
@@ -248,33 +273,12 @@ $$\text{NO Probability} = 100 - \text{YES Probability}$$
 *As more points accumulate on one side, the probability rises, shifting the entry price for subsequent traders. This represents collective intelligence in action.*
 
 ### 2. Trading Operations
-* **Open Trade:** Deducts MXP from `mxpBalance`. Stored as an `Open` Position.
-* **Close Position:** User can manually exit before resolution. Exit value is:
+- **Open Trade:** Deducts MXP from `mxpBalance`. Stored as an `Open` Position.
+- **Close Position:** User can manually exit before resolution. Exit value is:
   $$\text{Exit Value} = \text{round}\left( \text{InvestedAmount} \times \frac{\text{Current Probability}}{\text{Entry Probability}} \right)$$
-* **Resolution Settlement:** If market resolves to winning outcome:
+- **Resolution Settlement:** If market resolves to winning outcome:
   $$\text{Winning Payout} = \text{round}\left( \text{InvestedAmount} \times \frac{100}{\text{Entry Probability}} \right)$$
   If losing, value becomes 0 (worthless).
-
----
-
-## 🏆 Competitive Differentiation: What Makes Wagr.io Unique?
-
-Wagr.io bridges fintech prediction mechanisms, AI news feeds, and social interaction, creating a gamified forecasting community.
-
-| Feature | Wagr.io | Polymarket | Kalshi |
-| :--- | :---: | :---: | :---: |
-| **Asset Class** | **Virtual MXP Economy** (Risk-Free) | Cryptocurrency (USDC) | Fiat Currency (USD) |
-| **Market Discovery** | **AI-Assisted Event Scraper** | Manual Analyst Drafting | Manual Exchange Listing |
-| **Linked News briefs** | **AI Impact Analyst Summaries** | Static links only | No integrated news feed |
-| **Community Feed** | **Native Social Forum** | Limited external channels | None |
-| **Gamification** | **Badges & Achievements** | Leaderboard only | None |
-| **Accessibility** | **Instant Sandbox Play** | Requires Web3 Wallets | Requires Bank wire details |
-
-### Why This Matters:
-1. **AI-Driven Event Scrapers:** Wagr automatically identifies prediction-worthy events by monitoring real-world headlines, building draft contracts for review.
-2. **Linked News Context:** Traders see news updates side-by-side with market details, with an AI analysis detailing the likely impact on YES/NO contract probabilities.
-3. **No Financial Barriers:** Utilizing virtual MXP points removes the regulatory hurdles and risks of real-money gambling, making the platform accessible to a broad audience looking to test their forecasting skills.
-4. **Gamification & Social Interaction:** Blending a community forum with achievements and badges ensures users can communicate insights and track accomplishments together.
 
 ---
 
