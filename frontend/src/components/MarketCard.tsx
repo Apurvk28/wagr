@@ -9,6 +9,30 @@ interface MarketCardProps {
 }
 
 const MarketCard: React.FC<MarketCardProps> = ({ market, isDailyFlash }) => {
+  const [timeLeft, setTimeLeft] = React.useState<string>('');
+
+  React.useEffect(() => {
+    if (!isDailyFlash) return;
+
+    const calculateTimeLeft = () => {
+      const difference = new Date(market.resolutionDate).getTime() - Date.now();
+      if (difference <= 0) {
+        return 'LOCKED';
+      }
+      const hrs = Math.floor(difference / (1000 * 60 * 60));
+      const mins = Math.floor((difference / 1000 / 60) % 60);
+      const secs = Math.floor((difference / 1000) % 60);
+      return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    };
+
+    setTimeLeft(calculateTimeLeft());
+    const timer = setInterval(() => {
+      setTimeLeft(calculateTimeLeft());
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [market.resolutionDate, isDailyFlash]);
+
   // Category badge colors map
   const getCategoryColor = (category: string) => {
     switch (category.toLowerCase()) {
@@ -29,10 +53,14 @@ const MarketCard: React.FC<MarketCardProps> = ({ market, isDailyFlash }) => {
     ? market.participants 
     : Math.floor((market.volume || 100) / 120) + 12;
 
+  const hoverBorderGlow = isDailyFlash
+    ? 'hover:border-brand-blue/50 hover:shadow-brand-blue/20 hover:shadow-2xl'
+    : 'hover:border-brand-purple/50 hover:shadow-brand-purple/20 hover:shadow-2xl';
+
   return (
     <Link
       to={`/markets/${market._id}`}
-      className="block w-full bg-dark-card border border-dark-border/60 hover:border-dark-border/100 hover:scale-[1.01] rounded-2xl p-5 shadow-lg hover:shadow-brand-purple/5 transition-all duration-200 group relative overflow-hidden"
+      className={`block w-full bg-dark-card border border-dark-border/60 hover:scale-[1.03] rounded-2xl p-5 shadow-lg ${hoverBorderGlow} transition-all duration-300 ease-out group relative overflow-hidden`}
     >
       {/* Top Details: Category Badge & Expiry */}
       <div className="flex justify-between items-center mb-3">
@@ -40,8 +68,8 @@ const MarketCard: React.FC<MarketCardProps> = ({ market, isDailyFlash }) => {
           {market.category}
         </span>
         {isDailyFlash ? (
-          <span className="text-[9px] text-brand-danger font-black animate-pulse uppercase tracking-wider flex items-center space-x-1">
-            <span className="text-xs">⚡</span> <span>Closing Today</span>
+          <span className="text-[10px] text-brand-danger font-black uppercase tracking-wider flex items-center space-x-1 bg-brand-danger/10 border border-brand-danger/25 px-2 py-0.5 rounded animate-pulse">
+            <span className="text-xs">⏱️</span> <span>{timeLeft}</span>
           </span>
         ) : (
           <span className="text-[10px] text-dark-muted font-medium">

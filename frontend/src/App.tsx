@@ -27,11 +27,15 @@ import ContactSupport from './pages/ContactSupport';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsConditions from './pages/TermsConditions';
 
+import ScrollToTop from './components/ScrollToTop';
+
 function App() {
   return (
     <AuthProvider>
       <SocketProvider>
         <BrowserRouter>
+          {/* Automatically scrolls viewport to top on path transitions */}
+          <ScrollToTop />
           {/* Global toast notification overlay — fires on socket events */}
           <ToastNotification />
 

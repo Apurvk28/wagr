@@ -259,87 +259,188 @@ const NewsHub: React.FC = () => {
         {loading ? (
           <SkeletonLoader />
         ) : processedArticles.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {processedArticles.map((article) => (
-              <div
-                key={article._id}
-                className="bg-dark-card border border-dark-border/60 rounded-2xl p-6 shadow-xl flex flex-col justify-between group relative overflow-hidden transition-all duration-250 hover:border-dark-border/100"
-              >
-                <div>
-                  {/* Article Metadata Row */}
-                  <div className="flex justify-between items-center mb-4">
-                    <span className="text-[9px] font-bold uppercase tracking-wider text-brand-blue bg-brand-blue/10 border border-brand-blue/20 px-2 py-0.5 rounded">
-                      {article.category}
-                    </span>
-                    <div className="flex items-center space-x-3 text-[10px] text-dark-muted font-medium">
-                      <span className="flex items-center space-x-1">
-                        <Eye size={11} />
-                        <span>{article.views || 120} views</span>
-                      </span>
-                      <span className="flex items-center space-x-1">
-                        <Calendar size={11} />
-                        <span>{formatDate(article.publishedDate)}</span>
+          (() => {
+            const shortTermNews = processedArticles.filter(
+              (art) => art.relatedMarket && art.relatedMarket.marketType === 'Short-Term'
+            );
+            const longTermNews = processedArticles.filter(
+              (art) => !art.relatedMarket || art.relatedMarket.marketType === 'Long-Term'
+            );
+
+            return (
+              <div className="space-y-12 animate-fade-in">
+                {/* Short-Term News Section */}
+                {shortTermNews.length > 0 && (
+                  <div className="space-y-6">
+                    <div className="flex items-center space-x-2 border-b border-dark-border/20 pb-2">
+                      <span className="text-xl">⚡</span>
+                      <h2 className="text-base font-extrabold text-white tracking-tight leading-none uppercase">
+                        Short-Term News Briefings
+                      </h2>
+                      <span className="text-[10px] bg-brand-blue/10 border border-brand-blue/35 text-brand-blue font-bold uppercase tracking-wider px-2 py-0.5 rounded">
+                        Daily Updates
                       </span>
                     </div>
-                  </div>
-
-                  {/* Headline & Publication source */}
-                  <div className="mb-4">
-                    <h2 className="text-base font-extrabold text-white leading-snug mb-1 group-hover:text-brand-blue transition-colors">
-                      <a href={article.url} target="_blank" rel="noopener noreferrer">
-                        {article.headline}
-                      </a>
-                    </h2>
-                    <span className="text-[10px] text-dark-muted font-bold">
-                      via <span className="text-white/80">{article.source}</span>
-                    </span>
-                  </div>
-
-                  {/* Summary */}
-                  <p className="text-xs text-dark-muted leading-relaxed mb-6">
-                    {article.summary}
-                  </p>
-                </div>
-
-                <div className="space-y-4 pt-4 border-t border-dark-border/20">
-                  {/* AI summary briefing */}
-                  <div className="bg-dark/40 border border-dark-border/40 rounded-xl p-3.5 text-xs text-dark-muted relative overflow-hidden">
-                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-brand-blue"></div>
-                    <span className="text-[9px] font-bold text-brand-blue uppercase tracking-wider block mb-1">
-                      AI Impact Analysis
-                    </span>
-                    <p className="leading-relaxed text-[11px]">{article.aiSummary}</p>
-                  </div>
-
-                  {/* Linked Market indicator */}
-                  {article.relatedMarket ? (
-                    <Link
-                      to={`/markets/${article.relatedMarket._id}`}
-                      className="inline-flex items-center justify-between w-full bg-brand-purple/5 hover:bg-brand-purple/10 border border-brand-purple/20 hover:border-brand-purple/35 rounded-xl px-4 py-2.5 text-xs text-brand-purple transition-all duration-200"
-                    >
-                      <div className="flex items-center space-x-2 truncate">
-                        <Link2 size={13} className="flex-shrink-0" />
-                        <span className="font-bold truncate text-white">
-                          {article.relatedMarket.title}
-                        </span>
-                      </div>
-                      
-                      <div className="flex items-center space-x-2 flex-shrink-0 ml-4 font-bold">
-                        <span>YES {article.relatedMarket.yesProbability}%</span>
-                        <span className="text-white/30">•</span>
-                        <span>Trade Now →</span>
-                      </div>
-                    </Link>
-                  ) : (
-                    <div className="flex items-center space-x-1 text-[10px] text-dark-muted italic">
-                      <span>🔗</span>
-                      <span>No associated prediction contract registered.</span>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                      {shortTermNews.map((article) => (
+                        <div
+                          key={article._id}
+                          className="bg-dark-card border border-dark-border/60 rounded-2xl p-6 shadow-xl flex flex-col justify-between group relative overflow-hidden transition-all duration-250 hover:border-dark-border/100 hover:scale-[1.01]"
+                        >
+                          <div>
+                            <div className="flex justify-between items-center mb-4">
+                              <span className="text-[9px] font-bold uppercase tracking-wider text-brand-blue bg-brand-blue/10 border border-brand-blue/20 px-2 py-0.5 rounded">
+                                {article.category}
+                              </span>
+                              <div className="flex items-center space-x-3 text-[10px] text-dark-muted font-medium">
+                                <span className="flex items-center space-x-1">
+                                  <Eye size={11} />
+                                  <span>{article.views || 120} views</span>
+                                </span>
+                                <span className="flex items-center space-x-1">
+                                  <Calendar size={11} />
+                                  <span>{formatDate(article.publishedDate)}</span>
+                                </span>
+                              </div>
+                            </div>
+                            <div className="mb-4">
+                              <h2 className="text-base font-extrabold text-white leading-snug mb-1 group-hover:text-brand-blue transition-colors">
+                                <a href={article.url} target="_blank" rel="noopener noreferrer">
+                                  {article.headline}
+                                </a>
+                              </h2>
+                              <span className="text-[10px] text-dark-muted font-bold">
+                                via <span className="text-white/80">{article.source}</span>
+                              </span>
+                            </div>
+                            <p className="text-xs text-dark-muted leading-relaxed mb-6">
+                              {article.summary}
+                            </p>
+                          </div>
+                          <div className="space-y-4 pt-4 border-t border-dark-border/20">
+                            <div className="bg-dark/40 border border-dark-border/40 rounded-xl p-3.5 text-xs text-dark-muted relative overflow-hidden">
+                              <div className="absolute left-0 top-0 bottom-0 w-1 bg-brand-blue"></div>
+                              <span className="text-[9px] font-bold text-brand-blue uppercase tracking-wider block mb-1">
+                                AI Impact Analysis
+                              </span>
+                              <p className="leading-relaxed text-[11px]">{article.aiSummary}</p>
+                            </div>
+                            {article.relatedMarket && (
+                              <Link
+                                to={`/markets/${article.relatedMarket._id}`}
+                                className="inline-flex items-center justify-between w-full bg-brand-purple/5 hover:bg-brand-purple/10 border border-brand-purple/20 hover:border-brand-purple/35 rounded-xl px-4 py-2.5 text-xs text-brand-purple transition-all duration-200"
+                              >
+                                <div className="flex items-center space-x-2 truncate">
+                                  <Link2 size={13} className="flex-shrink-0" />
+                                  <span className="font-bold truncate text-white">
+                                    {article.relatedMarket.title}
+                                  </span>
+                                </div>
+                                <div className="flex items-center space-x-2 flex-shrink-0 ml-4 font-bold">
+                                  <span>YES {article.relatedMarket.yesProbability}%</span>
+                                  <span className="text-white/30">•</span>
+                                  <span>Trade Now →</span>
+                                </div>
+                              </Link>
+                            )}
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  )}
-                </div>
+                  </div>
+                )}
+
+                {/* Long-Term News Section */}
+                {longTermNews.length > 0 && (
+                  <div className="space-y-6">
+                    <div className="flex items-center space-x-2 border-b border-dark-border/20 pb-2">
+                      <span className="text-xl">📅</span>
+                      <h2 className="text-base font-extrabold text-white tracking-tight leading-none uppercase">
+                        Long-Term News Timelines
+                      </h2>
+                      <span className="text-[10px] bg-brand-purple/10 border border-brand-purple/35 text-brand-purple font-bold uppercase tracking-wider px-2 py-0.5 rounded">
+                        Contracts Timelines
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                      {longTermNews.map((article) => (
+                        <div
+                          key={article._id}
+                          className="bg-dark-card border border-dark-border/60 rounded-2xl p-6 shadow-xl flex flex-col justify-between group relative overflow-hidden transition-all duration-250 hover:border-dark-border/100 hover:scale-[1.01]"
+                        >
+                          <div>
+                            <div className="flex justify-between items-center mb-4">
+                              <span className="text-[9px] font-bold uppercase tracking-wider text-brand-purple bg-brand-purple/10 border border-brand-purple/20 px-2 py-0.5 rounded">
+                                {article.category}
+                              </span>
+                              <div className="flex items-center space-x-3 text-[10px] text-dark-muted font-medium">
+                                <span className="flex items-center space-x-1">
+                                  <Eye size={11} />
+                                  <span>{article.views || 120} views</span>
+                                </span>
+                                <span className="flex items-center space-x-1">
+                                  <Calendar size={11} />
+                                  <span>{formatDate(article.publishedDate)}</span>
+                                </span>
+                              </div>
+                            </div>
+                            <div className="mb-4">
+                              <h2 className="text-base font-extrabold text-white leading-snug mb-1 group-hover:text-brand-blue transition-colors">
+                                <a href={article.url} target="_blank" rel="noopener noreferrer">
+                                  {article.headline}
+                                </a>
+                              </h2>
+                              <span className="text-[10px] text-dark-muted font-bold">
+                                via <span className="text-white/80">{article.source}</span>
+                              </span>
+                            </div>
+                            <p className="text-xs text-dark-muted leading-relaxed mb-6">
+                              {article.summary}
+                            </p>
+                          </div>
+                          <div className="space-y-4 pt-4 border-t border-dark-border/20">
+                            <div className="bg-dark/40 border border-dark-border/40 rounded-xl p-3.5 text-xs text-dark-muted relative overflow-hidden">
+                              <div className="absolute left-0 top-0 bottom-0 w-1 bg-brand-purple"></div>
+                              <span className="text-[9px] font-bold text-brand-purple uppercase tracking-wider block mb-1">
+                                AI Impact Analysis
+                              </span>
+                              <p className="leading-relaxed text-[11px]">{article.aiSummary}</p>
+                            </div>
+                            {article.relatedMarket && (
+                              <Link
+                                to={`/markets/${article.relatedMarket._id}`}
+                                className="inline-flex items-center justify-between w-full bg-brand-purple/5 hover:bg-brand-purple/10 border border-brand-purple/20 hover:border-brand-purple/35 rounded-xl px-4 py-2.5 text-xs text-brand-purple transition-all duration-200"
+                              >
+                                <div className="flex items-center space-x-2 truncate">
+                                  <Link2 size={13} className="flex-shrink-0" />
+                                  <span className="font-bold truncate text-white">
+                                    {article.relatedMarket.title}
+                                  </span>
+                                </div>
+                                <div className="flex items-center space-x-2 flex-shrink-0 ml-4 font-bold">
+                                  <span>YES {article.relatedMarket.yesProbability}%</span>
+                                  <span className="text-white/30">•</span>
+                                  <span>Trade Now →</span>
+                                </div>
+                              </Link>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Empty State after filter */}
+                {shortTermNews.length === 0 && longTermNews.length === 0 && (
+                  <div className="bg-dark-card/30 border border-dark-border/40 rounded-2xl py-14 text-center">
+                    <p className="text-sm text-white font-bold mb-1">No news briefings matched</p>
+                    <p className="text-xs text-dark-muted">Try adjusting your filters.</p>
+                  </div>
+                )}
               </div>
-            ))}
-          </div>
+            );
+          })()
         ) : (
           <div className="bg-dark-card/30 border border-dark-border/40 rounded-2xl py-20 text-center flex flex-col items-center justify-center">
             <span className="text-3xl mb-4">📰</span>

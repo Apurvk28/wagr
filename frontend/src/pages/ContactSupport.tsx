@@ -31,7 +31,7 @@ const ContactSupport: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-dark flex flex-col justify-between">
+    <div className="min-h-screen bg-dark flex flex-col justify-between animate-fade-in">
       <Navbar />
 
       <div className="flex-grow max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-16">

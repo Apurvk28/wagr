@@ -13,6 +13,7 @@ export interface NewsArticle {
     status: string;
     yesProbability: number;
     noProbability: number;
+    marketType?: 'Long-Term' | 'Short-Term';
   };
   publishedDate: string;
   aiSummary: string;

@@ -90,7 +90,11 @@ export const generateMarketsSuggestions = async (marketType) => {
       return [];
     }
 
-    const apiKey = process.env.NEWS_API_KEY;
+    // Load appropriate API Key based on market type
+    const apiKey = marketType === 'Long-Term'
+      ? process.env.LONG_TERM_MARKET_API_KEY
+      : process.env.SHORT_TREM_MARKET_API_KEY;
+
     if (!apiKey || apiKey.startsWith('your_') || apiKey.includes('placeholder')) {
       const fallbackList = marketType === 'Long-Term' 
         ? getMockLongTermSuggestions(admin._id) 
@@ -101,12 +105,18 @@ export const generateMarketsSuggestions = async (marketType) => {
     }
 
     // Call Groq API to generate fresh market drafts
-    console.log(`📡 Fetching AI ${marketType} market suggestions from Groq...`);
+    console.log(`📡 Fetching AI ${marketType} market suggestions from Groq using dedicated key...`);
     const prompt = `
 You are an expert prediction analyst for a forecasting exchange.
-Generate exactly two realistic, high-quality prediction market contract proposals for the category '${marketType}'.
-- For Long-Term: focus on major global developments in AI, tech, finance, or business with resolution dates months away.
-- For Short-Term: focus on daily financial indexes, trending news, corporate stocks, or product updates expiring in exactly 24 hours.
+Generate exactly two realistic, high-quality, real-world prediction market contract proposals for the category '${marketType}'.
+
+CRITICAL QUALITY COMPLIANCE:
+- The current year is 2026 (July). All generated questions must pertain to future, unresolved, real-world events occurring in late 2026, 2027, or 2028.
+- NEVER generate questions for milestones that have already occurred (e.g. Do NOT generate questions about GPT-5 release as that already launched in 2025; instead forecast GPT-6 or Claude 4.5/5).
+- Ensure the event is highly relevant to current public interest and has a verifiable resolution source.
+- Avoid duplicate markets.
+- For Long-Term: focus on major developments in AI, tech, finance, global affairs, or business (e.g. specific space flights, future CPU launches, election outcomes) resolving in months/years.
+- For Short-Term: focus on daily financial indexes, corporate stock closing prices (e.g., Apple, NVIDIA, Tesla), major daily launches, or immediate breaking statements resolving in 24 hours.
 
 Return exactly a JSON object matching this schema:
 {

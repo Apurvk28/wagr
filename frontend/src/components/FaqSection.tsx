@@ -45,10 +45,6 @@ const faqData: FaqItem[] = [
 const FaqSection: React.FC = () => {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
-  const toggleAccordion = (index: number) => {
-    setActiveIndex(activeIndex === index ? null : index);
-  };
-
   return (
     <div className="w-full max-w-3xl mx-auto space-y-3">
       {faqData.map((item, index) => {
@@ -56,18 +52,19 @@ const FaqSection: React.FC = () => {
         return (
           <div
             key={index}
-            className="bg-dark-card border border-dark-border/80 rounded-xl overflow-hidden shadow-md transition-all duration-200"
+            onMouseEnter={() => setActiveIndex(index)}
+            onMouseLeave={() => setActiveIndex(null)}
+            className="bg-dark-card border border-dark-border/60 hover:border-brand-purple/30 rounded-xl overflow-hidden shadow-md transition-all duration-200"
           >
-            <button
-              onClick={() => toggleAccordion(index)}
-              className="w-full px-5 py-4 flex items-center justify-between text-left focus:outline-none select-none hover:bg-dark-card/90"
+            <div
+              className="w-full px-5 py-4 flex items-center justify-between text-left select-none"
             >
               <span className="text-xs md:text-sm font-semibold text-white/95">{item.question}</span>
               <ChevronDown
                 size={16}
                 className={`text-dark-muted transform transition-transform duration-300 ${isOpen ? 'rotate-180 text-brand-purple' : ''}`}
               />
-            </button>
+            </div>
 
             <AnimatePresence initial={false}>
               {isOpen && (

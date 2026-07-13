@@ -32,7 +32,7 @@ export const getNewsFeed = async (req, res, next) => {
 
     // Fetch news sorted by published date (newest first)
     const newsFeed = await News.find(query)
-      .populate('relatedMarket', 'title status yesProbability noProbability')
+      .populate('relatedMarket', 'title status yesProbability noProbability marketType')
       .sort({ publishedDate: -1, createdAt: -1 });
 
     res.status(200).json({
@@ -53,7 +53,7 @@ export const getNewsFeed = async (req, res, next) => {
 export const getNewsById = async (req, res, next) => {
   try {
     const news = await News.findById(req.params.id)
-      .populate('relatedMarket', 'title status yesProbability noProbability');
+      .populate('relatedMarket', 'title status yesProbability noProbability marketType');
 
     if (!news) {
       return res.status(404).json({
