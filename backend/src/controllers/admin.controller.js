@@ -2,6 +2,9 @@ import User from '../models/user.model.js';
 import Market from '../models/market.model.js';
 import Position from '../models/position.model.js';
 import Post from '../models/post.model.js';
+import { checkExpiredMarkets, archiveShortTermMarkets } from '../services/cron.service.js';
+import { generateMarketsSuggestions } from '../services/aiGeneration.service.js';
+import { syncAiNewsFromGroq } from '../services/aiNews.service.js';
 
 /**
  * @desc    Get admin dashboard statistics
@@ -176,6 +179,29 @@ export const getAllPosts = async (req, res, next) => {
     res.status(200).json({
       success: true,
       data: posts,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * @desc    Manually trigger cron background updates
+ * @route   POST /api/v1/admin/cron/trigger
+ * @access  Private/Admin
+ */
+export const triggerCronJobs = async (req, res, next) => {
+  try {
+    console.log('⚡ Manually triggering simulated V1.1 cron background tasks...');
+    await checkExpiredMarkets();
+    await archiveShortTermMarkets();
+    await generateMarketsSuggestions('Short-Term');
+    await generateMarketsSuggestions('Long-Term');
+    await syncAiNewsFromGroq();
+
+    res.status(200).json({
+      success: true,
+      message: 'Simulated daily updates and AI news fetches triggered successfully.',
     });
   } catch (error) {
     next(error);

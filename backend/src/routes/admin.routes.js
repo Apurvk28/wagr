@@ -6,6 +6,7 @@ import {
   getAllPendingMarkets,
   deletePost,
   getAllPosts,
+  triggerCronJobs,
 } from '../controllers/admin.controller.js';
 import { protect, authorize } from '../middleware/auth.middleware.js';
 
@@ -20,5 +21,6 @@ router.put('/users/:id/suspend', suspendUser);
 router.get('/markets/pending', getAllPendingMarkets);
 router.get('/posts', getAllPosts);
 router.delete('/posts/:id', deletePost);
+router.post('/cron/trigger', triggerCronJobs);
 
 export default router;

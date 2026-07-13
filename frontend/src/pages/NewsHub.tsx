@@ -270,17 +270,17 @@ const NewsHub: React.FC = () => {
             return (
               <div className="space-y-12 animate-fade-in">
                 {/* Short-Term News Section */}
-                {shortTermNews.length > 0 && (
-                  <div className="space-y-6">
-                    <div className="flex items-center space-x-2 border-b border-dark-border/20 pb-2">
-                      <span className="text-xl">⚡</span>
-                      <h2 className="text-base font-extrabold text-white tracking-tight leading-none uppercase">
-                        Short-Term News Briefings
-                      </h2>
-                      <span className="text-[10px] bg-brand-blue/10 border border-brand-blue/35 text-brand-blue font-bold uppercase tracking-wider px-2 py-0.5 rounded">
-                        Daily Updates
-                      </span>
-                    </div>
+                <div className="space-y-6">
+                  <div className="flex items-center space-x-2 border-b border-dark-border/20 pb-2">
+                    <span className="text-xl">⚡</span>
+                    <h2 className="text-base font-extrabold text-white tracking-tight leading-none uppercase">
+                      Short-Term News Briefings
+                    </h2>
+                    <span className="text-[10px] bg-brand-blue/10 border border-brand-blue/35 text-brand-blue font-bold uppercase tracking-wider px-2 py-0.5 rounded">
+                      Daily Updates
+                    </span>
+                  </div>
+                  {shortTermNews.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                       {shortTermNews.map((article) => (
                         <div
@@ -347,21 +347,25 @@ const NewsHub: React.FC = () => {
                         </div>
                       ))}
                     </div>
-                  </div>
-                )}
+                  ) : (
+                    <div className="bg-dark-card/30 border border-dark-border/40 rounded-2xl py-10 text-center">
+                      <p className="text-xs text-dark-muted">No daily short-term news briefings currently synced.</p>
+                    </div>
+                  )}
+                </div>
 
                 {/* Long-Term News Section */}
-                {longTermNews.length > 0 && (
-                  <div className="space-y-6">
-                    <div className="flex items-center space-x-2 border-b border-dark-border/20 pb-2">
-                      <span className="text-xl">📅</span>
-                      <h2 className="text-base font-extrabold text-white tracking-tight leading-none uppercase">
-                        Long-Term News Timelines
-                      </h2>
-                      <span className="text-[10px] bg-brand-purple/10 border border-brand-purple/35 text-brand-purple font-bold uppercase tracking-wider px-2 py-0.5 rounded">
-                        Contracts Timelines
-                      </span>
-                    </div>
+                <div className="space-y-6">
+                  <div className="flex items-center space-x-2 border-b border-dark-border/20 pb-2">
+                    <span className="text-xl">📅</span>
+                    <h2 className="text-base font-extrabold text-white tracking-tight leading-none uppercase">
+                      Long-Term News Timelines
+                    </h2>
+                    <span className="text-[10px] bg-brand-purple/10 border border-brand-purple/35 text-brand-purple font-bold uppercase tracking-wider px-2 py-0.5 rounded">
+                      Contracts Timelines
+                    </span>
+                  </div>
+                  {longTermNews.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                       {longTermNews.map((article) => (
                         <div
@@ -428,8 +432,12 @@ const NewsHub: React.FC = () => {
                         </div>
                       ))}
                     </div>
-                  </div>
-                )}
+                  ) : (
+                    <div className="bg-dark-card/30 border border-dark-border/40 rounded-2xl py-10 text-center">
+                      <p className="text-xs text-dark-muted">No long-term news timelines currently synced.</p>
+                    </div>
+                  )}
+                </div>
 
                 {/* Empty State after filter */}
                 {shortTermNews.length === 0 && longTermNews.length === 0 && (

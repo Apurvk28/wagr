@@ -309,7 +309,7 @@ const MarketsList: React.FC = () => {
             return (
               <div className="space-y-12 animate-fade-in">
                 {/* Short-Term Markets Section */}
-                {showShortTerm && shortTerm.length > 0 && (
+                {showShortTerm && (
                   <div className="space-y-5">
                     <div className="flex items-center space-x-2 border-b border-dark-border/20 pb-2">
                       <span className="text-xl">⚡</span>
@@ -320,16 +320,22 @@ const MarketsList: React.FC = () => {
                         closes in 24h
                       </span>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                      {shortTerm.map((market) => (
-                        <MarketCard key={market._id} market={market} isDailyFlash={true} />
-                      ))}
-                    </div>
+                    {shortTerm.length > 0 ? (
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        {shortTerm.map((market) => (
+                          <MarketCard key={market._id} market={market} isDailyFlash={true} />
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="bg-dark-card/30 border border-dark-border/40 rounded-2xl py-10 text-center">
+                        <p className="text-xs text-dark-muted">No active Short-Term markets available today.</p>
+                      </div>
+                    )}
                   </div>
                 )}
 
                 {/* Long-Term Markets Section */}
-                {showLongTerm && longTerm.length > 0 && (
+                {showLongTerm && (
                   <div className="space-y-5">
                     <div className="flex items-center space-x-2 border-b border-dark-border/20 pb-2">
                       <span className="text-xl">🌐</span>
@@ -340,20 +346,17 @@ const MarketsList: React.FC = () => {
                         strategic
                       </span>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                      {longTerm.map((market) => (
-                        <MarketCard key={market._id} market={market} />
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Empty State after filter */}
-                {((marketType === 'Short-Term' && shortTerm.length === 0) || 
-                  (marketType === 'Long-Term' && longTerm.length === 0)) && (
-                  <div className="bg-dark-card/30 border border-dark-border/40 rounded-2xl py-14 text-center">
-                    <p className="text-sm text-white font-bold mb-1">No markets in this category</p>
-                    <p className="text-xs text-dark-muted">No contracts match your chosen type filter.</p>
+                    {longTerm.length > 0 ? (
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        {longTerm.map((market) => (
+                          <MarketCard key={market._id} market={market} />
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="bg-dark-card/30 border border-dark-border/40 rounded-2xl py-10 text-center">
+                        <p className="text-xs text-dark-muted">No active Long-Term markets available right now.</p>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
