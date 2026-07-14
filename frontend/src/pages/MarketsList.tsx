@@ -19,7 +19,7 @@ const Categories = [
 ];
 
 const MarketsList: React.FC = () => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const [markets, setMarkets] = useState<Market[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

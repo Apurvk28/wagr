@@ -11,6 +11,7 @@ import type { Market, News, Post } from '../types';
 import { motion } from 'framer-motion';
 import { formatDate } from '../utils';
 import { TrendingUp, Activity, Newspaper, MessageSquare, HelpCircle } from 'lucide-react';
+import { TextRepel } from '../components/ui/text-repel';
 
 const Home: React.FC = () => {
   const { isAuthenticated, user } = useAuth();
@@ -102,7 +103,7 @@ const Home: React.FC = () => {
               >
                 <span className="text-[11px] font-bold text-dark-muted block uppercase tracking-widest">Welcome Back</span>
                 <span className="text-xl sm:text-2xl font-black tracking-widest bg-clip-text text-transparent bg-gradient-to-r from-brand-purple via-pink-500 to-brand-blue animate-pulse inline-block mt-1 uppercase border-b border-brand-purple/20 pb-0.5">
-                  {user.username}
+                  <TextRepel text={user.username} />
                 </span>
               </motion.div>
             )}
