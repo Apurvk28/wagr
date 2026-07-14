@@ -8,6 +8,7 @@ import {
   toggleFollowCategory,
   getPortfolio,
   getTradingHistory,
+  getHomepageSummary,
 } from '../controllers/user.controller.js';
 import { protect, optional } from '../middleware/auth.middleware.js';
 
@@ -22,6 +23,7 @@ router.post('/categories/follow', protect, toggleFollowCategory);
 
 router.get('/portfolio', protect, getPortfolio);
 router.get('/trades', protect, getTradingHistory);
+router.get('/homepage-summary', protect, getHomepageSummary);
 
 router.get('/profile/:username', optional, getUserProfile);
 router.post('/:id/follow', protect, toggleFollowUser);

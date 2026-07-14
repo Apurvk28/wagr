@@ -9,3 +9,8 @@ export const getTradingHistory = async () => {
   const response = await api.get('/users/trades');
   return response.data.data;
 };
+
+export const getHomepageSummary = async () => {
+  const response = await api.get('/users/homepage-summary');
+  return response.data.data;
+};
