@@ -336,21 +336,25 @@ const Home: React.FC = () => {
           </div>
         </section>
 
-        {/* 6. Card Stack Platform Highlights */}
-        <section className="bg-dark/20 border-y border-dark-border/25">
-          <CardStack />
-        </section>
+        {!isAuthenticated && (
+          <>
+            {/* 6. Card Stack Platform Highlights */}
+            <section className="bg-dark/20 border-y border-dark-border/25">
+              <CardStack />
+            </section>
 
-        {/* 7. FAQ Accordion Section */}
-        <section className="py-12 md:py-20 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mb-6">
-          <div className="flex items-center justify-center space-x-2 mb-10 text-center">
-            <div className="w-7 h-7 rounded-lg bg-orange-500/10 flex items-center justify-center text-orange-400 border border-orange-500/25">
-              <HelpCircle size={14} />
-            </div>
-            <h2 className="text-lg font-extrabold text-white tracking-tight">Frequently Asked Questions</h2>
-          </div>
-          <FaqSection />
-        </section>
+            {/* 7. FAQ Accordion Section */}
+            <section className="py-12 md:py-20 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mb-6">
+              <div className="flex items-center justify-center space-x-2 mb-10 text-center">
+                <div className="w-7 h-7 rounded-lg bg-orange-500/10 flex items-center justify-center text-orange-400 border border-orange-500/25">
+                  <HelpCircle size={14} />
+                </div>
+                <h2 className="text-lg font-extrabold text-white tracking-tight">Frequently Asked Questions</h2>
+              </div>
+              <FaqSection />
+            </section>
+          </>
+        )}
       </div>
 
       {/* 7. Footer */}

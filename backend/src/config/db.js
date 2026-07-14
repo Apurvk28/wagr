@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 
 import User from '../models/user.model.js';
 import Market from '../models/market.model.js';
+import News from '../models/news.model.js';
 import { mockMarkets } from '../utils/mockData.js';
 
 const seedDatabase = async () => {
