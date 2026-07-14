@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
@@ -13,10 +13,12 @@ import { motion } from 'framer-motion';
 import { formatDate } from '../utils';
 import { TrendingUp, Activity, Newspaper, MessageSquare, HelpCircle } from 'lucide-react';
 import { TextRepel } from '../components/ui/text-repel';
+import { ScrollSplitCard } from '../components/ui/scroll-split-card';
 
 const Home: React.FC = () => {
   const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
+  const splitCardContainerRef = useRef<HTMLDivElement>(null);
 
   // State definitions for API data
   const [trendingMarkets, setTrendingMarkets] = useState<Market[]>([]);
@@ -471,6 +473,38 @@ const Home: React.FC = () => {
             )}
           </div>
         </section>
+
+        {/* Scroll Split Card Section */}
+        <div
+          ref={splitCardContainerRef}
+          data-lenis-prevent
+          className="relative h-[100dvh] w-full overflow-y-auto overscroll-contain [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] border-b border-dark-border/20"
+        >
+          <ScrollSplitCard
+            containerRef={splitCardContainerRef}
+            imageSrc="https://images.unsplash.com/photo-1773058373644-74e4120bfc77?q=80&w=2832&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+            cards={[
+              {
+                title: "Going Zero to One",
+                description: "If you're navigating a new business... breaking into a new market.",
+                bgColor: "#e2e2e2",
+                textColor: "#111111"
+              },
+              {
+                title: "Scaling from One to N",
+                description: "If you've achieved Product/Market Fit...",
+                bgColor: "#1a5bcf",
+                textColor: "#ffffff"
+              },
+              {
+                title: "Need Quick Solutions",
+                description: "If you know exactly what you want and need...",
+                bgColor: "#1c1c1c",
+                textColor: "#ffffff"
+              }
+            ]}
+          />
+        </div>
 
         {/* 4. Latest News Section */}
         <section className="py-12 md:py-16 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 border-b border-dark-border/20">
