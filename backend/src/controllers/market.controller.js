@@ -94,6 +94,14 @@ export const getMarketById = async (req, res, next) => {
  */
 export const createMarket = async (req, res, next) => {
   try {
+    // Only administrators are allowed to create/propose markets manually
+    if (req.user.role !== 'Admin') {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied. Only Administrators can create prediction markets.',
+      });
+    }
+
     const { title, description, category, resolutionDate } = req.body;
 
     if (!title || !description || !category || !resolutionDate) {
@@ -110,8 +118,8 @@ export const createMarket = async (req, res, next) => {
       });
     }
 
-    // Standard users create Pending Approval markets, Admins create Live markets directly
-    const status = req.user.role === 'Admin' ? 'Live' : 'Pending Approval';
+    // Admins create Live markets directly
+    const status = 'Live';
 
     const market = await Market.create({
       title,

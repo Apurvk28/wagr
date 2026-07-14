@@ -117,7 +117,7 @@ const MarketsList: React.FC = () => {
             </p>
           </div>
 
-          {isAuthenticated && (
+          {isAuthenticated && user?.role === 'Admin' && (
             <Link
               to="/markets/create"
               className="inline-flex items-center space-x-2 bg-gradient-to-r from-brand-purple to-brand-blue text-white text-xs font-bold uppercase tracking-wider px-5 py-3 rounded-xl hover:opacity-95 transform active:scale-98 transition-all shadow-lg shadow-brand-purple/20"

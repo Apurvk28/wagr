@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { createMarket } from '../services/marketService';
 import { useNavigate, Link } from 'react-router-dom';
 import { ChevronLeft, Info } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 const Categories = [
   'Artificial Intelligence',
@@ -15,8 +16,16 @@ const Categories = [
 
 const CreateMarket: React.FC = () => {
   const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Only administrators are allowed to propose or create prediction markets
+    if (isAuthenticated && user && user.role !== 'Admin') {
+      navigate('/markets');
+    }
+  }, [isAuthenticated, user, navigate]);
 
   // Form states
   const [title, setTitle] = useState('');

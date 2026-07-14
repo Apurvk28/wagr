@@ -22,6 +22,12 @@ const seedDatabase = async () => {
       console.log('👑 Created default administrator user: admin@wagr.io / AdminPassword123!');
     }
 
+    // Always clean up any "test" or "test 1" markets on startup
+    const deletedTestCount = await Market.deleteMany({ title: /test 1|test/i });
+    if (deletedTestCount.deletedCount > 0) {
+      console.log(`🧹 Cleaned up ${deletedTestCount.deletedCount} manual test markets from database.`);
+    }
+
     const marketCount = await Market.countDocuments();
     if (marketCount > 0) {
       return;
@@ -49,7 +55,25 @@ const seedDatabase = async () => {
           ]
         };
       }),
-      // Short-Term Daily Markets
+      // 6th Long-Term Market
+      {
+        title: 'Will SpaceX complete a Starship lunar landing demonstration in 2026?',
+        description: 'Resolves to YES if SpaceX successfully conducts an uncrewed Starship lunar landing demonstration mission as part of NASA Artemis contract by December 31, 2026.',
+        category: 'Technology',
+        marketType: 'Long-Term',
+        yesProbability: 55,
+        noProbability: 45,
+        volume: 76500,
+        status: 'Live',
+        resolutionDate: new Date(Date.now() + 150 * 24 * 60 * 60 * 1000),
+        createdBy: admin._id,
+        participants: [],
+        probabilityHistory: [
+          { yesProbability: 50, timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000) },
+          { yesProbability: 55, timestamp: new Date() }
+        ]
+      },
+      // Short-Term Daily Markets (6 items)
       {
         title: 'Will the S&P 500 close green today?',
         description: 'Resolves to YES if the S&P 500 Index closes higher than yesterday\'s close today. This market will lock and archive at the end of the day.',
@@ -82,6 +106,73 @@ const seedDatabase = async () => {
         probabilityHistory: [
           { yesProbability: 48, timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000) },
           { yesProbability: 45, timestamp: new Date() }
+        ]
+      },
+      {
+        title: 'Will NVIDIA stock close above $135 today?',
+        description: 'Resolves to YES if NVIDIA common stock closes above $135 in normal Nasdaq trading hours today.',
+        category: 'Finance',
+        marketType: 'Short-Term',
+        yesProbability: 55,
+        noProbability: 45,
+        volume: 45000,
+        status: 'Live',
+        resolutionDate: endOfToday,
+        createdBy: admin._id,
+        participants: [],
+        probabilityHistory: [
+          { yesProbability: 50, timestamp: new Date(Date.now() - 3 * 60 * 60 * 1000) },
+          { yesProbability: 55, timestamp: new Date() }
+        ]
+      },
+      {
+        title: 'Will Bitcoin close above $120,000 today?',
+        description: 'Resolves to YES if the index price of Bitcoin closes above $120,000 at 23:59 UTC today on global feeds.',
+        category: 'Finance',
+        marketType: 'Short-Term',
+        yesProbability: 40,
+        noProbability: 60,
+        volume: 89000,
+        status: 'Live',
+        resolutionDate: endOfToday,
+        createdBy: admin._id,
+        participants: [],
+        probabilityHistory: [
+          { yesProbability: 42, timestamp: new Date(Date.now() - 5 * 60 * 60 * 1000) },
+          { yesProbability: 40, timestamp: new Date() }
+        ]
+      },
+      {
+        title: 'Will SpaceX successfully launch a Falcon 9 rocket today?',
+        description: 'Resolves to YES if SpaceX successfully launches and completes first stage recovery of a Falcon 9 mission today.',
+        category: 'Technology',
+        marketType: 'Short-Term',
+        yesProbability: 85,
+        noProbability: 15,
+        volume: 12000,
+        status: 'Live',
+        resolutionDate: endOfToday,
+        createdBy: admin._id,
+        participants: [],
+        probabilityHistory: [
+          { yesProbability: 80, timestamp: new Date(Date.now() - 1 * 60 * 60 * 1000) },
+          { yesProbability: 85, timestamp: new Date() }
+        ]
+      },
+      {
+        title: 'Will OpenAI release a new product update today?',
+        description: 'Resolves to YES if OpenAI issues an official press release or conducts a product announcement today.',
+        category: 'Artificial Intelligence',
+        marketType: 'Short-Term',
+        yesProbability: 50,
+        noProbability: 50,
+        volume: 15000,
+        status: 'Live',
+        resolutionDate: endOfToday,
+        createdBy: admin._id,
+        participants: [],
+        probabilityHistory: [
+          { yesProbability: 50, timestamp: new Date() }
         ]
       }
     ];

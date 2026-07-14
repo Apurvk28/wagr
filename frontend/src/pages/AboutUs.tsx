@@ -1,7 +1,7 @@
 import React from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import { Target, Eye, ShieldAlert, Award } from 'lucide-react';
+import { Target, Eye, ShieldAlert, Award, TrendingUp, Users } from 'lucide-react';
 
 const AboutUs: React.FC = () => {
   return (
@@ -70,6 +70,34 @@ const AboutUs: React.FC = () => {
             </p>
             <p>
               This gamified structure removes financial barriers and regulatory complexities, maintaining a safe, friendly sandbox focusing entirely on learning, trading correctness, and cooperative community building.
+            </p>
+          </section>
+
+          {/* Section 4: AI-Powered Probability Engineering */}
+          <section className="bg-dark-card border border-dark-border/60 rounded-2xl p-8 hover:border-brand-success/20 transition-colors">
+            <div className="flex items-center space-x-3 mb-4">
+              <TrendingUp className="text-brand-success" size={20} />
+              <h2 className="text-lg font-bold text-white uppercase tracking-wider">AI-Powered Probability Engineering</h2>
+            </div>
+            <p className="mb-4">
+              Unlike traditional models that are prone to manipulation by single high-value traders, Wagr implements a custom virtual buffer algorithm. By establishing a virtual pool buffer (C = 1000 MXP) on both sides of prediction contracts, we guarantee stable, smooth price adjustments.
+            </p>
+            <p>
+              AI sentiment simulators query global news feeds and update active contract volumes in the background. This ensures that the YES/NO odds dynamically adjust according to live sentiment data, creating a realistic simulation of standard market conditions.
+            </p>
+          </section>
+
+          {/* Section 5: Our Team & Community Focus */}
+          <section className="bg-dark-card border border-dark-border/60 rounded-2xl p-8 hover:border-brand-purple/20 transition-colors">
+            <div className="flex items-center space-x-3 mb-4">
+              <Users className="text-brand-purple" size={20} />
+              <h2 className="text-lg font-bold text-white uppercase tracking-wider">Our Team &amp; Community Focus</h2>
+            </div>
+            <p className="mb-4">
+              We are a group of developers, data scientists, and prediction market analysts dedicated to build next-generation forecasting toolkits. We believe that structured crowdsourced forecasting is an important research field for financial analysis.
+            </p>
+            <p>
+              By combining AI-generated insights, daily dynamic news, and community discussion boards, we allow our users to test strategies, learn behavioral economics, and connect with like-minded analytical minds.
             </p>
           </section>
         </div>

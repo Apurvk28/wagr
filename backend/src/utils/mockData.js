@@ -3,8 +3,8 @@
 export const mockMarkets = [
   {
     _id: 'm1',
-    title: 'Will OpenAI announce GPT-5 before December 2026?',
-    description: 'Resolves to YES if OpenAI officially announces or releases the GPT-5 large language model before December 31, 2026, 23:59 UTC. Otherwise, resolves to NO.',
+    title: 'Will OpenAI announce GPT-6 before December 2026?',
+    description: 'Resolves to YES if OpenAI officially announces or releases the GPT-6 large language model before December 31, 2026, 23:59 UTC. Otherwise, resolves to NO.',
     category: 'Artificial Intelligence',
     yesProbability: 68,
     noProbability: 32,
@@ -59,8 +59,8 @@ export const mockMarkets = [
   },
   {
     _id: 'm5',
-    title: 'Will Anthropic Claude 4 outperform GPT-5 on MMLU?',
-    description: 'Resolves to YES if Anthropic officially releases Claude 4 and its reported MMLU benchmark score is higher than that of OpenAI GPT-5, as verified by official technical reports before the end of 2026. Otherwise, resolves to NO.',
+    title: 'Will Anthropic Claude 4 outperform GPT-6 on MMLU?',
+    description: 'Resolves to YES if Anthropic officially releases Claude 4 and its reported MMLU benchmark score is higher than that of OpenAI GPT-6, as verified by official technical reports before the end of 2026. Otherwise, resolves to NO.',
     category: 'Artificial Intelligence',
     yesProbability: 52,
     noProbability: 48,

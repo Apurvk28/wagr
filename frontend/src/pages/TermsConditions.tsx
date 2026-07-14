@@ -1,7 +1,7 @@
 import React from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import { ShieldAlert, Cpu, Sparkles, Scale, Info } from 'lucide-react';
+import { ShieldAlert, Cpu, Sparkles, Scale, Info, Globe, AlertCircle } from 'lucide-react';
 
 const TermsConditions: React.FC = () => {
   return (
@@ -27,7 +27,7 @@ const TermsConditions: React.FC = () => {
               <h2 className="text-sm font-bold text-white uppercase tracking-wider">1. No Real Money / Virtual Currency Disclaimer</h2>
             </div>
             <p className="text-xs text-dark-muted leading-relaxed mb-3">
-              Wagr.io operates exclusively as a prediction simulation environment. The virtual currency, Market Exchange Points (MXP), holds absolutely no monetary value, cannot be redeemed for fiat, digital tokens, or items of real-world value, and cannot be transferred between user accounts.
+              Wagr.io operates exclusively as a prediction simulation environment. The virtual currency, Market Exchange Points (MXP), holds absolutely no monetary value, cannot be redeemed for fiat currency, digital tokens, or items of real-world value, and cannot be transferred between user accounts.
             </p>
             <p className="text-xs text-dark-muted leading-relaxed">
               Users are credited with 500 MXP upon email verification. Any reference to "wagers", "profits", "losses", or "trading volume" is strictly virtual and intended solely for platform gamification, forecasting practice, and leaderboard rankings.
@@ -66,7 +66,7 @@ const TermsConditions: React.FC = () => {
               <h2 className="text-sm font-bold text-white uppercase tracking-wider">3. Market Resolutions</h2>
             </div>
             <p className="text-xs text-dark-muted leading-relaxed">
-              All prediction contracts are resolved based on verified news outcomes. Administrators are responsible for verifying real-world event resolutions and settling contracts to either YES or NO. In the case of cancelled events or ambiguous resolution details, the market is cancelled, and all original user stakes are refunded in full.
+              All prediction contracts are resolved based on verified news outcomes. Administrators are responsible for verifying real-world event resolutions and settling contracts to either YES or NO. In the case of cancelled events or ambiguous resolution details, the market is cancelled, and all original user stakes are refunded in full. Decisions made by administrators regarding contract resolutions are final and binding.
             </p>
           </section>
 
@@ -84,6 +84,28 @@ const TermsConditions: React.FC = () => {
               <li>Exploiting platform software bugs to manipulate balances or stats.</li>
               <li>Creating duplicate accounts to farm virtual currency.</li>
             </ul>
+          </section>
+
+          {/* Section 5: Intellectual Property & Content Ownership */}
+          <section className="bg-dark-card border border-dark-border/60 rounded-2xl p-6">
+            <div className="flex items-center space-x-3 mb-3">
+              <Globe className="text-brand-success" size={18} />
+              <h2 className="text-sm font-bold text-white uppercase tracking-wider">5. Intellectual Property &amp; Content Ownership</h2>
+            </div>
+            <p className="text-xs text-dark-muted leading-relaxed">
+              All original graphics, interface elements, styling systems, and AI-generated news briefs or contract summaries displayed on Wagr.io are the intellectual property of the Wagr team. User-submitted posts or comments in the community feed remain the property of the poster, but by submitting content, you grant Wagr a non-exclusive, royalty-free license to display, host, and index your content across the platform.
+            </p>
+          </section>
+
+          {/* Section 6: Limitation of Liability */}
+          <section className="bg-dark-card border border-dark-border/60 rounded-2xl p-6">
+            <div className="flex items-center space-x-3 mb-3">
+              <AlertCircle className="text-orange-500" size={18} />
+              <h2 className="text-sm font-bold text-white uppercase tracking-wider">6. Limitation of Liability</h2>
+            </div>
+            <p className="text-xs text-dark-muted leading-relaxed">
+              Wagr.io is provided on an "as-is" and "as-available" basis. We offer no warranties, express or implied, regarding system uptime, database integrity, correctness of probabilities, or automated AI sentiment activities. In no event shall the developers, contributors, or administrators of Wagr.io be liable for any claims, damages, or losses (virtual or otherwise) resulting from system malfunctions, data corruption, or temporary service downtime.
+            </p>
           </section>
         </div>
       </div>

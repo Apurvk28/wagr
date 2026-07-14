@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import FaqSection from '../components/FaqSection';
+import CardStack from '../components/CardStack';
 import MarketCard from '../components/MarketCard';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
@@ -12,7 +13,7 @@ import { formatDate } from '../utils';
 import { TrendingUp, Activity, Newspaper, MessageSquare, HelpCircle } from 'lucide-react';
 
 const Home: React.FC = () => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
 
   // State definitions for API data
@@ -92,6 +93,20 @@ const Home: React.FC = () => {
           <div className="absolute top-20 right-0 w-80 h-80 bg-brand-blue/5 rounded-full blur-3xl -z-10"></div>
           
           <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
+            {isAuthenticated && user && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5 }}
+                className="mb-5 inline-block"
+              >
+                <span className="text-[11px] font-bold text-dark-muted block uppercase tracking-widest">Welcome Back</span>
+                <span className="text-xl sm:text-2xl font-black tracking-widest bg-clip-text text-transparent bg-gradient-to-r from-brand-purple via-pink-500 to-brand-blue animate-pulse inline-block mt-1 uppercase border-b border-brand-purple/20 pb-0.5">
+                  {user.username}
+                </span>
+              </motion.div>
+            )}
+
             <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -320,7 +335,12 @@ const Home: React.FC = () => {
           </div>
         </section>
 
-        {/* 6. FAQ Accordion Section */}
+        {/* 6. Card Stack Platform Highlights */}
+        <section className="bg-dark/20 border-y border-dark-border/25">
+          <CardStack />
+        </section>
+
+        {/* 7. FAQ Accordion Section */}
         <section className="py-12 md:py-20 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mb-6">
           <div className="flex items-center justify-center space-x-2 mb-10 text-center">
             <div className="w-7 h-7 rounded-lg bg-orange-500/10 flex items-center justify-center text-orange-400 border border-orange-500/25">
