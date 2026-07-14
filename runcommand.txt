@@ -1,0 +1,28 @@
+# Step-by-Step Running Commands for Wagr
+
+Follow these steps to run the Wagr application:
+
+### Step 1: Install All Dependencies
+Install all package dependencies for the root concurrently runner, the Node.js Express backend, and the React Vite frontend:
+```bash
+npm run install-all
+```
+
+### Step 2: Run Both Servers Concurrently
+Start the local development server. This single command concurrently fires up the backend server (on port 5050) and the frontend Vite server (on port 3003):
+```bash
+npm run dev
+```
+
+### Alternative: Run Servers Separately
+If you prefer to run the backend and frontend in separate terminals:
+
+- **To run the backend separately:**
+  ```bash
+  npm run backend
+  ```
+
+- **To run the frontend separately:**
+  ```bash
+  npm run frontend
+  ```
