@@ -9,6 +9,8 @@ import {
   getPortfolio,
   getTradingHistory,
   getHomepageSummary,
+  requestMxp,
+  getUserMxpRequests,
 } from '../controllers/user.controller.js';
 import { protect, optional } from '../middleware/auth.middleware.js';
 
@@ -24,6 +26,8 @@ router.post('/categories/follow', protect, toggleFollowCategory);
 router.get('/portfolio', protect, getPortfolio);
 router.get('/trades', protect, getTradingHistory);
 router.get('/homepage-summary', protect, getHomepageSummary);
+router.post('/request-mxp', protect, requestMxp);
+router.get('/mxp-requests', protect, getUserMxpRequests);
 
 router.get('/profile/:username', optional, getUserProfile);
 router.post('/:id/follow', protect, toggleFollowUser);

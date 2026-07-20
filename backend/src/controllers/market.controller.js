@@ -3,6 +3,7 @@ import Position from '../models/position.model.js';
 import User from '../models/user.model.js';
 import { createAndSendNotification } from '../services/notification.service.js';
 import { updateUserStatsAndCheckAchievements } from '../services/achievement.service.js';
+import { executeMarketResolution } from '../services/marketResolution.service.js';
 
 /**
  * @desc    Get all prediction markets (with search/filters)
@@ -387,98 +388,11 @@ export const resolveMarket = async (req, res, next) => {
       });
     }
 
-    const market = await Market.findById(marketId);
-    if (!market) {
-      return res.status(404).json({
-        success: false,
-        message: 'Prediction market not found.',
-      });
-    }
-
-    if (market.status !== 'Live' && market.status !== 'Pending Approval') {
-      return res.status(400).json({
-        success: false,
-        message: 'This market is not active or has already been resolved.',
-      });
-    }
-
-    // 1. Lock and resolve market settings
-    market.status = 'Resolved';
-    market.resolutionResult = outcome;
-    market.resolutionSource = resolutionSource || 'Official administrative verification';
-    market.yesProbability = outcome === 'YES' ? 100 : 0;
-    market.noProbability = outcome === 'NO' ? 100 : 0;
-    market.probabilityHistory.push({
-      yesProbability: market.yesProbability,
-      timestamp: new Date(),
-    });
-    await market.save();
-
-    // 2. Fetch all active open positions in this market
-    const openPositions = await Position.find({
-      marketId: market._id,
-      status: 'Open',
-    });
-
-    // 3. Process settlements for each participant and send notifications
-    const notifiedUsers = new Set();
-    for (const position of openPositions) {
-      if (position.outcome === outcome) {
-        // Winning positions receive payout based on 100% target settlement
-        const payout = Math.round(position.investedAmount * (100 / position.entryProbability));
-
-        // Credit user wallet
-        const participant = await User.findById(position.userId);
-        if (participant) {
-          participant.mxpBalance += payout;
-          await participant.save();
-        }
-
-        // Finalize winning position
-        position.status = 'Resolved';
-        position.exitValue = payout;
-        position.profitLoss = payout - position.investedAmount;
-        position.closedAt = new Date();
-        await position.save();
-      } else {
-        // Losing positions expire worthless
-        position.status = 'Resolved';
-        position.exitValue = 0;
-        position.profitLoss = -position.investedAmount;
-        position.closedAt = new Date();
-        await position.save();
-      }
-
-      // Send notification once per unique participant
-      const uid = position.userId.toString();
-      if (!notifiedUsers.has(uid)) {
-        notifiedUsers.add(uid);
-        const won = position.outcome === outcome;
-        
-        // Notify user about resolution
-        await createAndSendNotification({
-          userId: position.userId,
-          title: `Market Resolved: ${outcome}`,
-          message: `"${market.title}" has been resolved ${outcome}. You ${won ? 'won' : 'lost'} this prediction.`,
-          type: 'Market Resolved',
-          redirectUrl: `/markets/${market._id}`,
-        });
-
-        // Asynchronously update stats and check achievements
-        updateUserStatsAndCheckAchievements(position.userId, 'TRADE_RESOLVE').catch(console.error);
-      }
-    }
-
-    // 4. Emit real-time resolution update
-    const io = req.app.get('io');
-    if (io) {
-      io.emit('market_resolved', {
-        marketId: market._id,
-        outcome,
-        yesProbability: market.yesProbability,
-        noProbability: market.noProbability,
-      });
-    }
+    const market = await executeMarketResolution(
+      marketId,
+      outcome,
+      resolutionSource || 'Official administrative verification'
+    );
 
     res.status(200).json({
       success: true,

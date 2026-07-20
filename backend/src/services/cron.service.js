@@ -7,8 +7,10 @@ import { syncAiNewsFromGroq } from './aiNews.service.js';
 import { generateMarketsSuggestions } from './aiGeneration.service.js';
 import { simulateMarketSentiment } from './aiSentiment.service.js';
 
+import { executeMarketResolution } from './marketResolution.service.js';
+
 /**
- * Check and lock expired prediction markets.
+ * Check and resolve expired prediction markets automatically when their timeline ends.
  * Runs every minute to find markets that have passed their resolution date.
  */
 export const checkExpiredMarkets = async () => {
@@ -22,26 +24,15 @@ export const checkExpiredMarkets = async () => {
 
     if (expiredMarkets.length === 0) return;
 
-    console.log(`⏰ Found ${expiredMarkets.length} expired prediction markets. Locking and queuing for resolution...`);
+    console.log(`⏰ Found ${expiredMarkets.length} expired prediction markets. Auto-resolving and distributing payouts...`);
 
     for (const market of expiredMarkets) {
-      // Set status to 'Pending Approval' (this acts as the locked admin queue for resolution)
-      market.status = 'Pending Approval';
-      await market.save();
-
-      // Emit status updates to connected clients
-      const io = getIo();
-      if (io) {
-        io.emit('market_update', {
-          marketId: market._id,
-          status: market.status,
-          yesProbability: market.yesProbability,
-          noProbability: market.noProbability,
-        });
-      }
+      // Determine outcome based on final market probability
+      const winningOutcome = market.yesProbability >= 50 ? 'YES' : 'NO';
+      await executeMarketResolution(market._id, winningOutcome, 'Automated timeline expiration');
     }
   } catch (error) {
-    console.error('❌ Error checking/locking expired markets:', error.message);
+    console.error('❌ Error checking/resolving expired markets:', error.message);
   }
 };
 

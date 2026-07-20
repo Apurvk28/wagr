@@ -7,6 +7,9 @@ import {
   deletePost,
   getAllPosts,
   triggerCronJobs,
+  getAdminMxpRequests,
+  approveMxpRequest,
+  rejectMxpRequest,
 } from '../controllers/admin.controller.js';
 import { protect, authorize } from '../middleware/auth.middleware.js';
 
@@ -22,5 +25,9 @@ router.get('/markets/pending', getAllPendingMarkets);
 router.get('/posts', getAllPosts);
 router.delete('/posts/:id', deletePost);
 router.post('/cron/trigger', triggerCronJobs);
+
+router.get('/mxp-requests', getAdminMxpRequests);
+router.put('/mxp-requests/:id/approve', approveMxpRequest);
+router.put('/mxp-requests/:id/reject', rejectMxpRequest);
 
 export default router;

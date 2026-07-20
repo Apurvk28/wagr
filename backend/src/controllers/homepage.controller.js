@@ -11,7 +11,7 @@ export const getTrendingMarkets = async (req, res, next) => {
   try {
     const trending = await Market.find({ status: 'Live' })
       .sort({ volume: -1 })
-      .limit(3);
+      .limit(6);
 
     res.status(200).json({
       success: true,

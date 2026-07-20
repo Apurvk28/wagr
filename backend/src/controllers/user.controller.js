@@ -4,6 +4,7 @@ import Position from '../models/position.model.js';
 import Market from '../models/market.model.js';
 import News from '../models/news.model.js';
 import Insight from '../models/insight.model.js';
+import MxpRequest from '../models/mxpRequest.model.js';
 import { createAndSendNotification } from '../services/notification.service.js';
 import { updateUserStatsAndCheckAchievements } from '../services/achievement.service.js';
 
@@ -404,8 +405,11 @@ const getDailyAiInsight = async () => {
   const todayStr = new Date().toISOString().split('T')[0];
   try {
     let insightDoc = await Insight.findOne({ date: todayStr });
-    if (insightDoc) {
+    if (insightDoc && ['.', '!', '?'].includes(insightDoc.text.trim().slice(-1))) {
       return insightDoc.text;
+    }
+    if (insightDoc) {
+      await Insight.deleteOne({ _id: insightDoc._id });
     }
     
     // Generate fresh insight using Groq API
@@ -426,6 +430,7 @@ ${marketsText}
 Rules:
 - Start with an emoji.
 - Make it look like a real-time, premium fintech trading tip.
+- Complete all sentences fully. Do not cut off text.
 - Return ONLY the raw insight text. No conversational greetings, introduction, or quote marks.
 `;
 
@@ -439,7 +444,7 @@ Rules:
         model: 'llama-3.1-8b-instant',
         messages: [{ role: 'user', content: prompt }],
         temperature: 0.7,
-        max_tokens: 100
+        max_tokens: 250
       })
     });
 
@@ -448,8 +453,15 @@ Rules:
     }
 
     const data = await response.json();
-    const text = data?.choices?.[0]?.message?.content?.trim();
+    let text = data?.choices?.[0]?.message?.content?.trim();
     if (text) {
+      // Ensure sentence completeness
+      if (!['.', '!', '?'].includes(text.slice(-1))) {
+        const lastPeriod = Math.max(text.lastIndexOf('.'), text.lastIndexOf('!'), text.lastIndexOf('?'));
+        if (lastPeriod > 20) {
+          text = text.substring(0, lastPeriod + 1);
+        }
+      }
       const created = await Insight.create({ text, date: todayStr });
       return created.text;
     }
@@ -595,6 +607,62 @@ export const getHomepageSummary = async (req, res, next) => {
         },
         tradingMotivation
       }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * @desc    Submit request for additional MXP points from Admin
+ * @route   POST /api/v1/users/request-mxp
+ * @access  Private
+ */
+export const requestMxp = async (req, res, next) => {
+  try {
+    const { amount, reason } = req.body;
+    if (!amount || amount < 100 || !reason || !reason.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide a valid requested amount (min 100 MXP) and reason.',
+      });
+    }
+
+    const pending = await MxpRequest.findOne({ userId: req.user._id, status: 'Pending' });
+    if (pending) {
+      return res.status(400).json({
+        success: false,
+        message: 'You already have a pending MXP request. Please wait for admin review.',
+      });
+    }
+
+    const newRequest = await MxpRequest.create({
+      userId: req.user._id,
+      amount: Number(amount),
+      reason: reason.trim(),
+    });
+
+    res.status(201).json({
+      success: true,
+      message: 'MXP credit request submitted successfully to administrators.',
+      data: newRequest,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * @desc    Get current user's MXP credit request history
+ * @route   GET /api/v1/users/mxp-requests
+ * @access  Private
+ */
+export const getUserMxpRequests = async (req, res, next) => {
+  try {
+    const requests = await MxpRequest.find({ userId: req.user._id }).sort({ createdAt: -1 });
+    res.status(200).json({
+      success: true,
+      data: requests,
     });
   } catch (error) {
     next(error);
