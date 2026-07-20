@@ -10,17 +10,16 @@ export default {
       colors: {
         dark: {
           DEFAULT: '#060218',
-          card: '#0A0624',
-          border: '#1D173D',
+          card: '#0D0726',
+          border: '#1A1033',
           text: '#F3F4F6',
           muted: '#9CA3AF',
         },
         brand: {
-          purple: '#8B5CF6',
-          violet: '#A068FF',
+          purple: '#6366F1',
           blue: '#0EA5E9',
-          success: '#10B981', // YES (Untouched)
-          danger: '#EF4444',  // NO (Untouched)
+          success: '#10B981', // YES
+          danger: '#EF4444',  // NO
         }
       },
       fontFamily: {
