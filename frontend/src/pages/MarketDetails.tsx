@@ -434,6 +434,63 @@ const MarketDetails: React.FC = () => {
               </div>
             </div>
 
+            {/* Price History Table */}
+            <div className="bg-dark-card border border-dark-border/60 rounded-2xl p-6 shadow-lg space-y-4">
+              <div className="flex justify-between items-center border-b border-dark-border/30 pb-3">
+                <h3 className="text-xs font-bold text-white uppercase tracking-wider flex items-center space-x-2">
+                  <span>📊</span>
+                  <span>Price History & Shift Logs</span>
+                </h3>
+                <span className="text-[10px] text-dark-muted font-mono">
+                  {market.probabilityHistory?.length || 1} Records
+                </span>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead>
+                    <tr className="border-b border-dark-border/30 text-[10px] font-bold text-dark-muted uppercase tracking-wider">
+                      <th className="py-2.5 px-3">Time / Date</th>
+                      <th className="py-2.5 px-3">YES Odds</th>
+                      <th className="py-2.5 px-3">NO Odds</th>
+                      <th className="py-2.5 px-3">YES Payout</th>
+                      <th className="py-2.5 px-3">NO Payout</th>
+                      <th className="py-2.5 px-3 text-right">Shift Cause</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-dark-border/20 text-white/90">
+                    {(market.probabilityHistory && market.probabilityHistory.length > 0 ? market.probabilityHistory : [
+                      { timestamp: new Date().toISOString(), yesProbability: market.yesProbability, reason: 'Initial Market Listing' }
+                    ]).slice().reverse().map((entry: any, index: number) => {
+                      const yes = entry.yesProbability;
+                      const no = 100 - yes;
+                      const yesPayout = `+${100 - yes}%`;
+                      const noPayout = `+${100 - no}%`;
+                      return (
+                        <tr key={index} className="hover:bg-dark/40 transition-colors">
+                          <td className="py-2.5 px-3 font-medium text-dark-muted">
+                            {new Date(entry.timestamp).toLocaleString(undefined, {
+                              month: 'short',
+                              day: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })}
+                          </td>
+                          <td className="py-2.5 px-3 font-bold text-purple-400">{yes}%</td>
+                          <td className="py-2.5 px-3 font-bold text-blue-400">{no}%</td>
+                          <td className="py-2.5 px-3 font-bold text-brand-success">{yesPayout}</td>
+                          <td className="py-2.5 px-3 font-bold text-brand-danger">{noPayout}</td>
+                          <td className="py-2.5 px-3 text-right text-[10px] text-dark-muted font-semibold">
+                            {entry.reason || (index === 0 ? 'Latest Market Trade' : 'Order Volume Rebalancing')}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
             {/* Linked news briefs */}
             <div className="space-y-4">
               <h3 className="text-xs font-bold text-white uppercase tracking-wider flex items-center space-x-2">

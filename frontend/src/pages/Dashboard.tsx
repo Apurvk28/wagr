@@ -5,6 +5,7 @@ import Footer from '../components/Footer';
 import { useAuth } from '../context/AuthContext';
 import { getPortfolio, getTradingHistory } from '../services/userService';
 import { formatMXP, formatDate } from '../utils';
+import { exportBetsHistoryPDF } from '../utils/pdfExporter';
 import {
   Wallet,
   TrendingUp,
@@ -25,6 +26,7 @@ import {
   Sparkles,
   Target,
   Trophy,
+  Download,
 } from 'lucide-react';
 
 // --- Types ---
@@ -113,27 +115,59 @@ const Dashboard: React.FC = () => {
 
       <div className="flex-grow max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Page Header */}
-        <div className="mb-10 flex flex-col md:flex-row md:justify-between md:items-end gap-4">
+        <div className="mb-6 flex flex-col md:flex-row md:justify-between md:items-end gap-4">
           <div>
-            <h1 className="text-3xl font-black text-white tracking-tight leading-none mb-2">
+            <h1 className="text-3xl font-black text-white tracking-tight leading-none mb-1">
               Portfolio<span className="text-brand-purple">.</span>
             </h1>
-            <p className="text-sm text-dark-muted">
-              Welcome back, <span className="text-white font-semibold">{user?.fullName}</span>
-              {' '}&middot; @{user?.username}
+            <p className="text-xs text-dark-muted font-medium">
+              Real-time forecast holdings, trading metrics, and account credentials
             </p>
           </div>
-          <div className="flex items-center space-x-3">
-            <Link
-              to="/markets/create"
-              className="inline-flex items-center space-x-1.5 bg-gradient-to-r from-brand-purple to-brand-blue text-white text-xs font-bold uppercase tracking-wider px-4 py-2.5 rounded-xl hover:opacity-90 transition-opacity shadow-lg shadow-brand-purple/20"
+        </div>
+
+        {/* User Account Details Banner */}
+        <div className="mb-8 bg-dark-card border border-dark-border/70 rounded-2xl p-5 md:p-6 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-brand-purple/5 rounded-full blur-3xl pointer-events-none" />
+          
+          <div className="flex items-center space-x-4 relative z-10">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-brand-purple to-brand-blue flex items-center justify-center font-black text-white text-lg shadow-lg shadow-brand-purple/20 shrink-0">
+              {user?.fullName?.charAt(0) || 'U'}
+            </div>
+            <div>
+              <div className="flex items-center space-x-2">
+                <h2 className="text-lg font-black text-white tracking-tight">{user?.fullName}</h2>
+                <span className="text-[10px] font-extrabold uppercase tracking-wider bg-brand-purple/15 text-brand-purple border border-brand-purple/30 px-2 py-0.5 rounded-full">
+                  {user?.role || 'Predictor'}
+                </span>
+              </div>
+              <div className="flex flex-wrap items-center gap-2.5 text-xs text-dark-muted font-medium mt-1">
+                <span className="text-brand-blue font-bold">@{user?.username}</span>
+                <span className="text-dark-border">&middot;</span>
+                <span className="text-white/80 font-mono text-[11px]">{user?.email}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-3 relative z-10 shrink-0">
+            <button
+              onClick={() => exportBetsHistoryPDF(user || {}, portfolio?.openPositions || [])}
+              className="inline-flex items-center space-x-1.5 bg-gradient-to-r from-brand-purple to-brand-blue text-white text-xs font-extrabold uppercase tracking-wider px-3.5 py-2 rounded-xl hover:opacity-95 shadow-md shadow-brand-purple/20 transition-all cursor-pointer"
+              title="Download Bets & Positions History as PDF"
             >
-              <Plus size={13} />
-              <span>Create Market</span>
+              <Download size={13} />
+              <span>Download Bets PDF</span>
+            </button>
+            <Link
+              to="/wallet"
+              className="inline-flex items-center space-x-1.5 bg-brand-blue/10 border border-brand-blue/30 text-brand-blue text-xs font-bold uppercase tracking-wider px-3.5 py-2 rounded-xl hover:bg-brand-blue/20 transition-all"
+            >
+              <Wallet size={13} />
+              <span>Wallet: {formatMXP(user?.mxpBalance || 0)}</span>
             </Link>
             <Link
               to="/markets"
-              className="inline-flex items-center space-x-1.5 bg-dark-card border border-dark-border text-white text-xs font-bold uppercase tracking-wider px-4 py-2.5 rounded-xl hover:border-brand-purple/40 transition-colors"
+              className="inline-flex items-center space-x-1.5 bg-dark border border-dark-border text-white text-xs font-bold uppercase tracking-wider px-3.5 py-2 rounded-xl hover:border-brand-purple/40 transition-colors"
             >
               <BarChart3 size={13} />
               <span>Browse Markets</span>

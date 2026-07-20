@@ -9,9 +9,6 @@ import AuthLayout from './layouts/AuthLayout';
 import ToastNotification from './components/ToastNotification';
 import Login from './pages/Login';
 import Register from './pages/Register';
-import VerifyEmail from './pages/VerifyEmail';
-import ForgotPassword from './pages/ForgotPassword';
-import ResetPassword from './pages/ResetPassword';
 import Dashboard from './pages/Dashboard';
 import Home from './pages/Home';
 import MarketsList from './pages/MarketsList';
@@ -26,6 +23,7 @@ import AboutUs from './pages/AboutUs';
 import ContactSupport from './pages/ContactSupport';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsConditions from './pages/TermsConditions';
+import WalletPage from './pages/Wallet';
 
 import ScrollToTop from './components/ScrollToTop';
 
@@ -58,15 +56,13 @@ function App() {
               <Route element={<AuthLayout />}>
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
-                <Route path="/forgot-password" element={<ForgotPassword />} />
-                <Route path="/reset-password" element={<ResetPassword />} />
-                <Route path="/verify-email" element={<VerifyEmail />} />
               </Route>
             </Route>
 
-            {/* Protected Main Dashboard */}
+            {/* Protected Routes */}
             <Route element={<ProtectedRoute />}>
               <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/wallet" element={<WalletPage />} />
               <Route path="/markets/create" element={<CreateMarket />} />
             </Route>
 
@@ -90,4 +86,3 @@ function App() {
 }
 
 export default App;
-

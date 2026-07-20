@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import {
@@ -10,6 +10,7 @@ import {
   deleteAdminPost,
 } from '../services/adminService';
 import { approveMarket, rejectMarket } from '../services/marketService';
+import api from '../services/api';
 import { formatDate, formatMXP } from '../utils';
 import {
   Users,
@@ -24,9 +25,10 @@ import {
   ShieldCheck,
   MessageSquare,
   TrendingUp,
+  Wallet,
 } from 'lucide-react';
 
-type Tab = 'overview' | 'markets' | 'users' | 'posts';
+type Tab = 'overview' | 'markets' | 'users' | 'posts' | 'mxp_requests';
 
 interface DashboardStats {
   totalUsers: number;
@@ -46,6 +48,7 @@ const AdminPanel: React.FC = () => {
   const [users, setUsers] = useState<any[]>([]);
   const [pendingMarkets, setPendingMarkets] = useState<any[]>([]);
   const [posts, setPosts] = useState<any[]>([]);
+  const [mxpRequests, setMxpRequests] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; msg: string } | null>(null);
@@ -53,6 +56,15 @@ const AdminPanel: React.FC = () => {
   const showFeedback = (type: 'success' | 'error', msg: string) => {
     setFeedback({ type, msg });
     setTimeout(() => setFeedback(null), 3500);
+  };
+
+  const loadMxpRequests = async () => {
+    try {
+      const res = await api.get('/admin/mxp-requests');
+      setMxpRequests(res.data.data || []);
+    } catch (err) {
+      console.error('Failed to load admin MXP requests:', err);
+    }
   };
 
   // Load tab data on switch
@@ -63,6 +75,7 @@ const AdminPanel: React.FC = () => {
         if (activeTab === 'overview') {
           const data = await getAdminDashboard();
           setStats(data);
+          await loadMxpRequests();
         } else if (activeTab === 'markets') {
           const data = await getPendingMarkets();
           setPendingMarkets(data);
@@ -72,6 +85,8 @@ const AdminPanel: React.FC = () => {
         } else if (activeTab === 'posts') {
           const data = await getAllAdminPosts();
           setPosts(data);
+        } else if (activeTab === 'mxp_requests') {
+          await loadMxpRequests();
         }
       } catch (err) {
         console.error(err);
@@ -137,8 +152,31 @@ const AdminPanel: React.FC = () => {
     }
   };
 
+  const handleApproveMxp = async (requestId: string) => {
+    try {
+      await api.put(`/admin/mxp-requests/${requestId}/approve`, {});
+      showFeedback('success', 'Approved MXP grant and credited user balance!');
+      await loadMxpRequests();
+    } catch (err: any) {
+      showFeedback('error', err.response?.data?.message || 'Failed to approve MXP request.');
+    }
+  };
+
+  const handleRejectMxp = async (requestId: string) => {
+    try {
+      await api.put(`/admin/mxp-requests/${requestId}/reject`, {});
+      showFeedback('success', 'MXP credit request rejected.');
+      await loadMxpRequests();
+    } catch (err: any) {
+      showFeedback('error', err.response?.data?.message || 'Failed to reject MXP request.');
+    }
+  };
+
+  const pendingRequestsCount = mxpRequests.filter(r => r.status === 'Pending').length;
+
   const tabs: { key: Tab; label: string; icon: React.ReactNode }[] = [
     { key: 'overview', label: 'Overview', icon: <BarChart3 size={14} /> },
+    { key: 'mxp_requests', label: 'MXP Requests', icon: <Wallet size={14} /> },
     { key: 'markets', label: 'Pending Markets', icon: <Activity size={14} /> },
     { key: 'users', label: 'Users', icon: <Users size={14} /> },
     { key: 'posts', label: 'Posts', icon: <MessageSquare size={14} /> },
@@ -188,9 +226,9 @@ const AdminPanel: React.FC = () => {
             >
               {tab.icon}
               <span>{tab.label}</span>
-              {tab.key === 'markets' && pendingMarkets.length > 0 && (
+              {tab.key === 'mxp_requests' && pendingRequestsCount > 0 && (
                 <span className="bg-white text-brand-danger text-[9px] font-black px-1.5 py-0.5 rounded-full ml-1">
-                  {pendingMarkets.length}
+                  {pendingRequestsCount}
                 </span>
               )}
             </button>
@@ -212,6 +250,7 @@ const AdminPanel: React.FC = () => {
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {[
                 { label: 'Total Users', value: stats.totalUsers, sub: `+${stats.recentUsers} this week`, color: 'text-brand-blue', icon: <Users size={14} className="text-brand-blue" /> },
+                { label: 'Pending MXP Grants', value: pendingRequestsCount, sub: 'Awaiting admin review', color: 'text-amber-400', icon: <Wallet size={14} className="text-amber-400" /> },
                 { label: 'Live Markets', value: stats.liveMarkets, sub: `${stats.totalMarkets} total`, color: 'text-brand-purple', icon: <Activity size={14} className="text-brand-purple" /> },
                 { label: 'Pending Approval', value: stats.pendingMarkets, sub: 'Awaiting review', color: 'text-yellow-400', icon: <AlertTriangle size={14} className="text-yellow-400" /> },
                 { label: 'Total Volume', value: formatMXP(stats.totalVolume), sub: `${stats.totalPositions} trades`, color: 'text-brand-success', icon: <TrendingUp size={14} className="text-brand-success" /> },
@@ -228,6 +267,68 @@ const AdminPanel: React.FC = () => {
                 </div>
               ))}
             </div>
+          </div>
+        )}
+
+        {/* MXP Credit Requests Tab */}
+        {!loading && activeTab === 'mxp_requests' && (
+          <div className="space-y-4">
+            {mxpRequests.length === 0 ? (
+              <div className="bg-dark-card border border-dark-border/40 rounded-2xl py-16 text-center">
+                <Wallet size={28} className="mx-auto mb-3 text-brand-blue" />
+                <p className="text-sm font-bold text-white">No MXP Credit Requests</p>
+                <p className="text-xs text-dark-muted">There are no user credit requests.</p>
+              </div>
+            ) : (
+              mxpRequests.map((req) => (
+                <div key={req._id} className="bg-dark-card border border-dark-border/60 rounded-2xl p-5 shadow-lg">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="space-y-1">
+                      <div className="flex items-center space-x-3">
+                        <span className="text-sm font-bold text-white">
+                          @{req.userId?.username || 'user'} ({req.userId?.fullName})
+                        </span>
+                        <span className="text-xs font-black text-brand-purple">
+                          +{req.amount?.toLocaleString()} MXP
+                        </span>
+                        <span className={`text-[9px] font-bold px-2 py-0.5 rounded uppercase tracking-wider ${
+                          req.status === 'Approved' ? 'bg-brand-success/15 text-brand-success border border-brand-success/30' :
+                          req.status === 'Rejected' ? 'bg-brand-danger/15 text-brand-danger border border-brand-danger/30' :
+                          'bg-amber-500/15 text-amber-400 border border-amber-500/30'
+                        }`}>
+                          {req.status}
+                        </span>
+                      </div>
+                      <p className="text-xs text-dark-muted font-medium">
+                        <span className="text-white font-semibold">Reason:</span> "{req.reason}"
+                      </p>
+                      <p className="text-[10px] text-dark-muted">
+                        User Current Balance: {formatMXP(req.userId?.mxpBalance || 0)} &middot; Requested {formatDate(req.createdAt)}
+                      </p>
+                    </div>
+
+                    {req.status === 'Pending' && (
+                      <div className="flex items-center space-x-2 shrink-0">
+                        <button
+                          onClick={() => handleRejectMxp(req._id)}
+                          className="flex items-center space-x-1.5 bg-brand-danger/10 border border-brand-danger/30 text-brand-danger text-xs font-bold px-3 py-2 rounded-xl hover:bg-brand-danger/20 transition-colors cursor-pointer"
+                        >
+                          <XCircle size={13} />
+                          <span>Reject</span>
+                        </button>
+                        <button
+                          onClick={() => handleApproveMxp(req._id)}
+                          className="flex items-center space-x-1.5 bg-gradient-to-r from-brand-purple to-brand-blue text-white text-xs font-bold px-4 py-2 rounded-xl hover:opacity-95 shadow-md shadow-brand-purple/20 transition-all cursor-pointer"
+                        >
+                          <CheckCircle2 size={13} />
+                          <span>Approve &amp; Grant</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         )}
 
