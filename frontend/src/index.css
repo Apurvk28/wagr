@@ -35,7 +35,7 @@
   inset: 0;
   border-radius: inherit;
   padding: 1.5px;
-  background: conic-gradient(from var(--border-angle), #6366F1, #0EA5E9, #6366F1, #0B0B0F, #6366F1);
+  background: conic-gradient(from var(--border-angle), #A068FF, #070319, #8B5CF6, #070319, #A068FF);
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
@@ -48,21 +48,21 @@
 @tailwind utilities;
 
 :root {
-  --color-bg: #0B0B0F;
-  --color-card: #12121A;
-  --color-border: #1F1F2E;
+  --color-bg: #060218;
+  --color-card: #0A0624;
+  --color-border: #1D173D;
   --color-text: #F3F4F6;
   --color-muted: #9CA3AF;
   --color-heading: #FFFFFF;
 }
 
 html.light {
-  --color-bg: #F3F4F6;
+  --color-bg: #F8F7FF;
   --color-card: #FFFFFF;
-  --color-border: #E5E7EB;
-  --color-text: #374151;
-  --color-muted: #6B7280;
-  --color-heading: #111827;
+  --color-border: #E5E1F5;
+  --color-text: #2D2A3E;
+  --color-muted: #6B6580;
+  --color-heading: #0F0A29;
 }
 
 @layer base {
@@ -76,6 +76,10 @@ html.light {
     font-family: 'Inter', sans-serif;
     overflow-x: clip;
     transition: background-color 0.2s ease, color 0.2s ease;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Urbanist', 'Inter', sans-serif;
+    letter-spacing: -0.02em;
   }
   #root {
     width: 100%;
@@ -160,16 +164,16 @@ html.light nav button span {
 }
 
 ::-webkit-scrollbar-track {
-  background: #0B0B0F;
+  background: #060218;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #1F1F2E;
+  background: #1D173D;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #2E2E42;
+  background: #2D235C;
 }
 
 @keyframes fadeIn {
