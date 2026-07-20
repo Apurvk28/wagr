@@ -5,6 +5,7 @@ import { createMarket } from '../services/marketService';
 import { useNavigate, Link } from 'react-router-dom';
 import { ChevronLeft, Info } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { AnimatedBorderButton } from '../components/ui/AnimatedBorderButton';
 
 const Categories = [
   'Artificial Intelligence',
@@ -189,20 +190,22 @@ const CreateMarket: React.FC = () => {
             </div>
 
             {/* Submit button */}
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-gradient-to-r from-brand-purple to-brand-blue text-white rounded-xl py-3 text-sm font-semibold tracking-wider hover:opacity-95 active:scale-[0.99] transition-all disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center space-x-2"
-            >
-              {loading ? (
-                <>
-                  <span className="w-4 h-4 rounded-full border-2 border-white/20 border-t-white animate-spin"></span>
-                  <span>Creating contract...</span>
-                </>
-              ) : (
-                <span>Submit Contract</span>
-              )}
-            </button>
+            <div className="w-full flex justify-center pt-2">
+              <AnimatedBorderButton
+                type="submit"
+                disabled={loading}
+                className="!w-full !py-3.5"
+              >
+                {loading ? (
+                  <>
+                    <span className="w-4 h-4 rounded-full border-2 border-white/20 border-t-white animate-spin"></span>
+                    <span>Creating contract...</span>
+                  </>
+                ) : (
+                  <span>Submit Contract →</span>
+                )}
+              </AnimatedBorderButton>
+            </div>
           </form>
         </div>
       </div>

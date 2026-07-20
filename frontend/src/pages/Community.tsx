@@ -21,8 +21,7 @@ import {
   Clock, 
   MessageCircle,
   TrendingUp,
-  Sparkles,
-  ArrowRight
+  Sparkles
 } from 'lucide-react';
 
 const Community: React.FC = () => {
@@ -119,8 +118,8 @@ const Community: React.FC = () => {
                 ...p,
                 likesCount: result.likesCount,
                 likes: result.hasLiked 
-                  ? [...p.likes, user?.id || '']
-                  : p.likes.filter(id => id !== user?.id)
+                  ? [...p.likes, user?._id || user?.id || '']
+                  : p.likes.filter(id => id !== (user?._id || user?.id))
               }
             : p
         )
@@ -378,7 +377,7 @@ const Community: React.FC = () => {
             ) : (
               <div className="space-y-4">
                 {posts.map((post) => {
-                  const hasLiked = post.likes.includes(user?.id || '');
+                  const hasLiked = post.likes.includes(user?._id || user?.id || '');
                   return (
                     <div key={post._id} className="bg-dark-card border border-dark-border/60 hover:border-dark-border transition-colors rounded-2xl p-5 space-y-4 shadow-lg animate-fade-in">
                       

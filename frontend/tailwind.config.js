@@ -24,6 +24,12 @@ export default {
       },
       fontFamily: {
         sans: ['Inter', 'sans-serif'],
+        display: ['Urbanist', 'Inter', 'sans-serif'],
+      },
+      boxShadow: {
+        'glow-purple': '0 0 35px -5px rgba(99, 102, 241, 0.4)',
+        'glow-blue': '0 0 35px -5px rgba(14, 165, 233, 0.4)',
+        'glow-success': '0 0 35px -5px rgba(16, 185, 129, 0.4)',
       },
     },
   },

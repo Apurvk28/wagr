@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import { getPortfolio, getTradingHistory } from '../services/userService';
 import { formatMXP, formatDate } from '../utils';
 import { exportBetsHistoryPDF } from '../utils/pdfExporter';
+import { useCountUp } from '../components/ui/useCountUp';
 import {
   Wallet,
   TrendingUp,
@@ -13,7 +14,6 @@ import {
   Activity,
   BarChart3,
   ChevronRight,
-  Plus,
   Users,
   Newspaper,
   ArrowUpRight,
@@ -21,7 +21,6 @@ import {
   Clock,
   Lock,
   Compass,
-  Eye,
   Footprints,
   Sparkles,
   Target,
@@ -214,7 +213,9 @@ const Dashboard: React.FC = () => {
                 <Award size={14} className="text-brand-success" />
                 <span className="text-[10px] font-bold text-dark-muted uppercase tracking-wider">Win Rate</span>
               </div>
-              <p className="text-2xl font-black text-white">{portfolio.winRate}%</p>
+              <p className="text-2xl font-black text-white font-display">
+                {useCountUp({ end: portfolio.winRate || 0, duration: 1500 })}%
+              </p>
               <p className="text-[10px] text-dark-muted mt-1">{portfolio.wins} / {portfolio.totalResolved} resolved</p>
             </div>
 

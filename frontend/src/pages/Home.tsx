@@ -17,6 +17,9 @@ import { ScrollSplitCard } from '../components/ui/scroll-split-card';
 import { ScrollBasedVelocity } from '../components/ui/scroll-based-velocity';
 import { Signature } from '../components/ui/signature';
 import { MusicPlayer } from '../components/ui/music-player';
+import { TypewriterHeading } from '../components/ui/TypewriterHeading';
+import { AnimatedBorderButton } from '../components/ui/AnimatedBorderButton';
+import { HeroOrbitVisualization } from '../components/ui/HeroOrbitVisualization';
 
 const Home: React.FC = () => {
   const { isAuthenticated, user } = useAuth();
@@ -24,7 +27,6 @@ const Home: React.FC = () => {
 
   // State definitions for API data
   const [trendingMarkets, setTrendingMarkets] = useState<Market[]>([]);
-  const [activeMarkets, setActiveMarkets] = useState<Market[]>([]);
   const [latestNews, setLatestNews] = useState<News[]>([]);
   const [communityHighlights, setCommunityHighlights] = useState<Post[]>([]);
   const [summaryData, setSummaryData] = useState<any>(null);
@@ -38,9 +40,8 @@ const Home: React.FC = () => {
       setLoading(true);
       setError(null);
       try {
-        const [trendingRes, activeRes, newsRes, postsRes, allMarketsRes] = await Promise.all([
+        const [trendingRes, newsRes, postsRes, allMarketsRes] = await Promise.all([
           api.get('/markets/trending'),
-          api.get('/markets/active'),
           api.get('/news/latest'),
           api.get('/community/highlights'),
           api.get('/markets'),
@@ -59,7 +60,6 @@ const Home: React.FC = () => {
         }
 
         setTrendingMarkets(combined.slice(0, 6));
-        setActiveMarkets((activeRes.data?.data || []).slice(0, 3));
         setLatestNews((newsRes.data?.data || []).slice(0, 3));
         setCommunityHighlights((postsRes.data?.data || []).slice(0, 3));
       } catch (err: any) {
@@ -219,52 +219,92 @@ const Home: React.FC = () => {
           </section>
         ) : (
           /* GUEST HERO SECTION */
-          <section className="relative pt-16 pb-20 md:pt-24 md:pb-28 text-center px-4 overflow-hidden border-b border-dark-border/20">
-            {/* Ambient Background Glows */}
-            <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[300px] bg-brand-purple/15 blur-[120px] rounded-full pointer-events-none" />
-            <div className="absolute top-1/3 left-1/3 -translate-x-1/2 w-[350px] h-[250px] bg-brand-blue/10 blur-[100px] rounded-full pointer-events-none" />
+          <section className="relative pt-12 pb-16 md:pt-20 md:pb-24 px-4 sm:px-6 lg:px-8 overflow-hidden border-b border-dark-border/40">
+            {/* Ambient Background Radial Glows */}
+            <div className="absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[350px] bg-brand-purple/20 blur-[130px] rounded-full pointer-events-none" />
+            <div className="absolute top-1/3 right-1/4 w-[400px] h-[300px] bg-brand-blue/15 blur-[110px] rounded-full pointer-events-none" />
 
-            <div className="relative max-w-4xl mx-auto space-y-6">
+            <div className="max-w-6xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-12 relative z-10">
+              {/* Left Column: Copy & Actions */}
+              <div className="flex-1 text-left space-y-6 max-w-xl">
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5 }}
+                  className="inline-block"
+                >
+                  <span className="text-[11px] font-extrabold bg-dark-card border border-brand-purple/30 text-brand-purple px-4 py-1.5 rounded-full uppercase tracking-widest shadow-md">
+                    AI-POWERED PREDICTION EXCHANGE ✦
+                  </span>
+                </motion.div>
+
+                <motion.h1
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2, duration: 0.6 }}
+                  className="text-4xl sm:text-6xl md:text-7xl font-black tracking-tight text-white font-display uppercase leading-[1.05]"
+                >
+                  <TypewriterHeading text="The Future Has Odds." className="text-white" speed={40} delay={300} />
+                </motion.h1>
+
+                <motion.p
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4, duration: 0.5 }}
+                  className="text-sm sm:text-base text-dark-muted font-medium leading-relaxed"
+                >
+                  Forecast real-world outcomes, trade binary probabilities with Market Exchange Points (MXP), and explore collective intelligence driven by real-time AI news streams.
+                </motion.p>
+
+                {/* CTAs */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.6, duration: 0.5 }}
+                  className="flex flex-wrap items-center gap-4 pt-2"
+                >
+                  <AnimatedBorderButton onClick={handleHeroCTA} className="!px-8 !py-3.5 text-sm">
+                    <span>Start Predicting Now →</span>
+                  </AnimatedBorderButton>
+
+                  <button
+                    onClick={() => navigate('/markets')}
+                    className="px-6 py-3 rounded-full text-xs font-bold text-dark-muted hover:text-white border border-dark-border hover:border-dark-border/80 transition-colors cursor-pointer uppercase tracking-wider"
+                  >
+                    Browse Markets
+                  </button>
+                </motion.div>
+
+                {/* Micro Stats Row */}
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.8, duration: 0.6 }}
+                  className="grid grid-cols-3 gap-4 pt-6 border-t border-dark-border/40"
+                >
+                  <div>
+                    <span className="text-lg font-black text-white font-display">10,000</span>
+                    <span className="block text-[10px] font-bold text-dark-muted uppercase tracking-wider">Welcome MXP</span>
+                  </div>
+                  <div>
+                    <span className="text-lg font-black text-brand-purple font-display">100%</span>
+                    <span className="block text-[10px] font-bold text-dark-muted uppercase tracking-wider">Risk-Free Sandbox</span>
+                  </div>
+                  <div>
+                    <span className="text-lg font-black text-brand-blue font-display">24/7</span>
+                    <span className="block text-[10px] font-bold text-dark-muted uppercase tracking-wider">AI Live News</span>
+                  </div>
+                </motion.div>
+              </div>
+
+              {/* Right Column: Hero Orbit Visualization */}
               <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5 }}
-                className="inline-block"
+                transition={{ delay: 0.4, duration: 0.8 }}
+                className="flex-1 flex justify-center lg:justify-end"
               >
-                <span className="text-xs font-bold bg-dark-card border border-dark-border text-brand-purple px-4 py-1.5 rounded-full uppercase tracking-wider shadow-sm">
-                  Predict Future Events with MXP ✦
-                </span>
-              </motion.div>
-
-              <motion.h1 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2, duration: 0.6 }}
-                className="text-4xl sm:text-6xl md:text-7xl font-black tracking-tight text-white uppercase leading-[1.1]"
-              >
-                <TextRepel text="The Future Has Odds." className="text-white" />
-              </motion.h1>
-
-              <motion.p
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4, duration: 0.5 }}
-                className="text-sm sm:text-base text-dark-muted max-w-2xl mx-auto leading-relaxed"
-              >
-                Predict real-world events, trade probabilities using Market Exchange Points (MXP), and explore the future through AI-powered prediction markets and community-driven forecasting.
-              </motion.p>
-
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6, duration: 0.5 }}
-              >
-                <button
-                  onClick={handleHeroCTA}
-                  className="bg-gradient-to-r from-brand-purple to-brand-blue text-white rounded-full px-8 py-3.5 text-sm font-bold tracking-wider hover:opacity-95 transform active:scale-95 transition-all shadow-xl shadow-brand-purple/20 hover:shadow-brand-purple/35 cursor-pointer"
-                >
-                  Start Predicting
-                </button>
+                <HeroOrbitVisualization />
               </motion.div>
             </div>
           </section>
@@ -388,7 +428,7 @@ const Home: React.FC = () => {
                     </div>
 
                     <h3 className="text-sm font-bold text-white group-hover:text-emerald-400 transition-colors leading-snug mb-2 line-clamp-2">
-                      {item.title}
+                      {item.headline || (item as any).title}
                     </h3>
 
                     <p className="text-xs text-dark-muted line-clamp-3 leading-relaxed mb-4 font-medium">

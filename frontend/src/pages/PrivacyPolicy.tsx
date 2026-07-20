@@ -1,7 +1,7 @@
 import React from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import { Lock, Eye, Database, Globe, Trash2, Shield, AlertTriangle, FileText, CheckCircle2, Server, KeyRound, UserCheck, Download } from 'lucide-react';
+import { Eye, Database, Globe, Shield, AlertTriangle, FileText, CheckCircle2, Server, KeyRound, UserCheck, Download } from 'lucide-react';
 import { exportPrivacyPolicyPDF } from '../utils/pdfExporter';
 
 const PrivacyPolicy: React.FC = () => {

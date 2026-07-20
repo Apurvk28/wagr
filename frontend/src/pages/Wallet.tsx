@@ -5,7 +5,8 @@ import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import { formatMXP, formatDate } from '../utils';
 import { exportMxpHistoryPDF } from '../utils/pdfExporter';
-import { Wallet as WalletIcon, Send, Clock, CheckCircle, XCircle, AlertCircle, PlusCircle, ArrowUpRight, ArrowDownLeft, Download } from 'lucide-react';
+import { Wallet as WalletIcon, Clock, CheckCircle, XCircle, AlertCircle, PlusCircle, Download } from 'lucide-react';
+import { AnimatedBorderButton } from '../components/ui/AnimatedBorderButton';
 
 interface MxpRequestItem {
   _id: string;
@@ -17,7 +18,7 @@ interface MxpRequestItem {
 }
 
 const WalletPage: React.FC = () => {
-  const { user, reloadProfile } = useAuth();
+  const { user } = useAuth();
   const [requests, setRequests] = useState<MxpRequestItem[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -128,19 +129,19 @@ const WalletPage: React.FC = () => {
           <div className="flex items-center space-x-3 shrink-0">
             <button
               onClick={() => exportMxpHistoryPDF(user || {}, requests)}
-              className="bg-dark border border-dark-border hover:border-brand-blue/50 text-white text-xs font-extrabold uppercase tracking-wider px-4 py-3.5 rounded-xl flex items-center space-x-2 transition-all cursor-pointer"
+              className="bg-dark border border-dark-border hover:border-brand-blue/50 text-white text-xs font-extrabold uppercase tracking-wider px-4 py-3.5 rounded-full flex items-center space-x-2 transition-all cursor-pointer shadow-lg"
               title="Download MXP Wallet & Request Log as PDF"
             >
               <Download size={15} />
               <span>Download MXP PDF</span>
             </button>
-            <button
+            <AnimatedBorderButton
               onClick={() => setShowRequestModal(true)}
-              className="bg-gradient-to-r from-brand-purple to-brand-blue hover:opacity-95 text-white text-xs font-extrabold uppercase tracking-wider px-6 py-3.5 rounded-xl shadow-lg shadow-brand-purple/25 flex items-center space-x-2 transition-all cursor-pointer"
+              className="!py-3.5"
             >
               <PlusCircle size={16} />
               <span>Request More MXP</span>
-            </button>
+            </AnimatedBorderButton>
           </div>
         </div>
 

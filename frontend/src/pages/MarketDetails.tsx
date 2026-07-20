@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { useAuth } from '../context/AuthContext';
@@ -14,18 +14,12 @@ import {
   toggleFollowMarket,
 } from '../services/marketService';
 import type { Market } from '../types';
-import { formatDate, formatMXP, formatProbability } from '../utils';
+import { formatDate, formatMXP } from '../utils';
 import {
   ChevronLeft,
-  Calendar,
-  Layers,
-  Award,
   Wallet,
   TrendingUp,
   Activity,
-  CheckCircle2,
-  XCircle,
-  HelpCircle,
   Clock,
   Bookmark,
   BookmarkCheck,
@@ -43,7 +37,6 @@ import api from '../services/api';
 
 const MarketDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
   const { isAuthenticated, user, updateProfile } = useAuth(); // Profile can reload user balance
 
   const [market, setMarket] = useState<Market | null>(null);
@@ -68,9 +61,8 @@ const MarketDetails: React.FC = () => {
   const [isFollowing, setIsFollowing] = useState(false);
   const [followLoading, setFollowLoading] = useState(false);
 
-  // Linked news & posts
+  // Linked news
   const [linkedNews, setLinkedNews] = useState<any[]>([]);
-  const [linkedPosts, setLinkedPosts] = useState<any[]>([]);
 
   // 1. Initial Data Load
   useEffect(() => {
@@ -79,18 +71,15 @@ const MarketDetails: React.FC = () => {
       setLoading(true);
       setError(null);
       try {
-        const [marketData, newsRes, postsRes] = await Promise.all([
+        const [marketData, newsRes] = await Promise.all([
           getMarketById(id),
           api.get('/news/latest'),
-          api.get('/community/highlights'),
         ]);
         setMarket(marketData);
 
-        // Filter linked items
+        // Filter linked news
         const news = newsRes.data.data.filter((n: any) => n.relatedMarket === id);
-        const posts = postsRes.data.data.filter((p: any) => p.linkedMarket === id);
         setLinkedNews(news);
-        setLinkedPosts(posts);
 
         // Fetch user positions if authenticated
         if (isAuthenticated) {

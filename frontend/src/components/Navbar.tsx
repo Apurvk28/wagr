@@ -6,13 +6,13 @@ import api from '../services/api';
 import { globalSearch, type SearchResults } from '../services/searchService';
 import { Menu, X, Wallet, User as UserIcon, LogOut, ChevronDown, Search, ShieldAlert } from 'lucide-react';
 import NotificationBell from './NotificationBell';
+import { AnimatedBorderButton } from './ui/AnimatedBorderButton';
 
 const Navbar: React.FC = () => {
   const { user, isAuthenticated, logout, reloadProfile } = useAuth();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
-  const [showBalanceControls, setShowBalanceControls] = useState(false);
 
   // Global Search state
   const [searchOpen, setSearchOpen] = useState(false);
@@ -60,26 +60,24 @@ const Navbar: React.FC = () => {
     try {
       await api.post('/users/admin/balance', { amount });
       await reloadProfile();
-      setShowBalanceControls(false);
     } catch (err) {
       console.error('Failed to adjust balance:', err);
     }
   };
 
-
   const toggleDropdown = () => setProfileDropdownOpen(!profileDropdownOpen);
 
   return (
-    <nav className="bg-dark/80 backdrop-blur-md border-b border-dark-border/60 sticky top-0 z-50 transition-all duration-300">
+    <nav className="bg-dark/85 backdrop-blur-xl border-b border-dark-border/80 sticky top-0 z-50 transition-all duration-300 shadow-2xl">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           {/* Logo */}
           <div className="flex items-center">
-            <Link to="/" className="flex items-center space-x-2.5">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-brand-purple to-brand-blue flex items-center justify-center font-black text-white text-base shadow-lg shadow-brand-purple/10">
+            <Link to="/" className="flex items-center space-x-2.5 group">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-brand-purple to-brand-blue flex items-center justify-center font-black text-white text-base shadow-lg shadow-brand-purple/20 group-hover:scale-105 transition-transform">
                 W
               </div>
-              <span className="text-xl font-extrabold tracking-wider text-white">
+              <span className="text-xl font-black tracking-wider text-white font-display">
                 wagr<span className="text-brand-blue">.io</span>
               </span>
             </Link>
@@ -87,7 +85,7 @@ const Navbar: React.FC = () => {
 
           {/* Centered Desktop Menu */}
           <div className="hidden md:flex items-center justify-center flex-1 px-8">
-            <div className="flex items-center space-x-8 lg:space-x-10 text-sm font-medium text-dark-muted">
+            <div className="flex items-center space-x-8 lg:space-x-10 text-xs sm:text-sm font-semibold tracking-wide text-dark-muted">
               <Link to="/markets" className="hover:text-white transition-colors duration-150 py-2">
                 Prediction Markets
               </Link>
@@ -123,7 +121,7 @@ const Navbar: React.FC = () => {
                 {/* Wallet Balance Display (Links to /wallet) */}
                 <Link
                   to="/wallet"
-                  className="bg-dark-card/90 hover:bg-dark-card border border-dark-border/80 hover:border-brand-purple/40 rounded-full pl-3.5 pr-4 py-1.5 flex items-center space-x-2 shadow-inner text-xs font-semibold text-brand-blue transition-all cursor-pointer"
+                  className="bg-dark-card/90 hover:bg-dark-card border border-dark-border/80 hover:border-brand-purple/50 rounded-full pl-3.5 pr-4 py-1.5 flex items-center space-x-2 shadow-inner text-xs font-bold text-brand-blue transition-all cursor-pointer"
                   title="Open MXP Wallet"
                 >
                   <Wallet size={14} className="text-brand-blue" />
@@ -134,20 +132,20 @@ const Navbar: React.FC = () => {
                 <div className="relative">
                   <button
                     onClick={toggleDropdown}
-                    className="flex items-center space-x-2 bg-dark-card hover:bg-dark-card/80 border border-dark-border rounded-full px-3 py-1.5 transition-colors focus:outline-none"
+                    className="flex items-center space-x-2 bg-dark-card hover:bg-dark-card/80 border border-dark-border rounded-full px-3 py-1.5 transition-colors focus:outline-none cursor-pointer"
                   >
                     <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-brand-purple to-brand-blue flex items-center justify-center text-[10px] font-black text-white">
                       {user.fullName.charAt(0)}
                     </div>
-                    <span className="text-xs text-white/90 font-medium">{user.fullName.split(' ')[0]}</span>
+                    <span className="text-xs text-white/90 font-semibold">{user.fullName.split(' ')[0]}</span>
                     <ChevronDown size={12} className={`text-dark-muted transform transition-transform duration-200 ${profileDropdownOpen ? 'rotate-180' : ''}`} />
                   </button>
 
                   {/* Dropdown Menu */}
                   {profileDropdownOpen && (
-                    <div className="absolute right-0 mt-2 w-48 bg-dark-card border border-dark-border rounded-xl py-1.5 shadow-2xl z-50 animate-fade-in">
+                    <div className="absolute right-0 mt-2 w-48 bg-dark-card border border-dark-border rounded-2xl py-1.5 shadow-2xl z-50 animate-fade-in">
                       <div className="px-4 py-2 border-b border-dark-border/50">
-                        <p className="text-xs text-white font-semibold truncate">{user.fullName}</p>
+                        <p className="text-xs text-white font-bold truncate">{user.fullName}</p>
                         <p className="text-[10px] text-dark-muted truncate">@{user.username}</p>
                       </div>
                       <Link
@@ -174,7 +172,7 @@ const Navbar: React.FC = () => {
                           logout();
                           navigate('/');
                         }}
-                        className="flex items-center space-x-2 w-full text-left px-4 py-2 text-xs text-brand-danger/95 hover:bg-dark/45 hover:text-brand-danger transition-colors border-t border-dark-border/50"
+                        className="flex items-center space-x-2 w-full text-left px-4 py-2 text-xs text-brand-danger/95 hover:bg-dark/45 hover:text-brand-danger transition-colors border-t border-dark-border/50 cursor-pointer"
                       >
                         <LogOut size={13} />
                         <span>Logout</span>
@@ -184,18 +182,17 @@ const Navbar: React.FC = () => {
                 </div>
               </div>
             ) : (
-              <div className="flex items-center space-x-3.5">
+              <div className="flex items-center space-x-3">
                 <Link
                   to="/login"
-                  className="text-xs font-semibold text-white/95 hover:text-white transition-colors py-2 px-3"
+                  className="text-xs font-bold uppercase tracking-wider text-white/90 hover:text-white transition-colors py-2 px-3"
                 >
                   Log In
                 </Link>
-                <Link
-                  to="/register"
-                  className="bg-gradient-to-r from-brand-purple to-brand-blue text-white rounded-full px-5 py-2 text-xs font-bold shadow-lg shadow-brand-purple/10 hover:opacity-95 transition-opacity"
-                >
-                  Sign Up
+                <Link to="/register">
+                  <AnimatedBorderButton className="!px-5 !py-2 text-xs">
+                    Sign Up
+                  </AnimatedBorderButton>
                 </Link>
               </div>
             )}

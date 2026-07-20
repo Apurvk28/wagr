@@ -58,10 +58,6 @@ export function ScrollSplitCard({
   const textOpacity = useTransform(scrollYProgress, [0.8, 1], [0, 1]);
   const textY = useTransform(scrollYProgress, [0.8, 1], [40, 0]);
 
-  // Indicator text appearance at the start
-  const startTextOpacity = useTransform(scrollYProgress, [0, 0.1], [1, 0]);
-  const startTextY = useTransform(scrollYProgress, [0, 0.1], [0, 20]);
-
   // Text appearance on cards as they flip
   const cardTextOpacity = useTransform(scrollYProgress, [0.45, 0.75], [0, 1]);
   const cardTextY = useTransform(scrollYProgress, [0.45, 0.75], [30, 0]);

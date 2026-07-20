@@ -100,8 +100,8 @@ const UserProfile: React.FC = () => {
                 ...p,
                 likesCount: result.likesCount,
                 likes: result.hasLiked 
-                  ? [...p.likes, currentUser?.id || '']
-                  : p.likes.filter(id => id !== currentUser?.id)
+                  ? [...p.likes, currentUser?._id || currentUser?.id || '']
+                  : p.likes.filter(id => id !== (currentUser?._id || currentUser?.id))
               }
             : p
         )
@@ -389,7 +389,7 @@ const UserProfile: React.FC = () => {
                 ) : (
                   <div className="space-y-4">
                     {posts.map((post) => {
-                      const hasLiked = post.likes.includes(currentUser?.id || '');
+                      const hasLiked = post.likes.includes(currentUser?._id || currentUser?.id || '');
                       return (
                         <div key={post._id} className="bg-dark-card border border-dark-border/60 rounded-2xl p-5 space-y-4 shadow-lg animate-fade-in">
                           

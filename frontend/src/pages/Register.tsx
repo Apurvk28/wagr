@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { AnimatedBorderButton } from '../components/ui/AnimatedBorderButton';
 
 const Register: React.FC = () => {
   const { register, error, clearErrors, loading } = useAuth();
@@ -230,20 +231,22 @@ const Register: React.FC = () => {
         </div>
 
         {/* Submit button */}
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-gradient-to-r from-brand-purple to-brand-blue text-white rounded-xl py-2.5 text-sm font-semibold tracking-wider hover:opacity-95 active:scale-[0.99] transition-all disabled:opacity-50 disabled:pointer-events-none mt-4 flex items-center justify-center space-x-2"
-        >
-          {loading ? (
-            <>
-              <span className="w-4 h-4 rounded-full border-2 border-white/20 border-t-white animate-spin"></span>
-              <span>Registering...</span>
-            </>
-          ) : (
-            <span>Sign Up</span>
-          )}
-        </button>
+        <div className="w-full flex justify-center pt-2">
+          <AnimatedBorderButton
+            type="submit"
+            disabled={loading}
+            className="!w-full !py-3"
+          >
+            {loading ? (
+              <>
+                <span className="w-4 h-4 rounded-full border-2 border-white/20 border-t-white animate-spin"></span>
+                <span>Registering account...</span>
+              </>
+            ) : (
+              <span>Create Account →</span>
+            )}
+          </AnimatedBorderButton>
+        </div>
       </form>
 
       {/* Navigation Footer */}

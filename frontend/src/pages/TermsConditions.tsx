@@ -1,7 +1,7 @@
 import React from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import { ShieldAlert, Cpu, Sparkles, Scale, Info, Globe, AlertCircle, FileText, CheckCircle2, Lock, Gavel, UserX, Download } from 'lucide-react';
+import { ShieldAlert, Cpu, Scale, Globe, AlertCircle, FileText, CheckCircle2, Lock, Gavel, UserX, Download } from 'lucide-react';
 import { exportTermsConditionsPDF } from '../utils/pdfExporter';
 
 const TermsConditions: React.FC = () => {

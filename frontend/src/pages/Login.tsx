@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { AnimatedBorderButton } from '../components/ui/AnimatedBorderButton';
 
 const Login: React.FC = () => {
   const { login, error, clearErrors, loading } = useAuth();
@@ -94,20 +95,22 @@ const Login: React.FC = () => {
         </div>
 
         {/* Submit Button */}
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-gradient-to-r from-brand-purple to-brand-blue text-white rounded-xl py-2.5 text-sm font-semibold tracking-wider hover:opacity-95 active:scale-[0.99] transition-all disabled:opacity-50 disabled:pointer-events-none mt-2 flex items-center justify-center space-x-2"
-        >
-          {loading ? (
-            <>
-              <span className="w-4 h-4 rounded-full border-2 border-white/20 border-t-white animate-spin"></span>
-              <span>Signing in...</span>
-            </>
-          ) : (
-            <span>Sign In</span>
-          )}
-        </button>
+        <div className="w-full flex justify-center pt-2">
+          <AnimatedBorderButton
+            type="submit"
+            disabled={loading}
+            className="!w-full !py-3"
+          >
+            {loading ? (
+              <>
+                <span className="w-4 h-4 rounded-full border-2 border-white/20 border-t-white animate-spin"></span>
+                <span>Signing in...</span>
+              </>
+            ) : (
+              <span>Sign In →</span>
+            )}
+          </AnimatedBorderButton>
+        </div>
       </form>
 
       {/* Navigation Footer */}

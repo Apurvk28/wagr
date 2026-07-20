@@ -2,6 +2,7 @@ export type UserRole = 'User' | 'Admin';
 
 export interface User {
   _id: string;
+  id?: string;
   fullName: string;
   username: string;
   email: string;
@@ -31,8 +32,10 @@ export interface Market {
   marketType?: 'Long-Term' | 'Short-Term';
   resolutionDate: string;
   resolvedOutcome?: 'YES' | 'NO';
+  resolutionResult?: 'YES' | 'NO';
   createdBy: string; // User ID
   approvedBy?: string; // Admin ID
+  probabilityHistory?: { yesProbability: number; noProbability: number; timestamp?: string; date?: string }[];
   createdAt: string;
   updatedAt: string;
 }
@@ -130,31 +133,6 @@ export interface Comment {
   userId: string | User; // Populated User
   comment: string;
   replies?: Comment[];
-  createdAt: string;
-}
-
-export type NotificationType = 
-  | 'Market Resolved' 
-  | 'Market Cancelled' 
-  | 'Followed Market Updated' 
-  | 'New Market' 
-  | 'Follow' 
-  | 'Like' 
-  | 'Comment' 
-  | 'Reply' 
-  | 'Mention'
-  | 'Verification'
-  | 'Security'
-  | 'Admin Announcement';
-
-export interface Notification {
-  _id: string;
-  userId: string;
-  title: string;
-  message: string;
-  type: NotificationType;
-  readStatus: boolean;
-  redirectUrl: string;
   createdAt: string;
 }
 

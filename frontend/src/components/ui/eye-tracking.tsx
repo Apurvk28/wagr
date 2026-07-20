@@ -38,7 +38,7 @@ export const EyeTracking: React.FC<EyeTrackingProps> = ({
   }, []);
 
   // Helper function to compute pupil offset for each eye
-  const calculatePupilOffset = (eyeRef: React.RefObject<HTMLDivElement>) => {
+  const calculatePupilOffset = (eyeRef: React.RefObject<HTMLDivElement | null>) => {
     if (!eyeRef.current) return { x: 0, y: 0 };
     const rect = eyeRef.current.getBoundingClientRect();
     const eyeCenterX = rect.left + rect.width / 2;

@@ -4,7 +4,7 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { getLeaderboardData, type LeaderboardUser } from '../services/leaderboardService';
 import { formatMXP } from '../utils';
-import { Trophy, Search, Sparkles, TrendingUp, Award, ArrowUp, ArrowDown } from 'lucide-react';
+import { Trophy, Search, TrendingUp, Award } from 'lucide-react';
 
 type SortBy = 'profit' | 'accuracy';
 
@@ -45,7 +45,7 @@ const Leaderboard: React.FC = () => {
 
   const tableList = filteredUsers.slice(3);
 
-  const renderPodiumItem = (user: LeaderboardUser, idx: number) => {
+  const renderPodiumItem = (user: LeaderboardUser) => {
     // Determine podium rank based on user.rank
     const rank = user.rank;
     let cardHeight = 'h-52';
@@ -163,7 +163,7 @@ const Leaderboard: React.FC = () => {
         {!loading && filteredUsers.length > 0 && (
           <div className="flex flex-col sm:flex-row items-end gap-5 max-w-3xl mx-auto mb-14 pt-8">
             {/* Show podium order: 2nd place, 1st place, 3rd place */}
-            {podiumOrder.map((user, idx) => renderPodiumItem(user, idx))}
+            {podiumOrder.map((user) => renderPodiumItem(user))}
           </div>
         )}
 
