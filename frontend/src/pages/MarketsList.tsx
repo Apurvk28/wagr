@@ -8,6 +8,7 @@ import type { Market } from '../types';
 import { Search, SlidersHorizontal, Plus, Bell, BellOff } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { AnimatedBorderButton } from '../components/ui/AnimatedBorderButton';
 
 const Categories = [
   'All',
@@ -118,12 +119,11 @@ const MarketsList: React.FC = () => {
           </div>
 
           {isAuthenticated && user?.role === 'Admin' && (
-            <Link
-              to="/markets/create"
-              className="inline-flex items-center space-x-2 bg-gradient-to-r from-brand-purple to-brand-blue text-white text-xs font-bold uppercase tracking-wider px-5 py-3 rounded-xl hover:opacity-95 transform active:scale-98 transition-all shadow-lg shadow-brand-purple/20"
-            >
-              <Plus size={14} />
-              <span>Create Market</span>
+            <Link to="/markets/create">
+              <AnimatedBorderButton className="!px-5 !py-3 text-xs" rounded="rounded-xl">
+                <Plus size={14} />
+                <span>Create Market</span>
+              </AnimatedBorderButton>
             </Link>
           )}
         </div>

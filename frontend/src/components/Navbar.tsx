@@ -183,11 +183,10 @@ const Navbar: React.FC = () => {
               </div>
             ) : (
               <div className="flex items-center space-x-3">
-                <Link
-                  to="/login"
-                  className="text-xs font-bold uppercase tracking-wider text-white/90 hover:text-white transition-colors py-2 px-3"
-                >
-                  Log In
+                <Link to="/login">
+                  <AnimatedBorderButton className="!px-5 !py-2 text-xs bg-dark/80">
+                    Log In
+                  </AnimatedBorderButton>
                 </Link>
                 <Link to="/register">
                   <AnimatedBorderButton className="!px-5 !py-2 text-xs">

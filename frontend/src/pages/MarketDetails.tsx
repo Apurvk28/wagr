@@ -24,6 +24,7 @@ import {
   Bookmark,
   BookmarkCheck,
 } from 'lucide-react';
+import { AnimatedBorderButton } from '../components/ui/AnimatedBorderButton';
 import {
   ResponsiveContainer,
   LineChart,
@@ -658,10 +659,12 @@ const MarketDetails: React.FC = () => {
                       })()
                     )}
 
-                    <button
+                    <AnimatedBorderButton
                       type="submit"
                       disabled={tradeLoading}
-                      className="w-full bg-gradient-to-r from-brand-purple to-brand-blue text-white rounded-xl py-3 text-xs font-bold uppercase tracking-wider hover:opacity-95 active:scale-[0.99] transition-all disabled:opacity-50 flex items-center justify-center space-x-2"
+                      className="w-full !py-3 text-xs"
+                      rounded="rounded-xl"
+                      wrapperClassName="w-full"
                     >
                       {tradeLoading ? (
                         <>
@@ -671,7 +674,7 @@ const MarketDetails: React.FC = () => {
                       ) : (
                         <span>Place {selectedOutcome} Bet</span>
                       )}
-                    </button>
+                    </AnimatedBorderButton>
                   </form>
 
                   {/* Active Positions List Deck (Render all user bets in this market) */}

@@ -23,6 +23,7 @@ import {
   TrendingUp,
   Sparkles
 } from 'lucide-react';
+import { AnimatedBorderButton } from '../components/ui/AnimatedBorderButton';
 
 const Community: React.FC = () => {
   const { isAuthenticated, user } = useAuth();
@@ -533,13 +534,15 @@ const Community: React.FC = () => {
                     </select>
                   </div>
 
-                  <button
+                  <AnimatedBorderButton
                     type="submit"
                     disabled={submittingPost}
-                    className="w-full bg-gradient-to-r from-brand-purple to-brand-blue text-white rounded-xl py-2.5 text-xs font-bold uppercase tracking-wider hover:opacity-95 shadow-md shadow-brand-purple/10 active:scale-98 transition-all flex items-center justify-center space-x-2 cursor-pointer"
+                    className="w-full !py-2.5 text-xs"
+                    rounded="rounded-xl"
+                    wrapperClassName="w-full"
                   >
-                    {submittingPost ? 'Publishing...' : 'Share insight'}
-                  </button>
+                    <span>{submittingPost ? 'Publishing...' : 'Share insight'}</span>
+                  </AnimatedBorderButton>
                 </form>
               </div>
             ) : (
@@ -552,11 +555,15 @@ const Community: React.FC = () => {
                   Sign in or register to publish insight posts, like forecasts, and comment threads.
                 </p>
                 <div className="grid grid-cols-2 gap-2 pt-2">
-                  <Link to="/login" className="bg-dark border border-dark-border text-white text-xs font-bold py-2 rounded-xl hover:bg-dark-card/65 transition-colors">
-                    Login
+                  <Link to="/login">
+                    <AnimatedBorderButton className="w-full !py-2 text-xs" rounded="rounded-xl" wrapperClassName="w-full">
+                      <span>Login</span>
+                    </AnimatedBorderButton>
                   </Link>
-                  <Link to="/register" className="bg-gradient-to-r from-brand-purple to-brand-blue text-white text-xs font-bold py-2 rounded-xl hover:opacity-95 transition-opacity">
-                    Register
+                  <Link to="/register">
+                    <AnimatedBorderButton className="w-full !py-2 text-xs" rounded="rounded-xl" wrapperClassName="w-full">
+                      <span>Register</span>
+                    </AnimatedBorderButton>
                   </Link>
                 </div>
               </div>

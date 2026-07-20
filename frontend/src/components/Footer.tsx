@@ -48,7 +48,7 @@ const Footer: React.FC = () => {
             <h3 className="text-xs font-bold text-white uppercase tracking-wider mb-4">Developers</h3>
             <ul className="space-y-2 text-xs">
               <li>
-                <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors duration-150">
+                <a href="https://github.com/Apurvk28/wagr.git" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors duration-150">
                   GitHub Repository
                 </a>
               </li>

@@ -267,12 +267,12 @@ const Home: React.FC = () => {
                     <span>Start Predicting Now →</span>
                   </AnimatedBorderButton>
 
-                  <button
+                  <AnimatedBorderButton
                     onClick={() => navigate('/markets')}
-                    className="px-6 py-3 rounded-full text-xs font-bold text-dark-muted hover:text-white border border-dark-border hover:border-dark-border/80 transition-colors cursor-pointer uppercase tracking-wider"
+                    className="!px-6 !py-3.5 text-xs text-dark-muted hover:text-white"
                   >
-                    Browse Markets
-                  </button>
+                    <span>Browse Markets →</span>
+                  </AnimatedBorderButton>
                 </motion.div>
 
                 {/* Micro Stats Row */}

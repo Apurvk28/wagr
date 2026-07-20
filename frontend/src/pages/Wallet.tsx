@@ -127,14 +127,13 @@ const WalletPage: React.FC = () => {
           </div>
 
           <div className="flex items-center space-x-3 shrink-0">
-            <button
+            <AnimatedBorderButton
               onClick={() => exportMxpHistoryPDF(user || {}, requests)}
-              className="bg-dark border border-dark-border hover:border-brand-blue/50 text-white text-xs font-extrabold uppercase tracking-wider px-4 py-3.5 rounded-full flex items-center space-x-2 transition-all cursor-pointer shadow-lg"
-              title="Download MXP Wallet & Request Log as PDF"
+              className="!py-3.5 !px-4"
             >
               <Download size={15} />
               <span>Download MXP PDF</span>
-            </button>
+            </AnimatedBorderButton>
             <AnimatedBorderButton
               onClick={() => setShowRequestModal(true)}
               className="!py-3.5"

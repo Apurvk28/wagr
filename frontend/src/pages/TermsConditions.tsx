@@ -3,6 +3,7 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { ShieldAlert, Cpu, Scale, Globe, AlertCircle, FileText, CheckCircle2, Lock, Gavel, UserX, Download } from 'lucide-react';
 import { exportTermsConditionsPDF } from '../utils/pdfExporter';
+import { AnimatedBorderButton } from '../components/ui/AnimatedBorderButton';
 
 const TermsConditions: React.FC = () => {
   return (
@@ -22,13 +23,13 @@ const TermsConditions: React.FC = () => {
             Last Updated: July 2026 &bull; Operational agreement, platform rules, and virtual exchange guidelines.
           </p>
 
-          <button
+          <AnimatedBorderButton
             onClick={exportTermsConditionsPDF}
-            className="bg-brand-danger/15 hover:bg-brand-danger/25 border border-brand-danger/40 text-brand-danger text-xs font-black uppercase tracking-wider px-6 py-2.5 rounded-full inline-flex items-center space-x-2 transition-all cursor-pointer shadow-lg shadow-brand-danger/10"
+            className="!px-6 !py-2.5 text-xs text-brand-danger"
           >
             <Download size={14} />
             <span>Download Terms &amp; Conditions PDF</span>
-          </button>
+          </AnimatedBorderButton>
         </div>
 
         {/* Highlight Banner */}

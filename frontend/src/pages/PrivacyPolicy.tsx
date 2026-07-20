@@ -3,6 +3,7 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { Eye, Database, Globe, Shield, AlertTriangle, FileText, CheckCircle2, Server, KeyRound, UserCheck, Download } from 'lucide-react';
 import { exportPrivacyPolicyPDF } from '../utils/pdfExporter';
+import { AnimatedBorderButton } from '../components/ui/AnimatedBorderButton';
 
 const PrivacyPolicy: React.FC = () => {
   return (
@@ -22,13 +23,13 @@ const PrivacyPolicy: React.FC = () => {
             Last Updated: July 2026 &bull; Comprehensive specifications for user data protection, privacy controls, and security standards.
           </p>
 
-          <button
+          <AnimatedBorderButton
             onClick={exportPrivacyPolicyPDF}
-            className="bg-brand-success/15 hover:bg-brand-success/25 border border-brand-success/40 text-brand-success text-xs font-black uppercase tracking-wider px-6 py-2.5 rounded-full inline-flex items-center space-x-2 transition-all cursor-pointer shadow-lg shadow-brand-success/10"
+            className="!px-6 !py-2.5 text-xs text-brand-success"
           >
             <Download size={14} />
             <span>Download Privacy Policy PDF</span>
-          </button>
+          </AnimatedBorderButton>
         </div>
 
         {/* Executive Summary Card */}

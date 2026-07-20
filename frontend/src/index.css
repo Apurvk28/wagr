@@ -21,7 +21,7 @@
 
 .btn-border-wrap {
   position: relative;
-  border-radius: 9999px;
+  border-radius: inherit;
   padding: 1.5px;
   background: transparent;
   display: inline-flex;

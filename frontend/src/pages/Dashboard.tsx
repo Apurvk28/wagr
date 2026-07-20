@@ -7,6 +7,7 @@ import { getPortfolio, getTradingHistory } from '../services/userService';
 import { formatMXP, formatDate } from '../utils';
 import { exportBetsHistoryPDF } from '../utils/pdfExporter';
 import { useCountUp } from '../components/ui/useCountUp';
+import { AnimatedBorderButton } from '../components/ui/AnimatedBorderButton';
 import {
   Wallet,
   TrendingUp,
@@ -148,28 +149,32 @@ const Dashboard: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex items-center space-x-3 relative z-10 shrink-0">
-            <button
+          <div className="flex flex-wrap items-center gap-3 relative z-10 shrink-0">
+            <AnimatedBorderButton
               onClick={() => exportBetsHistoryPDF(user || {}, portfolio?.openPositions || [])}
-              className="inline-flex items-center space-x-1.5 bg-gradient-to-r from-brand-purple to-brand-blue text-white text-xs font-extrabold uppercase tracking-wider px-3.5 py-2 rounded-xl hover:opacity-95 shadow-md shadow-brand-purple/20 transition-all cursor-pointer"
-              title="Download Bets & Positions History as PDF"
+              className="!px-3.5 !py-2 text-xs"
+              rounded="rounded-xl"
             >
               <Download size={13} />
               <span>Download Bets PDF</span>
-            </button>
-            <Link
-              to="/wallet"
-              className="inline-flex items-center space-x-1.5 bg-brand-blue/10 border border-brand-blue/30 text-brand-blue text-xs font-bold uppercase tracking-wider px-3.5 py-2 rounded-xl hover:bg-brand-blue/20 transition-all"
-            >
-              <Wallet size={13} />
-              <span>Wallet: {formatMXP(user?.mxpBalance || 0)}</span>
+            </AnimatedBorderButton>
+            <Link to="/wallet">
+              <AnimatedBorderButton
+                className="!px-3.5 !py-2 text-xs text-brand-blue"
+                rounded="rounded-xl"
+              >
+                <Wallet size={13} />
+                <span>Wallet: {formatMXP(user?.mxpBalance || 0)}</span>
+              </AnimatedBorderButton>
             </Link>
-            <Link
-              to="/markets"
-              className="inline-flex items-center space-x-1.5 bg-dark border border-dark-border text-white text-xs font-bold uppercase tracking-wider px-3.5 py-2 rounded-xl hover:border-brand-purple/40 transition-colors"
-            >
-              <BarChart3 size={13} />
-              <span>Browse Markets</span>
+            <Link to="/markets">
+              <AnimatedBorderButton
+                className="!px-3.5 !py-2 text-xs"
+                rounded="rounded-xl"
+              >
+                <BarChart3 size={13} />
+                <span>Browse Markets</span>
+              </AnimatedBorderButton>
             </Link>
           </div>
         </div>
