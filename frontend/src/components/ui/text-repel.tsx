@@ -13,7 +13,7 @@ export const TextRepel: React.FC<TextRepelProps> = ({ text, className }) => {
     <div className={`inline-flex flex-wrap justify-center ${className || ''}`}>
       {characters.map((char, index) => {
         if (char === ' ') {
-          return <span key={index} className="w-1.5 sm:w-2">&nbsp;</span>;
+          return <span key={index} className="inline-block w-4 sm:w-6 md:w-8">&nbsp;</span>;
         }
 
         return (

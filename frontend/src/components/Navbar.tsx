@@ -73,8 +73,8 @@ const Navbar: React.FC = () => {
     <nav className="bg-dark/80 backdrop-blur-md border-b border-dark-border/60 sticky top-0 z-50 transition-all duration-300">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
-          {/* Logo & Primary Nav Links */}
-          <div className="flex items-center space-x-8">
+          {/* Logo */}
+          <div className="flex items-center">
             <Link to="/" className="flex items-center space-x-2.5">
               <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-brand-purple to-brand-blue flex items-center justify-center font-black text-white text-base shadow-lg shadow-brand-purple/10">
                 W
@@ -83,9 +83,11 @@ const Navbar: React.FC = () => {
                 wagr<span className="text-brand-blue">.io</span>
               </span>
             </Link>
+          </div>
 
-            {/* Desktop Menu */}
-            <div className="hidden md:flex space-x-6 text-sm font-medium text-dark-muted">
+          {/* Centered Desktop Menu */}
+          <div className="hidden md:flex items-center justify-center flex-1 px-8">
+            <div className="flex items-center space-x-8 lg:space-x-10 text-sm font-medium text-dark-muted">
               <Link to="/markets" className="hover:text-white transition-colors duration-150 py-2">
                 Prediction Markets
               </Link>
@@ -104,12 +106,12 @@ const Navbar: React.FC = () => {
           {/* User Controls / Auth Controls */}
           <div className="hidden md:flex items-center space-x-4">
             {isAuthenticated && user ? (
-              <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-3.5 pl-4 border-l border-dark-border/40">
                 {/* Global Search Button */}
                 <button
                   id="global-search-btn"
                   onClick={() => setSearchOpen(true)}
-                  className="w-8 h-8 flex items-center justify-center rounded-lg text-dark-muted hover:text-white hover:bg-dark-card border border-transparent hover:border-dark-border/60 transition-all"
+                  className="w-8 h-8 flex items-center justify-center rounded-lg text-dark-muted hover:text-white hover:bg-dark-card border border-transparent hover:border-dark-border/60 transition-all cursor-pointer"
                   title="Search markets, users, news..."
                 >
                   <Search size={15} />
@@ -117,41 +119,16 @@ const Navbar: React.FC = () => {
 
                 {/* Notification Bell */}
                 <NotificationBell />
-                {/* Wallet Balance Display */}
-                {user.role === 'Admin' ? (
-                  <div className="relative">
-                    <button
-                      onClick={() => setShowBalanceControls(!showBalanceControls)}
-                      className="bg-dark-card/90 hover:bg-dark-card/85 border border-dark-border/80 rounded-full pl-3.5 pr-4 py-1.5 flex items-center space-x-2 shadow-inner text-xs font-semibold text-brand-blue focus:outline-none cursor-pointer"
-                    >
-                      <Wallet size={14} className="text-brand-blue" />
-                      <span>{formatMXP(user.mxpBalance)}</span>
-                      <span className="text-[9px] opacity-60">⚙️</span>
-                    </button>
 
-                    {showBalanceControls && (
-                      <div className="absolute right-0 mt-2 w-36 bg-dark-card border border-dark-border rounded-xl py-1.5 shadow-2xl z-50 animate-fade-in flex flex-col space-y-0.5 p-1">
-                        <button
-                          onClick={() => handleAdjustBalance(10000)}
-                          className="text-left px-3 py-1.5 text-xs text-brand-success hover:bg-dark/45 rounded-lg transition-colors font-bold"
-                        >
-                          + 10,000 MXP
-                        </button>
-                        <button
-                          onClick={() => handleAdjustBalance(-10000)}
-                          className="text-left px-3 py-1.5 text-xs text-brand-danger hover:bg-dark/45 rounded-lg transition-colors font-bold"
-                        >
-                          - 10,000 MXP
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div className="bg-dark-card/90 border border-dark-border/80 rounded-full pl-3.5 pr-4 py-1.5 flex items-center space-x-2 shadow-inner text-xs font-semibold text-brand-blue">
-                    <Wallet size={14} className="text-brand-blue" />
-                    <span>{formatMXP(user.mxpBalance)}</span>
-                  </div>
-                )}
+                {/* Wallet Balance Display (Links to /wallet) */}
+                <Link
+                  to="/wallet"
+                  className="bg-dark-card/90 hover:bg-dark-card border border-dark-border/80 hover:border-brand-purple/40 rounded-full pl-3.5 pr-4 py-1.5 flex items-center space-x-2 shadow-inner text-xs font-semibold text-brand-blue transition-all cursor-pointer"
+                  title="Open MXP Wallet"
+                >
+                  <Wallet size={14} className="text-brand-blue" />
+                  <span>{formatMXP(user.mxpBalance)}</span>
+                </Link>
 
                 {/* User Dropdown */}
                 <div className="relative">

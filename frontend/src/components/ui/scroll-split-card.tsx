@@ -24,13 +24,11 @@ export function ScrollSplitCard({
   className,
   imageSrc,
   cards,
-  containerRef: externalContainerRef,
 }: ScrollSplitCardProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
-    container: externalContainerRef,
     offset: ["start start", "end end"],
   });
 
@@ -64,24 +62,18 @@ export function ScrollSplitCard({
   const startTextOpacity = useTransform(scrollYProgress, [0, 0.1], [1, 0]);
   const startTextY = useTransform(scrollYProgress, [0, 0.1], [0, 20]);
 
+  // Text appearance on cards as they flip
+  const cardTextOpacity = useTransform(scrollYProgress, [0.45, 0.75], [0, 1]);
+  const cardTextY = useTransform(scrollYProgress, [0.45, 0.75], [30, 0]);
+  const cardIconScale = useTransform(scrollYProgress, [0.45, 0.75], [0.5, 1]);
+
   return (
     <div
       ref={containerRef}
-      className={cn("relative h-[500vh] w-full", className)}
+      className={cn("relative h-[300vh] w-full", className)}
     >
-      <div className="sticky top-0 flex h-screen w-full items-center justify-center overflow-hidden [perspective:1200px]">
-        {/* Starting Text indicator */}
-        <motion.div
-          className="absolute top-[20%] left-0 right-0 text-center"
-          style={{
-            opacity: startTextOpacity,
-            y: startTextY,
-          }}
-        >
-          <p className="text-xs font-bold tracking-widest text-dark-muted uppercase">
-            Scroll down to reveal highlights
-          </p>
-        </motion.div>
+      <div className="sticky top-16 flex h-[calc(100vh-4rem)] w-full items-center justify-center overflow-hidden [perspective:1200px]">
+
 
         <motion.div
           style={{ scale, y: cardsY, transformStyle: "preserve-3d" }}
@@ -101,11 +93,13 @@ export function ScrollSplitCard({
             >
               {/* Front Side: Original Image Split */}
               <motion.div
-                className="absolute inset-0 overflow-hidden [backface-visibility:hidden]"
+                className="absolute inset-0 overflow-hidden"
                 style={{
                   zIndex: 2, // Ensure front stays above initially
                   borderRadius: i === 0 ? borderRadiusLeft : i === 2 ? borderRadiusRight : borderRadiusMiddle,
                   boxShadow,
+                  backfaceVisibility: "hidden",
+                  WebkitBackfaceVisibility: "hidden",
                 }}
               >
                 <div
@@ -122,17 +116,19 @@ export function ScrollSplitCard({
               {/* Back Side: New Content Card */}
               <motion.div
                 className={cn(
-                  "absolute inset-0 overflow-hidden flex flex-col justify-end p-8 [backface-visibility:hidden] will-change-transform",
-                  "border border-white/5 bg-gradient-to-br from-white/10 to-transparent",
-                  "shadow-[inset_0_1px_1px_rgba(255,255,255,0.1),inset_0_-24px_48px_rgba(0,0,0,0.2)]"
+                  "absolute inset-0 overflow-hidden flex flex-col justify-between p-6 sm:p-8 will-change-transform",
+                  "border border-white/15 bg-gradient-to-br from-white/15 to-transparent",
+                  "shadow-[inset_0_1px_1px_rgba(255,255,255,0.15),inset_0_-24px_48px_rgba(0,0,0,0.25)]"
                 )}
                 style={{
                   backgroundColor: card.bgColor,
                   color: card.textColor,
-                  transform: "rotateY(180deg)",
+                  rotateY: 180,
                   zIndex: 1, // Ensure back is behind before flip
                   borderRadius: i === 0 ? borderRadiusLeft : i === 2 ? borderRadiusRight : borderRadiusMiddle,
                   boxShadow,
+                  backfaceVisibility: "hidden",
+                  WebkitBackfaceVisibility: "hidden",
                 }}
               >
                 {/* Grainy Noise Overlay */}
@@ -144,11 +140,33 @@ export function ScrollSplitCard({
                   }}
                 />
 
-                <div className="relative z-10 mb-auto">{card.icon}</div>
-                <h3 className="relative z-10 mb-4 text-base sm:text-lg font-black uppercase tracking-tight">
+                {/* Top: Icon / Emoji Badge */}
+                <motion.div 
+                  style={{ opacity: cardTextOpacity, scale: cardIconScale }}
+                  className="relative z-10"
+                >
+                  {card.icon || (
+                    <div className="w-12 h-12 rounded-2xl bg-white/20 border border-white/30 flex items-center justify-center text-2xl shadow-lg backdrop-blur-md">
+                      {i === 0 ? "💰" : i === 1 ? "🏆" : "🚀"}
+                    </div>
+                  )}
+                </motion.div>
+                
+                {/* Middle: Title */}
+                <motion.h3 
+                  style={{ opacity: cardTextOpacity, y: cardTextY }}
+                  className="relative z-10 text-lg sm:text-xl font-black uppercase tracking-tight leading-snug drop-shadow-lg my-auto"
+                >
                   {card.title}
-                </h3>
-                <p className="relative z-10 text-xs opacity-80 leading-relaxed">{card.description}</p>
+                </motion.h3>
+
+                {/* Bottom: Description */}
+                <motion.p 
+                  style={{ opacity: cardTextOpacity, y: cardTextY }}
+                  className="relative z-10 text-xs sm:text-sm opacity-95 leading-relaxed font-medium"
+                >
+                  {card.description}
+                </motion.p>
               </motion.div>
             </motion.div>
           ))}

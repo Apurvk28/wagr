@@ -1,7 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import type { Market } from '../types';
-import { formatMXP, formatDate, formatProbability } from '../utils';
+import { formatMXP, formatDate } from '../utils';
 
 interface MarketCardProps {
   market: Market;
@@ -53,67 +54,77 @@ const MarketCard: React.FC<MarketCardProps> = ({ market, isDailyFlash }) => {
     ? market.participants 
     : Math.floor((market.volume || 100) / 120) + 12;
 
-  const hoverBorderGlow = isDailyFlash
-    ? 'hover:border-brand-blue/50 hover:shadow-brand-blue/20 hover:shadow-2xl'
-    : 'hover:border-brand-purple/50 hover:shadow-brand-purple/20 hover:shadow-2xl';
+  const hoverGlow = isDailyFlash
+    ? 'hover:border-brand-blue hover:ring-2 hover:ring-brand-blue/50 hover:shadow-2xl hover:shadow-brand-blue/30'
+    : 'hover:border-brand-purple hover:ring-2 hover:ring-brand-purple/50 hover:shadow-2xl hover:shadow-brand-purple/30';
 
   return (
-    <Link
-      to={`/markets/${market._id}`}
-      className={`block w-full bg-dark-card border border-dark-border/60 hover:scale-[1.03] rounded-2xl p-5 shadow-lg ${hoverBorderGlow} transition-all duration-300 ease-out group relative overflow-hidden`}
+    <motion.div
+      whileHover={{ y: -12, scale: 1.055, zIndex: 40 }}
+      whileTap={{ scale: 0.97 }}
+      transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+      className="w-full relative"
     >
-      {/* Top Details: Category Badge & Expiry */}
-      <div className="flex justify-between items-center mb-3">
-        <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border ${getCategoryColor(market.category)}`}>
-          {market.category}
-        </span>
-        {isDailyFlash ? (
-          <span className="text-[10px] text-brand-danger font-black uppercase tracking-wider flex items-center space-x-1 bg-brand-danger/10 border border-brand-danger/25 px-2 py-0.5 rounded animate-pulse">
-            <span className="text-xs">⏱️</span> <span>{timeLeft}</span>
-          </span>
-        ) : (
-          <span className="text-[10px] text-dark-muted font-medium">
-            Ends {formatDate(market.resolutionDate)}
-          </span>
-        )}
-      </div>
+      <Link
+        to={`/markets/${market._id}`}
+        className={`block w-full bg-dark-card border border-dark-border/60 rounded-2xl p-5 shadow-xl ${hoverGlow} transition-all duration-200 ease-out group relative overflow-hidden`}
+      >
+        {/* Shine highlight line on hover */}
+        <div className="absolute top-0 -left-[100%] w-[60%] h-full bg-gradient-to-r from-transparent via-white/15 to-transparent skew-x-12 group-hover:left-[200%] transition-all duration-1000 ease-in-out pointer-events-none" />
 
-      {/* Title */}
-      <h3 className="text-sm font-bold text-white group-hover:text-brand-blue transition-colors leading-snug mb-5 min-h-[40px]">
-        {market.title}
-      </h3>
-
-      {/* Probabilities Widgets */}
-      <div className="grid grid-cols-2 gap-2.5 mb-4">
-        {/* YES Side */}
-        <div className="bg-dark/40 hover:bg-brand-success/5 border border-dark-border/60 hover:border-brand-success/35 rounded-xl p-3 flex flex-col items-center justify-center transition-colors group/btn cursor-pointer">
-          <span className="text-[10px] font-bold text-brand-success uppercase tracking-wider mb-1">YES Payout</span>
-          <span className="text-base font-black text-white group-hover/btn:text-brand-success transition-colors">
-            +{100 - market.yesProbability}%
+        {/* Top Details: Category Badge & Expiry */}
+        <div className="flex justify-between items-center mb-3 relative z-10">
+          <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border ${getCategoryColor(market.category)}`}>
+            {market.category}
           </span>
+          {isDailyFlash ? (
+            <span className="text-[10px] text-brand-danger font-black uppercase tracking-wider flex items-center space-x-1 bg-brand-danger/10 border border-brand-danger/25 px-2 py-0.5 rounded animate-pulse">
+              <span className="text-xs">⏱️</span> <span>{timeLeft}</span>
+            </span>
+          ) : (
+            <span className="text-[10px] text-dark-muted font-medium">
+              Ends {formatDate(market.resolutionDate)}
+            </span>
+          )}
         </div>
 
-        {/* NO Side */}
-        <div className="bg-dark/40 hover:bg-brand-danger/5 border border-dark-border/60 hover:border-brand-danger/35 rounded-xl p-3 flex flex-col items-center justify-center transition-colors group/btn cursor-pointer">
-          <span className="text-[10px] font-bold text-brand-danger uppercase tracking-wider mb-1">NO Payout</span>
-          <span className="text-base font-black text-white group-hover/btn:text-brand-danger transition-colors">
-            +{100 - market.noProbability}%
-          </span>
-        </div>
-      </div>
+        {/* Title */}
+        <h3 className="text-sm font-bold text-white group-hover:text-brand-purple transition-colors leading-snug mb-5 min-h-[40px] relative z-10">
+          {market.title}
+        </h3>
 
-      {/* Bottom Info: Volume & Participant Count */}
-      <div className="flex justify-between items-center border-t border-dark-border/20 pt-3 text-[11px] text-dark-muted font-medium">
-        <div className="flex items-center space-x-1">
-          <span>📊</span>
-          <span>Vol: {formatMXP(market.volume)}</span>
+        {/* Probabilities Widgets */}
+        <div className="grid grid-cols-2 gap-2.5 mb-4 relative z-10">
+          {/* YES Side */}
+          <div className="bg-dark/40 hover:bg-brand-success/15 border border-dark-border/60 hover:border-brand-success/50 rounded-xl p-3 flex flex-col items-center justify-center transition-colors group/btn cursor-pointer">
+            <span className="text-[10px] font-bold text-brand-success uppercase tracking-wider mb-1">YES Payout</span>
+            <span className="text-base font-black text-white group-hover/btn:text-brand-success transition-colors">
+              +{100 - market.yesProbability}%
+            </span>
+          </div>
+
+          {/* NO Side */}
+          <div className="bg-dark/40 hover:bg-brand-danger/15 border border-dark-border/60 hover:border-brand-danger/50 rounded-xl p-3 flex flex-col items-center justify-center transition-colors group/btn cursor-pointer">
+            <span className="text-[10px] font-bold text-brand-danger uppercase tracking-wider mb-1">NO Payout</span>
+            <span className="text-base font-black text-white group-hover/btn:text-brand-danger transition-colors">
+              +{100 - market.noProbability}%
+            </span>
+          </div>
         </div>
-        <div className="flex items-center space-x-1">
-          <span>👥</span>
-          <span>{tradersCount} Traders</span>
+
+        {/* Bottom Info: Volume & Participant Count */}
+        <div className="flex justify-between items-center border-t border-dark-border/20 pt-3 text-[11px] text-dark-muted font-medium relative z-10">
+          <div className="flex items-center space-x-1">
+            <span>📊</span>
+            <span>Vol: {formatMXP(market.volume)}</span>
+          </div>
+          <div className="flex items-center space-x-1">
+            <span>👥</span>
+            <span>{tradersCount} Traders</span>
+          </div>
         </div>
-      </div>
-    </Link>
+      </Link>
+    </motion.div>
   );
 };
 
