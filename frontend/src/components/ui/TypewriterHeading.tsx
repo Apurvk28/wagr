@@ -50,7 +50,7 @@ export const TypewriterHeading: React.FC<TypewriterHeadingProps> = ({
   }, [text, speed, delay, onComplete]);
 
   return (
-    <span className={`inline-block ${className}`}>
+    <span className={`inline-block whitespace-pre-wrap ${className}`}>
       {displayedText}
       {isTyping && (
         <span className="inline-block ml-1 w-1.5 h-[0.9em] bg-brand-purple animate-pulse align-baseline" />

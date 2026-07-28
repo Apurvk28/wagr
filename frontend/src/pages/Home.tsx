@@ -242,9 +242,9 @@ const Home: React.FC = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2, duration: 0.6 }}
-                  className="text-4xl sm:text-6xl md:text-7xl font-black tracking-tight text-white font-display uppercase leading-[1.05]"
+                  className="text-4xl sm:text-6xl md:text-7xl font-black tracking-tight text-white font-display uppercase leading-[1.08]"
                 >
-                  <TypewriterHeading text="The Future Has Odds." className="text-white" speed={40} delay={300} />
+                  <TypewriterHeading text={"THE FUTURE\n    HAS ODDS."} className="text-white" speed={40} delay={300} />
                 </motion.h1>
 
                 <motion.p
