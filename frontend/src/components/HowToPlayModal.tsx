@@ -1,4 +1,5 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
 import { X, Award, Zap, Globe, Wallet, ShieldCheck, ArrowRight } from 'lucide-react';
 import { AnimatedBorderButton } from './ui/AnimatedBorderButton';
 
@@ -10,9 +11,12 @@ interface HowToPlayModalProps {
 export const HowToPlayModal: React.FC<HowToPlayModalProps> = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in overflow-y-auto">
-      <div className="bg-dark-card border border-brand-purple/40 rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl relative my-8 space-y-6">
+  return ReactDOM.createPortal(
+    <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 sm:p-6 bg-black/85 backdrop-blur-md animate-fade-in overflow-y-auto">
+      <div 
+        className="bg-dark-card border border-brand-purple/40 rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl relative my-auto space-y-6 max-h-[90vh] overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
         
         {/* Header */}
         <div className="flex justify-between items-center border-b border-dark-border/40 pb-4">
@@ -110,6 +114,7 @@ export const HowToPlayModal: React.FC<HowToPlayModalProps> = ({ isOpen, onClose 
         </div>
 
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
