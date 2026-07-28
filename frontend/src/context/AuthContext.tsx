@@ -8,8 +8,8 @@ interface AuthContextType {
   isAuthenticated: boolean;
   loading: boolean;
   error: string | null;
-  login: (email: string, password: string) => Promise<boolean>;
-  register: (fullName: string, username: string, email: string, password: string) => Promise<{ success: boolean; message: string }>;
+  login: (email: string, password: string, accessKey: string) => Promise<boolean>;
+  register: (fullName: string, username: string, email: string, password: string, accessKey: string) => Promise<{ success: boolean; message: string }>;
   verifyEmail: (token: string) => Promise<boolean>;
   logout: () => void;
   updateProfile: (fullName: string) => Promise<boolean>;
@@ -60,11 +60,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, []);
 
   // Login Handler
-  const login = async (email: string, password: string): Promise<boolean> => {
+  const login = async (email: string, password: string, accessKey: string): Promise<boolean> => {
     setLoading(true);
     setError(null);
     try {
-      const res = await api.post('/auth/login', { email, password });
+      const res = await api.post('/auth/login', { email, password, accessKey });
       if (res.data.success) {
         const userToken = res.data.token;
         localStorage.setItem('token', userToken);
@@ -88,12 +88,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     fullName: string,
     username: string,
     email: string,
-    password: string
+    password: string,
+    accessKey: string
   ): Promise<{ success: boolean; message: string }> => {
     setLoading(true);
     setError(null);
     try {
-      const res = await api.post('/auth/register', { fullName, username, email, password });
+      const res = await api.post('/auth/register', { fullName, username, email, password, accessKey });
       if (res.data.success) {
         const userToken = res.data.token;
         localStorage.setItem('token', userToken);

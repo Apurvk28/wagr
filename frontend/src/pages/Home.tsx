@@ -244,7 +244,7 @@ const Home: React.FC = () => {
                   transition={{ delay: 0.2, duration: 0.6 }}
                   className="text-4xl sm:text-6xl md:text-7xl font-black tracking-tight text-white font-display uppercase leading-[1.08]"
                 >
-                  <TypewriterHeading text={"THE FUTURE\n    HAS ODDS."} className="text-white" speed={40} delay={300} />
+                  <TypewriterHeading text={"THE FUTURE\nHAS ODDS."} className="text-white" speed={40} delay={300} />
                 </motion.h1>
 
                 <motion.p
@@ -283,7 +283,7 @@ const Home: React.FC = () => {
                   className="grid grid-cols-3 gap-4 pt-6 border-t border-dark-border/40"
                 >
                   <div>
-                    <span className="text-lg font-black text-white font-display">10,000</span>
+                    <span className="text-lg font-black text-white font-display">500</span>
                     <span className="block text-[10px] font-bold text-dark-muted uppercase tracking-wider">Welcome MXP</span>
                   </div>
                   <div>

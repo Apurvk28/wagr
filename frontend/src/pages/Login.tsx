@@ -9,6 +9,7 @@ const Login: React.FC = () => {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [accessKey, setAccessKey] = useState('');
   const [localError, setLocalError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -17,8 +18,8 @@ const Login: React.FC = () => {
     clearErrors();
 
     // Client-side validations
-    if (!email || !password) {
-      setLocalError('Please fill in all fields.');
+    if (!email || !password || !accessKey) {
+      setLocalError('Please fill in all fields including the Special Access Key.');
       return;
     }
 
@@ -28,7 +29,7 @@ const Login: React.FC = () => {
       return;
     }
 
-    const success = await login(email, password);
+    const success = await login(email, password, accessKey);
     if (success) {
       navigate('/');
     }
@@ -38,7 +39,7 @@ const Login: React.FC = () => {
     <div className="w-full">
       <div className="text-center mb-6">
         <h2 className="text-xl font-bold text-white mb-1">Welcome back</h2>
-        <p className="text-xs text-dark-muted">Enter your credentials to access your predictions</p>
+        <p className="text-xs text-dark-muted">Enter your credentials and special access key</p>
       </div>
 
       {/* Backend Error Alert */}
@@ -90,6 +91,26 @@ const Login: React.FC = () => {
               clearErrors();
             }}
             placeholder="••••••••"
+            className="w-full bg-dark/60 border border-dark-border rounded-xl px-4 py-2.5 text-sm text-white placeholder-dark-muted focus:outline-none focus:border-brand-purple/70 transition-colors"
+          />
+        </div>
+
+        {/* Special Access Key Field */}
+        <div>
+          <label className="block text-xs font-semibold text-white/90 uppercase tracking-wider mb-1.5" htmlFor="accessKey">
+            Special Access Key 🔑
+          </label>
+          <input
+            id="accessKey"
+            type="password"
+            required
+            value={accessKey}
+            onChange={(e) => {
+              setAccessKey(e.target.value);
+              setLocalError(null);
+              clearErrors();
+            }}
+            placeholder="Enter Special Access Key"
             className="w-full bg-dark/60 border border-dark-border rounded-xl px-4 py-2.5 text-sm text-white placeholder-dark-muted focus:outline-none focus:border-brand-purple/70 transition-colors"
           />
         </div>

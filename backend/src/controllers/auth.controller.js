@@ -12,9 +12,18 @@ const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@
  * @access  Public
  */
 export const register = async (req, res, next) => {
-  const { fullName, username, email, password } = req.body;
+  const { fullName, username, email, password, accessKey } = req.body;
 
   try {
+    // 0. Access Key Check
+    const expectedKey = process.env.SPECIAL_ACCESS_KEY || 'Apurvsk';
+    if (!accessKey || accessKey.trim() !== expectedKey) {
+      return res.status(403).json({
+        success: false,
+        message: 'Invalid Special Access Key. You are not authorized to access Wagr.io.',
+      });
+    }
+
     // 1. Inputs validation
     if (!fullName || !username || !email || !password) {
       return res.status(400).json({
@@ -162,9 +171,18 @@ export const verifyEmail = async (req, res, next) => {
  * @access  Public
  */
 export const login = async (req, res, next) => {
-  const { email, password } = req.body;
+  const { email, password, accessKey } = req.body;
 
   try {
+    // 0. Access Key Check
+    const expectedKey = process.env.SPECIAL_ACCESS_KEY || 'Apurvsk';
+    if (!accessKey || accessKey.trim() !== expectedKey) {
+      return res.status(403).json({
+        success: false,
+        message: 'Invalid Special Access Key. You are not authorized to access Wagr.io.',
+      });
+    }
+
     // 1. Validation
     if (!email || !password) {
       return res.status(400).json({

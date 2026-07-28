@@ -12,6 +12,7 @@ const Register: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [accessKey, setAccessKey] = useState('');
   
   const [localError, setLocalError] = useState<string | null>(null);
 
@@ -40,8 +41,8 @@ const Register: React.FC = () => {
     clearErrors();
 
     // Field completion check
-    if (!fullName || !username || !email || !password || !confirmPassword) {
-      setLocalError('Please fill in all fields.');
+    if (!fullName || !username || !email || !password || !confirmPassword || !accessKey) {
+      setLocalError('Please fill in all fields including the Special Access Key.');
       return;
     }
 
@@ -65,7 +66,7 @@ const Register: React.FC = () => {
       return;
     }
 
-    const result = await register(fullName, username, email, password);
+    const result = await register(fullName, username, email, password, accessKey);
     if (result.success) {
       navigate('/');
     }
@@ -226,6 +227,26 @@ const Register: React.FC = () => {
               clearErrors();
             }}
             placeholder="••••••••"
+            className="w-full bg-dark/60 border border-dark-border rounded-xl px-4 py-2 text-sm text-white placeholder-dark-muted focus:outline-none focus:border-brand-purple/70 transition-colors"
+          />
+        </div>
+
+        {/* Special Access Key Field */}
+        <div>
+          <label className="block text-xs font-semibold text-white/90 uppercase tracking-wider mb-1" htmlFor="accessKey">
+            Special Access Key 🔑
+          </label>
+          <input
+            id="accessKey"
+            type="password"
+            required
+            value={accessKey}
+            onChange={(e) => {
+              setAccessKey(e.target.value);
+              setLocalError(null);
+              clearErrors();
+            }}
+            placeholder="Enter Special Access Key"
             className="w-full bg-dark/60 border border-dark-border rounded-xl px-4 py-2 text-sm text-white placeholder-dark-muted focus:outline-none focus:border-brand-purple/70 transition-colors"
           />
         </div>
