@@ -10,7 +10,6 @@ interface AuthContextType {
   error: string | null;
   login: (email: string, password: string, accessKey: string) => Promise<boolean>;
   register: (fullName: string, username: string, email: string, password: string, accessKey: string) => Promise<{ success: boolean; message: string }>;
-  verifyEmail: (token: string) => Promise<boolean>;
   logout: () => void;
   updateProfile: (fullName: string) => Promise<boolean>;
   reloadProfile: () => Promise<boolean>;
@@ -115,30 +114,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  // Verify Email Handler
-  const verifyEmail = async (verificationToken: string): Promise<boolean> => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await api.post('/auth/verify-email', { token: verificationToken });
-      if (res.data.success) {
-        const userToken = res.data.token;
-        localStorage.setItem('token', userToken);
-        setToken(userToken);
-        setUser(res.data.data);
-        setIsAuthenticated(true);
-        setLoading(false);
-        return true;
-      }
-      setLoading(false);
-      return false;
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Email verification failed.');
-      setLoading(false);
-      return false;
-    }
-  };
-
   // Logout Handler
   const logout = () => {
     localStorage.removeItem('token');
@@ -192,7 +167,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         error,
         login,
         register,
-        verifyEmail,
         logout,
         updateProfile,
         reloadProfile,
