@@ -100,6 +100,13 @@ const Navbar: React.FC = () => {
               <Link to="/leaderboard" className="hover:text-white transition-colors duration-150 py-2">
                 Leaderboard
               </Link>
+              <button
+                onClick={() => setHowToPlayOpen(true)}
+                className="hover:text-white text-brand-purple font-bold transition-colors duration-150 py-2 flex items-center space-x-1 cursor-pointer"
+              >
+                <HelpCircle size={14} />
+                <span>How to Play</span>
+              </button>
             </div>
           </div>
 
@@ -260,6 +267,33 @@ const Navbar: React.FC = () => {
           >
             Leaderboard
           </Link>
+          <button
+            onClick={() => {
+              setMobileMenuOpen(false);
+              setHowToPlayOpen(true);
+            }}
+            className="block w-full text-left text-sm text-brand-purple font-bold py-1 cursor-pointer"
+          >
+            How to Play 📖
+          </button>
+          {isAuthenticated && (
+            <>
+              <Link
+                to="/profile"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block text-sm text-dark-muted hover:text-white font-medium py-1"
+              >
+                My Profile
+              </Link>
+              <Link
+                to="/dashboard"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block text-sm text-dark-muted hover:text-white font-medium py-1"
+              >
+                My Portfolio
+              </Link>
+            </>
+          )}
 
           {/* Guest or User actions for Mobile */}
           <div className="border-t border-dark-border/40 pt-3.5 space-y-2">
