@@ -100,13 +100,6 @@ const Navbar: React.FC = () => {
               <Link to="/leaderboard" className="hover:text-white transition-colors duration-150 py-2">
                 Leaderboard
               </Link>
-              <button
-                onClick={() => setHowToPlayOpen(true)}
-                className="hover:text-white text-brand-purple font-bold transition-colors duration-150 py-2 flex items-center space-x-1 cursor-pointer"
-              >
-                <HelpCircle size={14} />
-                <span>How to Play</span>
-              </button>
             </div>
           </div>
 

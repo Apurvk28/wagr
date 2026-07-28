@@ -48,7 +48,7 @@ app.use(express.urlencoded({ extended: true }));
 // Global rate limiting
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: process.env.NODE_ENV === 'development' ? 10000 : 100, // Limit each IP to 10000 requests in dev, 100 in production
+  max: 10000, // High throughput limit to prevent 429 rate-limiting on client data fetches
   standardHeaders: true,
   legacyHeaders: false,
   message: {
