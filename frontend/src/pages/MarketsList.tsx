@@ -322,7 +322,7 @@ const MarketsList: React.FC = () => {
                     </div>
                     {shortTerm.length > 0 ? (
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        {shortTerm.map((market) => (
+                        {shortTerm.slice(0, 9).map((market) => (
                           <MarketCard key={market._id} market={market} isDailyFlash={true} />
                         ))}
                       </div>
@@ -348,7 +348,7 @@ const MarketsList: React.FC = () => {
                     </div>
                     {longTerm.length > 0 ? (
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        {longTerm.map((market) => (
+                        {longTerm.slice(0, 9).map((market) => (
                           <MarketCard key={market._id} market={market} />
                         ))}
                       </div>

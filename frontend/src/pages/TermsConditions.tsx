@@ -169,15 +169,15 @@ const TermsConditions: React.FC = () => {
             <div className="flex items-center space-x-3 border-b border-dark-border/40 pb-4">
               <Lock className="text-brand-success shrink-0" size={22} />
               <h2 className="text-base font-black text-white uppercase tracking-wider">
-                5. Admin MXP Credit Requests &amp; Wallet Provisions
+                5. Admin MXP Credit Requests &amp; Automated AMM Payout Balancing
               </h2>
             </div>
             <p className="text-xs sm:text-sm text-dark-muted leading-relaxed">
-              Newly registered users receive a welcome allocation of 10,000 MXP. Should your virtual balance diminish through prediction activity, users may submit formal credit requests via the `/wallet` portal specifying requested amounts and operational reasons:
+              Newly registered users receive a welcome allocation of 500 MXP. Should your virtual balance diminish through prediction activity, users may submit formal credit requests via the `/wallet` portal specifying requested amounts and operational reasons:
             </p>
             <ul className="list-disc pl-5 text-xs text-dark-muted space-y-2 leading-relaxed">
               <li><strong className="text-white">Admin Discretion:</strong> Credit request approvals are handled at the sole discretion of platform administrators based on active user engagement and request validity.</li>
-              <li><strong className="text-white">Non-Entitlement:</strong> Submission of an MXP credit request does not guarantee approval. Abuse of credit requests may lead to request throttling.</li>
+              <li><strong className="text-white">Automated AMM Probability &amp; Payout Balancing:</strong> To ensure dynamic engagement and fun, Wagr.io utilizes Automated Market Maker (AMM) probability and payout adjustment algorithms. These automated algorithms balance YES and NO contract returns dynamically based on liquidity. You acknowledge that AMM probability and payout adjustments are conducted solely for entertainment and gamification, as Wagr.io involves zero real money or financial risk.</li>
             </ul>
           </section>
 

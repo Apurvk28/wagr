@@ -45,15 +45,21 @@ const UserProfile: React.FC = () => {
   const [newCommentText, setNewCommentText] = useState<{ [postId: string]: string }>({});
   const [replyToCommentId, setReplyToCommentId] = useState<{ [postId: string]: string | null }>({});
 
+  const targetUsername = username || currentUser?.username;
+
   const loadProfileData = async () => {
-    if (!username) return;
+    if (!targetUsername) {
+      setLoading(false);
+      setError('Please log in or specify a username to view profile details.');
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
-      const profileData = await getUserProfile(username);
+      const profileData = await getUserProfile(targetUsername);
       setProfile(profileData);
       
-      const postsData = await getPosts({ username });
+      const postsData = await getPosts({ username: targetUsername });
       setPosts(postsData);
     } catch (err: any) {
       console.error('Failed to load user profile:', err);
@@ -65,7 +71,7 @@ const UserProfile: React.FC = () => {
 
   useEffect(() => {
     loadProfileData();
-  }, [username]);
+  }, [username, currentUser?.username]);
 
   // Handle Follow / Unfollow
   const handleFollowToggle = async () => {

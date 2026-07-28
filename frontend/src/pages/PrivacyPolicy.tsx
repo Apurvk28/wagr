@@ -191,9 +191,9 @@ const PrivacyPolicy: React.FC = () => {
               Wagr.io leverages AI language models (such as Groq LLM completions) to automate news indexing, formulate event titles, and generate daily market briefings.
             </p>
             <div className="bg-dark/50 border border-dark-border/50 rounded-xl p-4 space-y-2">
-              <h4 className="text-xs font-bold text-white uppercase tracking-wider">AI Data Anonymization Guarantee</h4>
+              <h4 className="text-xs font-bold text-white uppercase tracking-wider">AI &amp; AMM Algorithmic Processing</h4>
               <p className="text-xs text-dark-muted leading-relaxed">
-                When communicating with external AI inference APIs, only public event titles, generic category names, and news headline strings are transmitted. <strong className="text-white">Zero personal user identifiers, email addresses, IP logs, or account metadata are ever shared with AI API providers.</strong>
+                When communicating with external AI inference APIs, only public event titles, generic category names, and news headline strings are transmitted. <strong className="text-white">Zero personal user identifiers, email addresses, IP logs, or account metadata are ever shared with AI API providers.</strong> Furthermore, Wagr.io utilizes Automated Market Maker (AMM) algorithmic adjustments to simulate dynamic payout returns and maintain balanced prediction liquidity strictly for gamified entertainment.
               </p>
             </div>
           </section>

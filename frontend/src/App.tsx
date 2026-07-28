@@ -61,6 +61,7 @@ function App() {
             {/* Protected Routes */}
             <Route element={<ProtectedRoute />}>
               <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/profile" element={<UserProfile />} />
               <Route path="/wallet" element={<WalletPage />} />
               <Route path="/markets/create" element={<CreateMarket />} />
             </Route>

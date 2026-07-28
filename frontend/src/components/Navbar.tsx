@@ -4,15 +4,17 @@ import { useAuth } from '../context/AuthContext';
 import { formatMXP } from '../utils';
 import api from '../services/api';
 import { globalSearch, type SearchResults } from '../services/searchService';
-import { Menu, X, Wallet, User as UserIcon, LogOut, ChevronDown, Search, ShieldAlert } from 'lucide-react';
+import { Menu, X, Wallet, User as UserIcon, LogOut, ChevronDown, Search, ShieldAlert, HelpCircle, PieChart } from 'lucide-react';
 import NotificationBell from './NotificationBell';
 import { AnimatedBorderButton } from './ui/AnimatedBorderButton';
+import { HowToPlayModal } from './HowToPlayModal';
 
 const Navbar: React.FC = () => {
   const { user, isAuthenticated, logout, reloadProfile } = useAuth();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+  const [howToPlayOpen, setHowToPlayOpen] = useState(false);
 
   // Global Search state
   const [searchOpen, setSearchOpen] = useState(false);
@@ -149,13 +151,31 @@ const Navbar: React.FC = () => {
                         <p className="text-[10px] text-dark-muted truncate">@{user.username}</p>
                       </div>
                       <Link
-                        to="/dashboard"
+                        to="/profile"
                         onClick={() => setProfileDropdownOpen(false)}
                         className="flex items-center space-x-2 px-4 py-2 text-xs text-white/80 hover:bg-dark/45 hover:text-white transition-colors"
                       >
                         <UserIcon size={13} />
+                        <span>My Profile</span>
+                      </Link>
+                      <Link
+                        to="/dashboard"
+                        onClick={() => setProfileDropdownOpen(false)}
+                        className="flex items-center space-x-2 px-4 py-2 text-xs text-white/80 hover:bg-dark/45 hover:text-white transition-colors"
+                      >
+                        <PieChart size={13} />
                         <span>My Portfolio</span>
                       </Link>
+                      <button
+                        onClick={() => {
+                          setProfileDropdownOpen(false);
+                          setHowToPlayOpen(true);
+                        }}
+                        className="flex items-center space-x-2 w-full text-left px-4 py-2 text-xs text-brand-purple hover:bg-dark/45 hover:text-white transition-colors cursor-pointer"
+                      >
+                        <HelpCircle size={13} />
+                        <span>How to Play</span>
+                      </button>
                       {user.role === 'Admin' && (
                         <Link
                           to="/admin"
@@ -451,6 +471,9 @@ const Navbar: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* How to Play Interactive Modal */}
+      <HowToPlayModal isOpen={howToPlayOpen} onClose={() => setHowToPlayOpen(false)} />
     </nav>
   );
 };

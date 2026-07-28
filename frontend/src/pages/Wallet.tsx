@@ -171,7 +171,7 @@ const WalletPage: React.FC = () => {
               {user?.role || 'Standard'} Predictor
             </div>
             <p className="text-[10px] text-dark-muted font-semibold mt-2">
-              Receives 10,000 MXP initial welcome credit + daily trading capabilities
+              Receives 500 MXP initial welcome credit + daily trading capabilities
             </p>
           </div>
 
@@ -187,6 +187,73 @@ const WalletPage: React.FC = () => {
             <p className="text-[10px] text-dark-muted font-semibold mt-2">
               Submissions are reviewed by system administrators in real-time
             </p>
+          </div>
+        </div>
+
+        {/* MXP Transaction Ledger & Balance History Section */}
+        <div className="bg-dark-card border border-dark-border/70 rounded-2xl p-6 shadow-xl mb-12">
+          <div className="flex justify-between items-center border-b border-dark-border/30 pb-4 mb-6">
+            <h3 className="text-sm font-extrabold text-white uppercase tracking-wider flex items-center space-x-2">
+              <span>💳</span>
+              <span>Your MXP Transaction Ledger &amp; Balance History</span>
+            </h3>
+            <span className="text-xs text-brand-purple font-bold bg-brand-purple/10 border border-brand-purple/30 px-3 py-1 rounded-full">
+              Live Balance: {user?.mxpBalance?.toLocaleString() || 500} MXP
+            </span>
+          </div>
+
+          <div className="divide-y divide-dark-border/20">
+            {/* Initial Registration Welcome Grant */}
+            <div className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex items-center space-x-3.5">
+                <div className="w-10 h-10 rounded-xl bg-brand-success/15 text-brand-success flex items-center justify-center font-bold text-sm shrink-0 border border-brand-success/30">
+                  🎁
+                </div>
+                <div>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-sm font-black text-white">Initial Account Welcome Grant</span>
+                    <span className="text-[10px] font-extrabold uppercase bg-brand-success/15 text-brand-success border border-brand-success/30 px-2 py-0.5 rounded-full">
+                      Credited
+                    </span>
+                  </div>
+                  <p className="text-xs text-dark-muted font-medium mt-0.5">
+                    Signup welcome credit granted automatically upon account initialization
+                  </p>
+                </div>
+              </div>
+
+              <div className="text-right shrink-0">
+                <span className="text-sm font-black text-brand-success">+500 MXP</span>
+                <p className="text-[10px] text-dark-muted font-medium">Account Creation</p>
+              </div>
+            </div>
+
+            {/* Approved Requests as Ledger Entries */}
+            {requests.filter(r => r.status === 'Approved').map(req => (
+              <div key={`ledger-${req._id}`} className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex items-center space-x-3.5">
+                  <div className="w-10 h-10 rounded-xl bg-brand-purple/15 text-brand-purple flex items-center justify-center font-bold text-sm shrink-0 border border-brand-purple/30">
+                    ⚡
+                  </div>
+                  <div>
+                    <div className="flex items-center space-x-2">
+                      <span className="text-sm font-black text-white">Admin Credit Grant</span>
+                      <span className="text-[10px] font-extrabold uppercase bg-brand-purple/15 text-brand-purple border border-brand-purple/30 px-2 py-0.5 rounded-full">
+                        Approved
+                      </span>
+                    </div>
+                    <p className="text-xs text-dark-muted font-medium mt-0.5">
+                      "{req.reason}"
+                    </p>
+                  </div>
+                </div>
+
+                <div className="text-right shrink-0">
+                  <span className="text-sm font-black text-brand-purple">+{req.amount.toLocaleString()} MXP</span>
+                  <p className="text-[10px] text-dark-muted font-medium">{formatDate(req.createdAt)}</p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
