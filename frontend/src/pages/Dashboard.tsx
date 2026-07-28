@@ -6,7 +6,6 @@ import { useAuth } from '../context/AuthContext';
 import { getPortfolio, getTradingHistory } from '../services/userService';
 import { formatMXP, formatDate } from '../utils';
 import { exportBetsHistoryPDF } from '../utils/pdfExporter';
-import { useCountUp } from '../components/ui/useCountUp';
 import { AnimatedBorderButton } from '../components/ui/AnimatedBorderButton';
 import {
   Wallet,
@@ -219,7 +218,7 @@ const Dashboard: React.FC = () => {
                 <span className="text-[10px] font-bold text-dark-muted uppercase tracking-wider">Win Rate</span>
               </div>
               <p className="text-2xl font-black text-white font-display">
-                {useCountUp({ end: portfolio.winRate || 0, duration: 1500 })}%
+                {portfolio.winRate || 0}%
               </p>
               <p className="text-[10px] text-dark-muted mt-1">{portfolio.wins} / {portfolio.totalResolved} resolved</p>
             </div>
