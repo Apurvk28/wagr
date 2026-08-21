@@ -1,7 +1,10 @@
 import React from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import { Eye, Database, Globe, Shield, AlertTriangle, FileText, CheckCircle2, Server, KeyRound, UserCheck, Download } from 'lucide-react';
+import { 
+  Eye, Database, Globe, Shield, AlertTriangle, FileText, CheckCircle2, 
+  Server, KeyRound, UserCheck, Download, RefreshCw, Layers, Mail
+} from 'lucide-react';
 import { exportPrivacyPolicyPDF } from '../utils/pdfExporter';
 import { AnimatedBorderButton } from '../components/ui/AnimatedBorderButton';
 
@@ -11,243 +14,312 @@ const PrivacyPolicy: React.FC = () => {
       <Navbar />
 
       <div className="flex-grow max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        {/* Header */}
-        <div className="text-center mb-14">
-          <span className="text-[10px] font-extrabold bg-brand-success/10 text-brand-success border border-brand-success/25 px-3.5 py-1 rounded-full uppercase tracking-widest">
-            Official Legal Document
+        
+        {/* Document Header */}
+        <div className="text-center mb-14 space-y-4">
+          <span className="text-[10px] font-extrabold bg-brand-success/10 text-brand-success border border-brand-success/25 px-4 py-1.5 rounded-full uppercase tracking-widest shadow-md">
+            OFFICIAL DATA PROTECTION &amp; PRIVACY SPECIFICATION
           </span>
-          <h1 className="text-4xl sm:text-5xl font-black text-white tracking-tight mt-4 leading-none">
+          <h1 className="text-4xl sm:text-6xl font-black text-white tracking-tight leading-none font-display">
             Privacy Policy<span className="text-brand-success">.</span>
           </h1>
-          <p className="text-xs sm:text-sm text-dark-muted font-medium mt-2 mb-6">
-            Last Updated: July 2026 &bull; Comprehensive specifications for user data protection, privacy controls, and security standards.
+          <p className="text-xs sm:text-sm text-dark-muted font-medium max-w-2xl mx-auto leading-relaxed">
+            Effective Date: July 2026 &bull; Version 3.4 &bull; Exhaustive specifications governing user data protection, algorithmic boundary controls, cryptographic hashing, and privacy rights across Wagr.io.
           </p>
 
-          <AnimatedBorderButton
-            onClick={exportPrivacyPolicyPDF}
-            className="!px-6 !py-2.5 text-xs text-brand-success"
-          >
-            <Download size={14} />
-            <span>Download Privacy Policy PDF</span>
-          </AnimatedBorderButton>
+          <div className="pt-2">
+            <AnimatedBorderButton
+              onClick={exportPrivacyPolicyPDF}
+              className="!px-6 !py-3 text-xs text-brand-success shadow-lg"
+            >
+              <Download size={15} />
+              <span>Download Official Privacy Policy PDF</span>
+            </AnimatedBorderButton>
+          </div>
         </div>
 
-        {/* Executive Summary Card */}
-        <div className="bg-dark-card border border-dark-border/70 rounded-3xl p-6 sm:p-8 mb-10 shadow-2xl relative overflow-hidden">
+        {/* Executive Summary Banner */}
+        <div className="bg-dark-card border border-dark-border/70 rounded-3xl p-6 sm:p-8 mb-12 shadow-2xl relative overflow-hidden">
           <div className="absolute top-0 right-0 w-80 h-80 bg-brand-success/5 rounded-full blur-3xl pointer-events-none" />
-          <h2 className="text-base sm:text-lg font-black text-white uppercase tracking-wider mb-3 flex items-center space-x-2">
-            <FileText className="text-brand-success" size={20} />
-            <span>Executive Privacy Statement</span>
+          <h2 className="text-base sm:text-lg font-black text-white uppercase tracking-wider mb-3 flex items-center space-x-2.5">
+            <FileText className="text-brand-success" size={22} />
+            <span>Executive Privacy Statement &amp; Commitment</span>
           </h2>
-          <p className="text-xs sm:text-sm text-dark-muted leading-relaxed font-medium mb-4">
-            At Wagr.io, we are committed to upholding transparency, security, and user data privacy. Because our prediction exchange operates exclusively on a virtual sandbox currency model (Market Exchange Points / MXP), we maintain a strict minimal data collection footprint. We do not process banking details, payment cards, or sensitive identity verification documents. This Privacy Policy details the precise mechanisms by which your electronic data is collected, stored, processed, and safeguarded when using Wagr.io.
+          <p className="text-xs sm:text-sm text-dark-muted leading-relaxed font-medium mb-5">
+            At Wagr.io, we believe user data privacy is a fundamental digital right. Because our prediction exchange operates exclusively on a virtual sandbox points model (Market Exchange Points / MXP), we maintain a strictly minimal data collection footprint. We do not accept, process, or store credit cards, bank accounts, or sensitive identity verification documents. This Privacy Policy details the exact specifications by which your data is processed, safeguarded, and governed.
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-3 border-t border-dark-border/40 text-[11px] font-bold text-white/90">
-            <div className="flex items-center space-x-2">
-              <CheckCircle2 size={14} className="text-brand-success shrink-0" />
-              <span>Zero Financial Record Processing</span>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t border-dark-border/40 text-[11px] font-bold text-white/90">
+            <div className="flex items-center space-x-2 bg-dark/40 p-3 rounded-xl border border-dark-border/40">
+              <CheckCircle2 size={16} className="text-brand-success shrink-0" />
+              <span>Zero Banking / Payment Card Records</span>
             </div>
-            <div className="flex items-center space-x-2">
-              <CheckCircle2 size={14} className="text-brand-success shrink-0" />
-              <span>End-to-End Cryptographic Hashing</span>
+            <div className="flex items-center space-x-2 bg-dark/40 p-3 rounded-xl border border-dark-border/40">
+              <CheckCircle2 size={16} className="text-brand-success shrink-0" />
+              <span>End-to-End Cryptographic Protection</span>
             </div>
-            <div className="flex items-center space-x-2">
-              <CheckCircle2 size={14} className="text-brand-success shrink-0" />
-              <span>Zero Third-Party Data Sales</span>
+            <div className="flex items-center space-x-2 bg-dark/40 p-3 rounded-xl border border-dark-border/40">
+              <CheckCircle2 size={16} className="text-brand-success shrink-0" />
+              <span>Zero Third-Party Data Monetization</span>
             </div>
           </div>
         </div>
 
-        {/* Exhaustive Policy Sections */}
+        {/* 12 Exhaustive Policy Sections */}
         <div className="space-y-8">
           
           {/* Section 1 */}
-          <section className="bg-dark-card border border-dark-border/70 rounded-2xl p-6 sm:p-8 shadow-xl space-y-4">
+          <section className="bg-dark-card border border-dark-border/70 rounded-3xl p-6 sm:p-8 shadow-xl space-y-4 hover:border-brand-success/30 transition-all">
             <div className="flex items-center space-x-3 border-b border-dark-border/40 pb-4">
               <Database className="text-brand-purple shrink-0" size={22} />
               <h2 className="text-base font-black text-white uppercase tracking-wider">
-                1. Information We Collect &amp; Data Classification
+                1. Information We Collect &amp; Data Classification Architecture
               </h2>
             </div>
-            <p className="text-xs sm:text-sm text-dark-muted leading-relaxed">
-              We collect information strictly necessary to operate the Wagr.io prediction exchange and community features. The categories of personal and technical data processed include:
+            <p className="text-xs sm:text-sm text-dark-muted leading-relaxed font-medium">
+              We collect information strictly necessary to provide the Wagr.io forecasting platform, maintain real-time MXP portfolio tracking, and facilitate community discussion streams:
             </p>
             <div className="space-y-3 pt-2">
-              <div className="bg-dark/50 border border-dark-border/50 rounded-xl p-4 space-y-1">
-                <h4 className="text-xs font-extrabold text-white uppercase tracking-wider">A. Identity &amp; Account Credentials</h4>
+              <div className="bg-dark/50 border border-dark-border/50 rounded-2xl p-5 space-y-1.5">
+                <h4 className="text-xs font-extrabold text-white uppercase tracking-wider">A. Identity &amp; Authentication Credentials</h4>
                 <p className="text-xs text-dark-muted leading-relaxed">
-                  When you register an account, we collect your Full Name, preferred Username, Email Address, and an encrypted hash of your chosen Account Password. Your password is encrypted prior to database storage using Bcrypt cryptographic algorithms and is never stored or transmitted in plaintext format.
+                  Upon registration, we collect your Full Name, preferred Username, Email Address, and an encrypted hash of your Password. Passwords undergo salted Bcrypt cryptographic hashing before database storage and are never stored or transmitted in plaintext.
                 </p>
               </div>
-              <div className="bg-dark/50 border border-dark-border/50 rounded-xl p-4 space-y-1">
-                <h4 className="text-xs font-extrabold text-white uppercase tracking-wider">B. Virtual Portfolio &amp; Trading Histories</h4>
+              <div className="bg-dark/50 border border-dark-border/50 rounded-2xl p-5 space-y-1.5">
+                <h4 className="text-xs font-extrabold text-white uppercase tracking-wider">B. Virtual Portfolio &amp; Trading Telemetry</h4>
                 <p className="text-xs text-dark-muted leading-relaxed">
-                  We log all virtual transactions occurring within the platform, including initial MXP welcome allocations, prediction positions opened or closed (YES / NO choices, invested amounts, entry probabilities), market resolution outcomes, and leaderboard rankings.
+                  We log all virtual sandbox interactions, including initial welcome allocations, open/closed prediction positions (YES/NO choices, invested MXP amounts, entry probabilities), market resolution outcomes, and leaderboard rankings.
                 </p>
               </div>
-              <div className="bg-dark/50 border border-dark-border/50 rounded-xl p-4 space-y-1">
-                <h4 className="text-xs font-extrabold text-white uppercase tracking-wider">C. Community Communications &amp; Forum Posts</h4>
+              <div className="bg-dark/50 border border-dark-border/50 rounded-2xl p-5 space-y-1.5">
+                <h4 className="text-xs font-extrabold text-white uppercase tracking-wider">C. Community Posts &amp; Forum Commentary</h4>
                 <p className="text-xs text-dark-muted leading-relaxed">
-                  Any content you voluntarily submit in community discussion streams, including commentary, replies, user mentions (@username), post likes, and market linkages, is indexed and stored in our primary database to provide community interactions.
+                  Any content you voluntarily publish in community streams — including comments, replies, user mentions (@username), post likes, and market linkages — is indexed in our database to display community interactions.
                 </p>
               </div>
-              <div className="bg-dark/50 border border-dark-border/50 rounded-xl p-4 space-y-1">
-                <h4 className="text-xs font-extrabold text-white uppercase tracking-wider">D. Technical Device Logs &amp; Metadata</h4>
+              <div className="bg-dark/50 border border-dark-border/50 rounded-2xl p-5 space-y-1.5">
+                <h4 className="text-xs font-extrabold text-white uppercase tracking-wider">D. Technical Logs &amp; Security Telemetry</h4>
                 <p className="text-xs text-dark-muted leading-relaxed">
-                  For security auditing and fraud prevention, our web servers automatically log device IP addresses, browser user-agent strings, HTTP request timestamps, and session token identifiers.
+                  For security auditing, rate-limiting, and fraud prevention, our web servers log IP addresses, browser user-agent strings, HTTP request timestamps, and JSON Web Token (JWT) session IDs.
                 </p>
               </div>
             </div>
           </section>
 
           {/* Section 2 */}
-          <section className="bg-dark-card border border-dark-border/70 rounded-2xl p-6 sm:p-8 shadow-xl space-y-4">
+          <section className="bg-dark-card border border-dark-border/70 rounded-3xl p-6 sm:p-8 shadow-xl space-y-4 hover:border-brand-blue/30 transition-all">
             <div className="flex items-center space-x-3 border-b border-dark-border/40 pb-4">
               <Server className="text-brand-blue shrink-0" size={22} />
               <h2 className="text-base font-black text-white uppercase tracking-wider">
-                2. Purpose &amp; Legal Basis for Processing
+                2. Purpose &amp; Lawful Basis for Data Processing
               </h2>
             </div>
-            <p className="text-xs sm:text-sm text-dark-muted leading-relaxed">
-              Wagr.io processes your information under legitimate interest and contractual performance grounds to deliver our virtual forecasting platform. Specifically, data is used to:
+            <p className="text-xs sm:text-sm text-dark-muted leading-relaxed font-medium">
+              Wagr.io processes data under Legitimate Interest and Contractual Performance grounds (GDPR Article 6) to deliver our simulated forecasting ecosystem:
             </p>
-            <ul className="list-disc pl-5 text-xs text-dark-muted space-y-2 leading-relaxed font-medium">
-              <li>Authenticate your identity upon sign-in and maintain secure active sessions via JSON Web Tokens (JWT).</li>
-              <li>Maintain real-time synchronization of your MXP virtual balance, portfolio valuation, and position P&amp;L stats.</li>
-              <li>Calculate global leaderboard rankings, win rates, and prediction accuracy percentages dynamically based on settled event resolutions.</li>
-              <li>Power the internal search engine allowing users to locate prediction topics, news briefs, and community profiles.</li>
-              <li>Detect and prevent multi-account farming, spam posting, or automated platform exploitation attempts.</li>
-              <li>Send critical system notifications regarding MXP request approvals, position settlements, or account security updates.</li>
+            <ul className="list-disc pl-5 text-xs text-dark-muted space-y-2.5 leading-relaxed font-medium">
+              <li>Authenticate sign-in requests and maintain active user sessions via secure JSON Web Tokens (JWT).</li>
+              <li>Maintain real-time synchronization of your MXP virtual balance, active position P&amp;L stats, and trade history logs.</li>
+              <li>Compute global leaderboard rankings, win rates, and prediction accuracy percentages based on settled resolutions.</li>
+              <li>Power the internal search engine allowing users to locate prediction topics, news briefings, and community profiles.</li>
+              <li>Detect and prevent multi-account farming, spam posting, bot automation, or platform exploitation.</li>
+              <li>Deliver essential system updates regarding wallet requests, position settlements, or security notifications.</li>
             </ul>
           </section>
 
           {/* Section 3 */}
-          <section className="bg-dark-card border border-dark-border/70 rounded-2xl p-6 sm:p-8 shadow-xl space-y-4">
+          <section className="bg-dark-card border border-dark-border/70 rounded-3xl p-6 sm:p-8 shadow-xl space-y-4 hover:border-brand-success/30 transition-all">
             <div className="flex items-center space-x-3 border-b border-dark-border/40 pb-4">
               <KeyRound className="text-brand-success shrink-0" size={22} />
               <h2 className="text-base font-black text-white uppercase tracking-wider">
-                3. Non-Financial Economy &amp; Zero Payment Processing
+                3. Non-Financial Economy &amp; Zero Payment Processing Guarantee
               </h2>
             </div>
-            <p className="text-xs sm:text-sm text-dark-muted leading-relaxed">
-              Wagr.io is strictly a simulated educational forecasting exchange. Under no circumstances do we collect, process, request, or store:
+            <p className="text-xs sm:text-sm text-dark-muted leading-relaxed font-medium">
+              Wagr.io is strictly a simulated educational prediction exchange. Under no circumstances do we collect, process, or store:
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-semibold text-white/90">
-              <div className="bg-dark/40 border border-dark-border/40 rounded-xl p-3 flex items-center space-x-2">
-                <span className="text-brand-danger">✕</span>
+              <div className="bg-dark/50 border border-dark-border/50 rounded-xl p-3.5 flex items-center space-x-2.5">
+                <span className="text-brand-danger font-bold text-sm">✕</span>
                 <span>Credit or Debit Card Numbers</span>
               </div>
-              <div className="bg-dark/40 border border-dark-border/40 rounded-xl p-3 flex items-center space-x-2">
-                <span className="text-brand-danger">✕</span>
-                <span>Bank Account Details / Wire Transfers</span>
+              <div className="bg-dark/50 border border-dark-border/50 rounded-xl p-3.5 flex items-center space-x-2.5">
+                <span className="text-brand-danger font-bold text-sm">✕</span>
+                <span>Bank Account Details / Wire Routing Numbers</span>
               </div>
-              <div className="bg-dark/40 border border-dark-border/40 rounded-xl p-3 flex items-center space-x-2">
-                <span className="text-brand-danger">✕</span>
-                <span>Cryptocurrency Wallet Private Keys</span>
+              <div className="bg-dark/50 border border-dark-border/50 rounded-xl p-3.5 flex items-center space-x-2.5">
+                <span className="text-brand-danger font-bold text-sm">✕</span>
+                <span>Cryptocurrency Private Keys or Wallet Seeds</span>
               </div>
-              <div className="bg-dark/40 border border-dark-border/40 rounded-xl p-3 flex items-center space-x-2">
-                <span className="text-brand-danger">✕</span>
-                <span>Government Tax Identifiers / SSN</span>
+              <div className="bg-dark/50 border border-dark-border/50 rounded-xl p-3.5 flex items-center space-x-2.5">
+                <span className="text-brand-danger font-bold text-sm">✕</span>
+                <span>Social Security Numbers / Tax Identifiers</span>
               </div>
             </div>
-            <p className="text-xs text-dark-muted leading-relaxed pt-2">
-              All references to points, trading, balances, returns, or wagers refer exclusively to Market Exchange Points (MXP). MXP holds zero real-world cash value, cannot be redeemed for fiat currency or physical goods, and cannot be transferred outside your personal account.
+            <p className="text-xs text-dark-muted leading-relaxed pt-2 font-medium">
+              All references to points, trading, balances, returns, or wagers refer exclusively to Market Exchange Points (MXP). MXP holds zero real-world cash value, cannot be redeemed for fiat currency or physical assets, and cannot be transferred outside your account.
             </p>
           </section>
 
           {/* Section 4 */}
-          <section className="bg-dark-card border border-dark-border/70 rounded-2xl p-6 sm:p-8 shadow-xl space-y-4">
+          <section className="bg-dark-card border border-dark-border/70 rounded-3xl p-6 sm:p-8 shadow-xl space-y-4 hover:border-brand-purple/30 transition-all">
             <div className="flex items-center space-x-3 border-b border-dark-border/40 pb-4">
-              <Eye className="text-amber-400 shrink-0" size={22} />
+              <Shield className="text-brand-purple shrink-0" size={22} />
               <h2 className="text-base font-black text-white uppercase tracking-wider">
-                4. Cookies &amp; Local Storage Technology
+                4. Cryptographic Security Standards &amp; Infrastructure Safeguards
               </h2>
             </div>
-            <p className="text-xs sm:text-sm text-dark-muted leading-relaxed">
-              We utilize HTML5 Local Storage and minimal session cookie mechanisms to provide essential functionality:
+            <p className="text-xs sm:text-sm text-dark-muted leading-relaxed font-medium">
+              We employ military-grade technical, administrative, and physical security measures to safeguard user data:
             </p>
-            <ul className="list-disc pl-5 text-xs text-dark-muted space-y-2 leading-relaxed">
-              <li>
-                <strong className="text-white">Authentication State:</strong> We store an encrypted JWT auth token in browser local storage (`auth_token`) to allow seamless navigation without prompting re-authentication on every page refresh.
-              </li>
-              <li>
-                <strong className="text-white">Zero Advertising Trackers:</strong> We do NOT employ ad-tracking pixels, third-party remarketing tags (e.g., Google Ads, Meta Pixel), or behavioral fingerprinting scripts.
-              </li>
-              <li>
-                <strong className="text-white">Session Control:</strong> You can clear local storage data at any time via your browser settings, which will instantly terminate your active Wagr.io session.
-              </li>
-            </ul>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-medium">
+              <div className="bg-dark/50 border border-dark-border/50 p-4 rounded-2xl space-y-1">
+                <h4 className="font-extrabold text-white uppercase tracking-wider">256-Bit TLS/SSL Encryption</h4>
+                <p className="text-dark-muted text-[11px] leading-relaxed">
+                  All data in transit between client browsers and server endpoints is protected using modern TLS 1.3 encryption.
+                </p>
+              </div>
+
+              <div className="bg-dark/50 border border-dark-border/50 p-4 rounded-2xl space-y-1">
+                <h4 className="font-extrabold text-white uppercase tracking-wider">Salted Bcrypt Password Hashing</h4>
+                <p className="text-dark-muted text-[11px] leading-relaxed">
+                  Passwords undergo 10-round salted Bcrypt hashing prior to storage in database collections.
+                </p>
+              </div>
+
+              <div className="bg-dark/50 border border-dark-border/50 p-4 rounded-2xl space-y-1">
+                <h4 className="font-extrabold text-white uppercase tracking-wider">Stateless JWT Authorization</h4>
+                <p className="text-dark-muted text-[11px] leading-relaxed">
+                  User requests are authorized via cryptographically signed JWT tokens with 7-day expiration limits.
+                </p>
+              </div>
+
+              <div className="bg-dark/50 border border-dark-border/50 p-4 rounded-2xl space-y-1">
+                <h4 className="font-extrabold text-white uppercase tracking-wider">MongoDB Atlas Security</h4>
+                <p className="text-dark-muted text-[11px] leading-relaxed">
+                  Production data is stored in isolated MongoDB Atlas clusters with automated encrypted backups and IP whitelisting.
+                </p>
+              </div>
+            </div>
           </section>
 
           {/* Section 5 */}
-          <section className="bg-dark-card border border-dark-border/70 rounded-2xl p-6 sm:p-8 shadow-xl space-y-4">
+          <section className="bg-dark-card border border-dark-border/70 rounded-3xl p-6 sm:p-8 shadow-xl space-y-4 hover:border-brand-blue/30 transition-all">
             <div className="flex items-center space-x-3 border-b border-dark-border/40 pb-4">
-              <Globe className="text-brand-purple shrink-0" size={22} />
+              <Globe className="text-brand-blue shrink-0" size={22} />
               <h2 className="text-base font-black text-white uppercase tracking-wider">
-                5. Third-Party Integrations &amp; Artificial Intelligence Processing
+                5. Artificial Intelligence Processing &amp; Zero PII Transfer Policy
               </h2>
             </div>
-            <p className="text-xs sm:text-sm text-dark-muted leading-relaxed">
-              Wagr.io leverages AI language models (such as Groq LLM completions) to automate news indexing, formulate event titles, and generate daily market briefings.
+            <p className="text-xs sm:text-sm text-dark-muted leading-relaxed font-medium">
+              Wagr.io leverages AI language models (Groq LLM completions) to automate news indexing, formulate event titles, and generate daily briefings.
             </p>
-            <div className="bg-dark/50 border border-dark-border/50 rounded-xl p-4 space-y-2">
-              <h4 className="text-xs font-bold text-white uppercase tracking-wider">AI &amp; AMM Algorithmic Processing</h4>
+            <div className="bg-dark/50 border border-dark-border/50 rounded-2xl p-5 space-y-2">
+              <h4 className="text-xs font-extrabold text-white uppercase tracking-wider">AI API Boundary Isolation:</h4>
               <p className="text-xs text-dark-muted leading-relaxed">
-                When communicating with external AI inference APIs, only public event titles, generic category names, and news headline strings are transmitted. <strong className="text-white">Zero personal user identifiers, email addresses, IP logs, or account metadata are ever shared with AI API providers.</strong> Furthermore, Wagr.io utilizes Automated Market Maker (AMM) algorithmic adjustments to simulate dynamic payout returns and maintain balanced prediction liquidity strictly for gamified entertainment.
+                When communicating with external LLM inference microservices, only public news headlines, generic category names, and market titles are transmitted. <strong className="text-white">Zero personal user identifiers, email addresses, IP logs, or portfolio metadata are ever shared with third-party AI API providers.</strong>
               </p>
             </div>
           </section>
 
           {/* Section 6 */}
-          <section className="bg-dark-card border border-dark-border/70 rounded-2xl p-6 sm:p-8 shadow-xl space-y-4">
+          <section className="bg-dark-card border border-dark-border/70 rounded-3xl p-6 sm:p-8 shadow-xl space-y-4 hover:border-brand-purple/30 transition-all">
             <div className="flex items-center space-x-3 border-b border-dark-border/40 pb-4">
-              <Shield className="text-brand-blue shrink-0" size={22} />
+              <Layers className="text-brand-purple shrink-0" size={22} />
               <h2 className="text-base font-black text-white uppercase tracking-wider">
-                6. Data Security &amp; Cryptographic Standards
+                6. Automated Market Maker (AMM) Data Isolation
               </h2>
             </div>
-            <p className="text-xs sm:text-sm text-dark-muted leading-relaxed">
-              We employ robust administrative, technical, and physical safeguards designed to protect your electronic information against unauthorized access, loss, or alteration:
+            <p className="text-xs sm:text-sm text-dark-muted leading-relaxed font-medium">
+              Our Automated Market Maker algorithm adjusts YES/NO odds based on liquidity pool balances ($C = 1000$ MXP). The AMM operates statelessly on aggregated pool totals and carries zero access to individual user profile information, IP logs, or personal account settings.
             </p>
-            <ul className="list-disc pl-5 text-xs text-dark-muted space-y-2 leading-relaxed">
-              <li><strong className="text-white">TLS/SSL Encryption:</strong> All data in transit between your browser and Wagr.io servers is protected using 256-bit TLS transport encryption.</li>
-              <li><strong className="text-white">Bcrypt Password Hashing:</strong> Passwords undergo salted Bcrypt hashing prior to storage in database collections.</li>
-              <li><strong className="text-white">Access Control Protocols:</strong> Administrative database access is protected by multi-factor controls and strictly restricted to authorized engineering personnel.</li>
-              <li><strong className="text-white">Automated Backups:</strong> Database states are backed up regularly to encrypted storage repositories with automated failure recovery.</li>
-            </ul>
           </section>
 
           {/* Section 7 */}
-          <section className="bg-dark-card border border-dark-border/70 rounded-2xl p-6 sm:p-8 shadow-xl space-y-4">
+          <section className="bg-dark-card border border-dark-border/70 rounded-3xl p-6 sm:p-8 shadow-xl space-y-4 hover:border-amber-400/30 transition-all">
             <div className="flex items-center space-x-3 border-b border-dark-border/40 pb-4">
-              <UserCheck className="text-brand-success shrink-0" size={22} />
+              <Eye className="text-amber-400 shrink-0" size={22} />
               <h2 className="text-base font-black text-white uppercase tracking-wider">
-                7. User Rights, Data Erasure &amp; Export
+                7. Cookies, Local Storage Telemetry &amp; Zero Ad-Tracker Guarantee
               </h2>
             </div>
-            <p className="text-xs sm:text-sm text-dark-muted leading-relaxed">
-              Regardless of your geographic location, Wagr.io grants users full governance over their electronic data:
+            <p className="text-xs sm:text-sm text-dark-muted leading-relaxed font-medium">
+              We utilize HTML5 Local Storage and minimal session cookies exclusively to provide core functionality:
             </p>
-            <div className="space-y-2 text-xs text-dark-muted">
-              <p><strong className="text-white">Right to Access:</strong> You can view your full account profile, trade history, MXP requests, and community contributions directly within your user dashboard.</p>
-              <p><strong className="text-white">Right to Correction:</strong> You can update your profile information at any time via account profile settings.</p>
-              <p><strong className="text-white">Right to Erasure (Account Deletion):</strong> You may request complete account deletion by contacting support. Upon verification, your account record, active positions, comments, and profile data will be permanently scrubbed from production databases within 14 business days.</p>
-            </div>
+            <ul className="list-disc pl-5 text-xs text-dark-muted space-y-2 leading-relaxed font-medium">
+              <li><strong className="text-white">Session Authentication:</strong> We store an encrypted JWT auth token (`auth_token`) in browser local storage to maintain your session across page refreshes.</li>
+              <li><strong className="text-white">Zero Advertising Trackers:</strong> We do NOT use advertising cookies, Google Remarketing pixels, Meta Pixels, or behavioral fingerprinting scripts.</li>
+              <li><strong className="text-white">User Storage Control:</strong> You can clear browser local storage at any time, which immediately logs out your active session.</li>
+            </ul>
           </section>
 
           {/* Section 8 */}
-          <section className="bg-dark-card border border-dark-border/70 rounded-2xl p-6 sm:p-8 shadow-xl space-y-4">
+          <section className="bg-dark-card border border-dark-border/70 rounded-3xl p-6 sm:p-8 shadow-xl space-y-4 hover:border-brand-success/30 transition-all">
             <div className="flex items-center space-x-3 border-b border-dark-border/40 pb-4">
-              <AlertTriangle className="text-orange-500 shrink-0" size={22} />
+              <RefreshCw className="text-brand-success shrink-0" size={22} />
               <h2 className="text-base font-black text-white uppercase tracking-wider">
-                8. Protection of Minors &amp; Policy Revisions
+                8. Data Retention Schedule &amp; Archival Schedules
               </h2>
             </div>
-            <p className="text-xs sm:text-sm text-dark-muted leading-relaxed">
-              Wagr.io is intended for general audiences. We do not knowingly collect personal data from children under the age of 13. If we discover an account registered by an individual under 13 without verified parental consent, we will purge the associated data immediately.
+            <p className="text-xs sm:text-sm text-dark-muted leading-relaxed font-medium">
+              Account credentials, trade records, and forum contributions are retained as long as your account remains active. Server access logs are automatically rotated and purged after 90 days.
             </p>
-            <p className="text-xs text-dark-muted leading-relaxed pt-2">
-              We reserve the right to amend this Privacy Policy as our platform evolves. Any material changes will be reflected on this page with an updated "Last Modified" timestamp. Continued use of Wagr.io following revisions constitutes acceptance of the updated terms.
+          </section>
+
+          {/* Section 9 */}
+          <section className="bg-dark-card border border-dark-border/70 rounded-3xl p-6 sm:p-8 shadow-xl space-y-4 hover:border-brand-purple/30 transition-all">
+            <div className="flex items-center space-x-3 border-b border-dark-border/40 pb-4">
+              <UserCheck className="text-brand-purple shrink-0" size={22} />
+              <h2 className="text-base font-black text-white uppercase tracking-wider">
+                9. User Data Rights &amp; Permanent Account Erasure (Right to be Forgotten)
+              </h2>
+            </div>
+            <p className="text-xs sm:text-sm text-dark-muted leading-relaxed font-medium">
+              Regardless of geographic residence, all Wagr users hold comprehensive rights over their data under GDPR and CCPA guidelines:
+            </p>
+            <div className="space-y-3 text-xs text-dark-muted">
+              <p><strong className="text-white">Right to Access:</strong> Inspect your profile, trade history, MXP requests, and post logs via your dashboard.</p>
+              <p><strong className="text-white">Right to Rectification:</strong> Edit profile information anytime via account settings.</p>
+              <p><strong className="text-white">Right to Erasure:</strong> Request complete account deletion by contacting support. Upon verification, your profile, positions, comments, and transaction logs will be permanently scrubbed from production databases within 14 business days.</p>
+            </div>
+          </section>
+
+          {/* Section 10 */}
+          <section className="bg-dark-card border border-dark-border/70 rounded-3xl p-6 sm:p-8 shadow-xl space-y-4 hover:border-brand-blue/30 transition-all">
+            <div className="flex items-center space-x-3 border-b border-dark-border/40 pb-4">
+              <Globe className="text-brand-blue shrink-0" size={22} />
+              <h2 className="text-base font-black text-white uppercase tracking-wider">
+                10. International Transfers &amp; Global Infrastructure
+              </h2>
+            </div>
+            <p className="text-xs sm:text-sm text-dark-muted leading-relaxed font-medium">
+              Wagr.io operates on secure global cloud infrastructure. Data is processed using industry-standard Data Processing Addendums (DPAs) and Standard Contractual Clauses (SCCs) to ensure cross-border compliance.
+            </p>
+          </section>
+
+          {/* Section 11 */}
+          <section className="bg-dark-card border border-dark-border/70 rounded-3xl p-6 sm:p-8 shadow-xl space-y-4 hover:border-brand-danger/30 transition-all">
+            <div className="flex items-center space-x-3 border-b border-dark-border/40 pb-4">
+              <AlertTriangle className="text-brand-danger shrink-0" size={22} />
+              <h2 className="text-base font-black text-white uppercase tracking-wider">
+                11. Protection of Minors &amp; Children's Online Privacy (COPPA)
+              </h2>
+            </div>
+            <p className="text-xs sm:text-sm text-dark-muted leading-relaxed font-medium">
+              Wagr.io is intended for general audiences aged 18 and older (or legal majority). We do not knowingly collect personal data from children under 13. Accounts discovered to belong to minors under 13 will be purged immediately.
+            </p>
+          </section>
+
+          {/* Section 12 */}
+          <section className="bg-dark-card border border-dark-border/70 rounded-3xl p-6 sm:p-8 shadow-xl space-y-4 hover:border-brand-success/30 transition-all">
+            <div className="flex items-center space-x-3 border-b border-dark-border/40 pb-4">
+              <Mail className="text-brand-success shrink-0" size={22} />
+              <h2 className="text-base font-black text-white uppercase tracking-wider">
+                12. Data Protection Officer (DPO) Contact &amp; Escalation
+              </h2>
+            </div>
+            <p className="text-xs sm:text-sm text-dark-muted leading-relaxed font-medium">
+              For privacy inquiries, data export requests, or erasure submissions, please contact our dedicated Data Protection Officer via <span className="text-white font-bold">privacy@wagr.io</span> or submit a ticket via our Contact Support portal.
             </p>
           </section>
 
