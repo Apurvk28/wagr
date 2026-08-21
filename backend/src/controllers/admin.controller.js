@@ -83,14 +83,28 @@ export const getAllUsers = async (req, res, next) => {
         }
       : {};
 
-    const users = await User.find(query)
-      .select('-password -verificationToken -resetPasswordToken -resetPasswordExpire')
-      .sort({ createdAt: -1 })
-      .limit(100);
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 20));
+    const skip = (page - 1) * limit;
+
+    const [users, totalCount] = await Promise.all([
+      User.find(query)
+        .select('-password -verificationToken -resetPasswordToken -resetPasswordExpire')
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit),
+      User.countDocuments(query),
+    ]);
 
     res.status(200).json({
       success: true,
       data: users,
+      pagination: {
+        page,
+        limit,
+        totalCount,
+        totalPages: Math.ceil(totalCount / limit),
+      },
     });
   } catch (error) {
     next(error);
@@ -175,14 +189,28 @@ export const deletePost = async (req, res, next) => {
  */
 export const getAllPosts = async (req, res, next) => {
   try {
-    const posts = await Post.find()
-      .populate('userId', 'fullName username')
-      .sort({ createdAt: -1 })
-      .limit(100);
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 20));
+    const skip = (page - 1) * limit;
+
+    const [posts, totalCount] = await Promise.all([
+      Post.find()
+        .populate('userId', 'fullName username')
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit),
+      Post.countDocuments(),
+    ]);
 
     res.status(200).json({
       success: true,
       data: posts,
+      pagination: {
+        page,
+        limit,
+        totalCount,
+        totalPages: Math.ceil(totalCount / limit),
+      },
     });
   } catch (error) {
     next(error);

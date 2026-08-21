@@ -108,6 +108,12 @@ marketSchema.pre('save', function (next) {
       timestamp: new Date(),
     });
   }
+
+  const MAX_HISTORY_POINTS = 200;
+  if (this.probabilityHistory.length > MAX_HISTORY_POINTS) {
+    this.probabilityHistory = this.probabilityHistory.slice(-MAX_HISTORY_POINTS);
+  }
+
   next();
 });
 

@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { useAuth } from '../context/AuthContext';
-import { io } from 'socket.io-client';
+import { useSocket } from '../context/SocketContext';
 import {
   getMarketById,
   openTrade,
@@ -39,6 +39,7 @@ import api from '../services/api';
 const MarketDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { isAuthenticated, user, updateProfile } = useAuth(); // Profile can reload user balance
+  const socket = useSocket();
 
   const [market, setMarket] = useState<Market | null>(null);
   const [userPositions, setUserPositions] = useState<any[]>([]);
@@ -98,18 +99,17 @@ const MarketDetails: React.FC = () => {
     fetchMarketData();
   }, [id, isAuthenticated]);
 
-  // 2. WebSockets Integration (Socket.IO client connection)
+  // 2. WebSockets Integration (Reusing shared SocketContext instance)
   useEffect(() => {
-    if (!id) return;
-    const socket = io('http://localhost:5050');
+    if (!id || !socket) return;
 
-    socket.on('market_update', (data) => {
+    const handleMarketUpdate = (data: any) => {
       if (data.marketId === id) {
         setMarket((prev) => (prev ? { ...prev, ...data } : null));
       }
-    });
+    };
 
-    socket.on('market_resolved', (data) => {
+    const handleMarketResolved = (data: any) => {
       if (data.marketId === id) {
         setMarket((prev) =>
           prev
@@ -122,26 +122,31 @@ const MarketDetails: React.FC = () => {
               }
             : null
         );
-        // Refresh positions state
         if (isAuthenticated) {
           getUserPositionInMarket(id).then(setUserPositions);
         }
       }
-    });
+    };
 
-    socket.on('market_cancelled', (data) => {
+    const handleMarketCancelled = (data: any) => {
       if (data.marketId === id) {
         setMarket((prev) => (prev ? { ...prev, status: 'Cancelled' } : null));
         if (isAuthenticated) {
           getUserPositionInMarket(id).then(setUserPositions);
         }
       }
-    });
+    };
+
+    socket.on('market_update', handleMarketUpdate);
+    socket.on('market_resolved', handleMarketResolved);
+    socket.on('market_cancelled', handleMarketCancelled);
 
     return () => {
-      socket.disconnect();
+      socket.off('market_update', handleMarketUpdate);
+      socket.off('market_resolved', handleMarketResolved);
+      socket.off('market_cancelled', handleMarketCancelled);
     };
-  }, [id, isAuthenticated]);
+  }, [id, isAuthenticated, socket]);
 
   // 3. Trade Submission
   const handleOpenTrade = async (e: React.FormEvent) => {

@@ -12,7 +12,7 @@ import {
   requestMxp,
   getUserMxpRequests,
 } from '../controllers/user.controller.js';
-import { protect, optional } from '../middleware/auth.middleware.js';
+import { protect, optional, authorize } from '../middleware/auth.middleware.js';
 
 const router = express.Router();
 
@@ -20,7 +20,7 @@ router.route('/profile')
   .get(protect, getProfile)
   .put(protect, updateProfile);
 
-router.post('/admin/balance', protect, adjustAdminBalance);
+router.post('/admin/balance', protect, authorize('Admin'), adjustAdminBalance);
 router.post('/categories/follow', protect, toggleFollowCategory);
 
 router.get('/portfolio', protect, getPortfolio);

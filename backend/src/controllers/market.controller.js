@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import Market from '../models/market.model.js';
 import Position from '../models/position.model.js';
 import User from '../models/user.model.js';
@@ -43,9 +44,18 @@ export const getMarkets = async (req, res, next) => {
       query.status = { $ne: 'Draft' };
     }
 
-    // Fetch markets sorted by status (Live first), then resolution date
-    const markets = await Market.find(query)
-      .sort({ status: 1, resolutionDate: 1, createdAt: -1 });
+    // Fetch markets sorted by status (Live first), then resolution date with pagination
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 20));
+    const skip = (page - 1) * limit;
+
+    const [markets, totalCount] = await Promise.all([
+      Market.find(query)
+        .sort({ status: 1, resolutionDate: 1, createdAt: -1 })
+        .skip(skip)
+        .limit(limit),
+      Market.countDocuments(query),
+    ]);
 
     res.status(200).json({
       success: true,
@@ -55,6 +65,12 @@ export const getMarkets = async (req, res, next) => {
         obj.participants = m.participants.length;
         return obj;
       }),
+      pagination: {
+        page,
+        limit,
+        totalCount,
+        totalPages: Math.ceil(totalCount / limit),
+      },
     });
   } catch (error) {
     next(error);
@@ -204,65 +220,78 @@ export const openTrade = async (req, res, next) => {
     // 5. Determine current market probability for this outcome
     const currentProb = outcome === 'YES' ? market.yesProbability : market.noProbability;
 
-    // 6. Deduct MXP from user balance
-    user.mxpBalance -= tradeAmount;
-    await user.save();
+    // Note: MongoDB transactions require a replica-set-backed deployment (e.g., MongoDB Atlas).
+    const session = await mongoose.startSession();
+    session.startTransaction();
 
-    // 7. Create new position entry for this trade
-    const position = await Position.create({
-      userId: user._id,
-      marketId: market._id,
-      outcome,
-      investedAmount: tradeAmount,
-      entryProbability: currentProb,
-    });
+    try {
+      // 6. Deduct MXP from user balance
+      user.mxpBalance -= tradeAmount;
+      await user.save({ session });
 
-    // Register user as participant if not already present in market
-    if (!market.participants.includes(user._id)) {
-      market.participants.push(user._id);
-      market.participantsCount = market.participants.length;
-    }
-
-    // 8. Update Market pools and volume
-    if (outcome === 'YES') {
-      market.totalYesPool += tradeAmount;
-    } else {
-      market.totalNoPool += tradeAmount;
-    }
-    market.volume += tradeAmount;
-
-    // Recalculating yesProbability & noProbability (handled in pre-save hook)
-    // Save market (pushes new record to history and updates status)
-    market.probabilityHistory.push({
-      yesProbability: Math.round(((market.totalYesPool + 1000) / (market.totalYesPool + market.totalNoPool + 2000)) * 100),
-      timestamp: new Date(),
-    });
-    await market.save();
-
-    // 9. Emit real-time updates via Socket.IO
-    const io = req.app.get('io');
-    if (io) {
-      io.emit('market_update', {
+      // 7. Create new position entry for this trade
+      const position = await Position.create([{
+        userId: user._id,
         marketId: market._id,
-        yesProbability: market.yesProbability,
-        noProbability: market.noProbability,
-        volume: market.volume,
-        participantsCount: market.participantsCount,
-        probabilityHistory: market.probabilityHistory,
+        outcome,
+        investedAmount: tradeAmount,
+        entryProbability: currentProb,
+      }], { session });
+
+      // Register user as participant if not already present in market
+      if (!market.participants.includes(user._id)) {
+        market.participants.push(user._id);
+        market.participantsCount = market.participants.length;
+      }
+
+      // 8. Update Market pools and volume
+      if (outcome === 'YES') {
+        market.totalYesPool += tradeAmount;
+      } else {
+        market.totalNoPool += tradeAmount;
+      }
+      market.volume += tradeAmount;
+
+      // Recalculating yesProbability & noProbability (handled in pre-save hook)
+      // Save market (pushes new record to history and updates status)
+      market.probabilityHistory.push({
+        yesProbability: Math.round(((market.totalYesPool + 1000) / (market.totalYesPool + market.totalNoPool + 2000)) * 100),
+        timestamp: new Date(),
       });
+      await market.save({ session });
+
+      await session.commitTransaction();
+      session.endSession();
+
+      // 9. Emit real-time updates via Socket.IO
+      const io = req.app.get('io');
+      if (io) {
+        io.emit('market_update', {
+          marketId: market._id,
+          yesProbability: market.yesProbability,
+          noProbability: market.noProbability,
+          volume: market.volume,
+          participantsCount: market.participantsCount,
+          probabilityHistory: market.probabilityHistory,
+        });
+      }
+
+      // Recalculate stats and check achievements asynchronously
+      updateUserStatsAndCheckAchievements(user._id, 'TRADE_OPEN').catch(console.error);
+
+      res.status(200).json({
+        success: true,
+        message: 'Trade executed successfully.',
+        data: {
+          position: position[0],
+          userBalance: user.mxpBalance,
+        },
+      });
+    } catch (error) {
+      await session.abortTransaction();
+      session.endSession();
+      throw error;
     }
-
-    // Recalculate stats and check achievements asynchronously
-    updateUserStatsAndCheckAchievements(user._id, 'TRADE_OPEN').catch(console.error);
-
-    res.status(200).json({
-      success: true,
-      message: 'Trade executed successfully.',
-      data: {
-        position,
-        userBalance: user.mxpBalance,
-      },
-    });
   } catch (error) {
     next(error);
   }
@@ -314,60 +343,74 @@ export const closeTrade = async (req, res, next) => {
 
     // 3. Calculate dynamic exit value
     const currentProb = position.outcome === 'YES' ? market.yesProbability : market.noProbability;
-    const exitVal = Math.round(position.investedAmount * (currentProb / position.entryProbability));
+    const safeEntryProbability = position.entryProbability > 0 ? position.entryProbability : 1;
+    const exitVal = Math.round(position.investedAmount * (currentProb / safeEntryProbability));
 
-    // 4. Return MXP exit value to user balance
-    user.mxpBalance += exitVal;
-    await user.save();
+    // Note: MongoDB transactions require a replica-set-backed deployment (e.g., MongoDB Atlas).
+    const session = await mongoose.startSession();
+    session.startTransaction();
 
-    // 5. Finalize Position document
-    position.status = 'Closed';
-    position.exitValue = exitVal;
-    position.profitLoss = exitVal - position.investedAmount;
-    position.closedAt = new Date();
-    await position.save();
+    try {
+      // 4. Return MXP exit value to user balance
+      user.mxpBalance += exitVal;
+      await user.save({ session });
 
-    // 6. Deduct initial investment amount from pools (keeps pool dynamics accurate)
-    if (position.outcome === 'YES') {
-      market.totalYesPool = Math.max(0, market.totalYesPool - position.investedAmount);
-    } else {
-      market.totalNoPool = Math.max(0, market.totalNoPool - position.investedAmount);
-    }
-    
-    // Add exit value to volume
-    market.volume += exitVal;
+      // 5. Finalize Position document
+      position.status = 'Closed';
+      position.exitValue = exitVal;
+      position.profitLoss = exitVal - position.investedAmount;
+      position.closedAt = new Date();
+      await position.save({ session });
 
-    // Recalculating probabilities and saving
-    market.probabilityHistory.push({
-      yesProbability: Math.round(((market.totalYesPool + 1000) / (market.totalYesPool + market.totalNoPool + 2000)) * 100),
-      timestamp: new Date(),
-    });
-    await market.save();
+      // 6. Deduct initial investment amount from pools (keeps pool dynamics accurate)
+      if (position.outcome === 'YES') {
+        market.totalYesPool = Math.max(0, market.totalYesPool - position.investedAmount);
+      } else {
+        market.totalNoPool = Math.max(0, market.totalNoPool - position.investedAmount);
+      }
+      
+      // Add exit value to volume
+      market.volume += exitVal;
 
-    // 7. Emit Socket.IO updates
-    const io = req.app.get('io');
-    if (io) {
-      io.emit('market_update', {
-        marketId: market._id,
-        yesProbability: market.yesProbability,
-        noProbability: market.noProbability,
-        volume: market.volume,
-        participantsCount: market.participantsCount,
-        probabilityHistory: market.probabilityHistory,
+      // Recalculating probabilities and saving
+      market.probabilityHistory.push({
+        yesProbability: Math.round(((market.totalYesPool + 1000) / (market.totalYesPool + market.totalNoPool + 2000)) * 100),
+        timestamp: new Date(),
       });
+      await market.save({ session });
+
+      await session.commitTransaction();
+      session.endSession();
+
+      // 7. Emit Socket.IO updates
+      const io = req.app.get('io');
+      if (io) {
+        io.emit('market_update', {
+          marketId: market._id,
+          yesProbability: market.yesProbability,
+          noProbability: market.noProbability,
+          volume: market.volume,
+          participantsCount: market.participantsCount,
+          probabilityHistory: market.probabilityHistory,
+        });
+      }
+
+      // Recalculate stats and check achievements asynchronously
+      updateUserStatsAndCheckAchievements(user._id, 'PORTFOLIO_UPDATE').catch(console.error);
+
+      res.status(200).json({
+        success: true,
+        message: 'Position closed successfully.',
+        data: {
+          position,
+          userBalance: user.mxpBalance,
+        },
+      });
+    } catch (error) {
+      await session.abortTransaction();
+      session.endSession();
+      throw error;
     }
-
-    // Recalculate stats and check achievements asynchronously
-    updateUserStatsAndCheckAchievements(user._id, 'PORTFOLIO_UPDATE').catch(console.error);
-
-    res.status(200).json({
-      success: true,
-      message: 'Position closed successfully.',
-      data: {
-        position,
-        userBalance: user.mxpBalance,
-      },
-    });
   } catch (error) {
     next(error);
   }

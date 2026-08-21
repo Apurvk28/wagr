@@ -48,6 +48,9 @@ const positionSchema = new mongoose.Schema(
   }
 );
 
+// Compound index to speed up the userId + status lookups used in closeTrade/getUserPositionInMarket
+positionSchema.index({ userId: 1, marketId: 1, status: 1 });
+
 const Position = mongoose.model('Position', positionSchema);
 
 export default Position;

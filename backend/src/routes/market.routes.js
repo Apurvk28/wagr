@@ -24,7 +24,7 @@ router.get('/', getMarkets);
 router.get('/:id', getMarketById);
 
 // Protected routes (Requires authentication)
-router.post('/', protect, createMarket);
+router.post('/', protect, authorize('Admin'), createMarket);
 router.post('/:id/trade', protect, openTrade);
 router.post('/:id/close', protect, closeTrade);
 router.get('/:id/position', protect, getUserPositionInMarket);
