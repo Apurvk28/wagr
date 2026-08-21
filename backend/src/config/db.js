@@ -7,20 +7,28 @@ import { mockMarkets } from '../utils/mockData.js';
 
 const seedDatabase = async () => {
   try {
-    // Find or create generic system admin user (always check on startup)
-    let admin = await User.findOne({ email: 'admin@wagr.io' });
-    if (!admin) {
-      admin = await User.create({
-        fullName: 'Wagr Administrator',
-        username: 'admin',
-        email: 'admin@wagr.io',
-        password: 'AdminPassword123!',
-        role: 'Admin',
-        isVerified: true,
-        mxpBalance: 10000,
-        portfolioValue: 10000,
-      });
-      console.log('👑 Created default administrator user: admin@wagr.io / AdminPassword123!');
+    const seedAdminEmail = process.env.SEED_ADMIN_EMAIL;
+    const seedAdminPassword = process.env.SEED_ADMIN_PASSWORD;
+
+    let admin = null;
+    if (!seedAdminEmail || !seedAdminPassword) {
+      console.warn('⚠️  SEED_ADMIN_EMAIL / SEED_ADMIN_PASSWORD not set — skipping admin seeding.');
+      admin = await User.findOne({ role: 'Admin' });
+    } else {
+      admin = await User.findOne({ email: seedAdminEmail });
+      if (!admin) {
+        admin = await User.create({
+          fullName: 'Wagr Administrator',
+          username: 'admin',
+          email: seedAdminEmail,
+          password: seedAdminPassword,
+          role: 'Admin',
+          isVerified: true,
+          mxpBalance: 10000,
+          portfolioValue: 10000,
+        });
+        console.log(`👑 Created default administrator user: ${seedAdminEmail}`);
+      }
     }
 
     // Always clean up any "test" or "test 1" markets on startup
@@ -39,6 +47,8 @@ const seedDatabase = async () => {
     const endOfToday = new Date();
     endOfToday.setHours(23, 59, 59, 999);
 
+    const adminId = admin ? admin._id : null;
+
     // Insert mock markets
     const marketsToInsert = [
       ...mockMarkets.map(m => {
@@ -46,7 +56,7 @@ const seedDatabase = async () => {
         return {
           ...rest,
           marketType: 'Long-Term',
-          createdBy: admin._id,
+          createdBy: adminId,
           participants: [], // Initialize database participants as empty array
           // Seed some history points for recharts graphing
           probabilityHistory: [
@@ -67,7 +77,7 @@ const seedDatabase = async () => {
         volume: 76500,
         status: 'Live',
         resolutionDate: new Date(Date.now() + 150 * 24 * 60 * 60 * 1000),
-        createdBy: admin._id,
+        createdBy: adminId,
         participants: [],
         probabilityHistory: [
           { yesProbability: 50, timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000) },
@@ -85,7 +95,7 @@ const seedDatabase = async () => {
         volume: 32400,
         status: 'Live',
         resolutionDate: endOfToday,
-        createdBy: admin._id,
+        createdBy: adminId,
         participants: [],
         probabilityHistory: [
           { yesProbability: 50, timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000) },
@@ -102,7 +112,7 @@ const seedDatabase = async () => {
         volume: 18900,
         status: 'Live',
         resolutionDate: endOfToday,
-        createdBy: admin._id,
+        createdBy: adminId,
         participants: [],
         probabilityHistory: [
           { yesProbability: 48, timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000) },
@@ -119,7 +129,7 @@ const seedDatabase = async () => {
         volume: 45000,
         status: 'Live',
         resolutionDate: endOfToday,
-        createdBy: admin._id,
+        createdBy: adminId,
         participants: [],
         probabilityHistory: [
           { yesProbability: 50, timestamp: new Date(Date.now() - 3 * 60 * 60 * 1000) },
@@ -136,7 +146,7 @@ const seedDatabase = async () => {
         volume: 89000,
         status: 'Live',
         resolutionDate: endOfToday,
-        createdBy: admin._id,
+        createdBy: adminId,
         participants: [],
         probabilityHistory: [
           { yesProbability: 42, timestamp: new Date(Date.now() - 5 * 60 * 60 * 1000) },
@@ -153,7 +163,7 @@ const seedDatabase = async () => {
         volume: 12000,
         status: 'Live',
         resolutionDate: endOfToday,
-        createdBy: admin._id,
+        createdBy: adminId,
         participants: [],
         probabilityHistory: [
           { yesProbability: 80, timestamp: new Date(Date.now() - 1 * 60 * 60 * 1000) },
@@ -170,7 +180,7 @@ const seedDatabase = async () => {
         volume: 15000,
         status: 'Live',
         resolutionDate: endOfToday,
-        createdBy: admin._id,
+        createdBy: adminId,
         participants: [],
         probabilityHistory: [
           { yesProbability: 50, timestamp: new Date() }

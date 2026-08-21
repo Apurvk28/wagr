@@ -2,6 +2,7 @@ import Market from '../models/market.model.js';
 import User from '../models/user.model.js';
 import News from '../models/news.model.js';
 import Post from '../models/post.model.js';
+import { escapeRegex } from '../utils/escapeRegex.js';
 
 /**
  * @desc    Global search across markets, users, news, and posts
@@ -20,7 +21,7 @@ export const globalSearch = async (req, res, next) => {
     }
 
     const query = q.trim();
-    const regex = { $regex: query, $options: 'i' };
+    const regex = { $regex: escapeRegex(query), $options: 'i' };
 
     // Run all searches in parallel for speed
     const [markets, users, news, posts] = await Promise.all([

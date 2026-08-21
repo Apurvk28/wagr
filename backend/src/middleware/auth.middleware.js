@@ -5,12 +5,12 @@ import User from '../models/user.model.js';
 export const protect = async (req, res, next) => {
   let token;
 
-  // Check for token in Authorization header
-  if (
+  if (req.cookies?.wagr_jwt) {
+    token = req.cookies.wagr_jwt;
+  } else if (
     req.headers.authorization &&
     req.headers.authorization.startsWith('Bearer')
   ) {
-    // Set token from Bearer token in header
     token = req.headers.authorization.split(' ')[1];
   }
 
@@ -63,7 +63,9 @@ export const authorize = (...roles) => {
 export const optional = async (req, res, next) => {
   let token;
 
-  if (
+  if (req.cookies?.wagr_jwt) {
+    token = req.cookies.wagr_jwt;
+  } else if (
     req.headers.authorization &&
     req.headers.authorization.startsWith('Bearer')
   ) {

@@ -10,7 +10,7 @@ interface AuthContextType {
   error: string | null;
   login: (email: string, password: string, accessKey: string) => Promise<boolean>;
   register: (fullName: string, username: string, email: string, password: string, accessKey: string) => Promise<{ success: boolean; message: string }>;
-  logout: () => void;
+  logout: () => Promise<void>;
   updateProfile: (fullName: string) => Promise<boolean>;
   reloadProfile: () => Promise<boolean>;
   clearErrors: () => void;
@@ -20,35 +20,24 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Load user details if JWT exists in local storage
+  // Load user details via cookie-authenticated API request
   const loadUser = async () => {
-    const storedToken = localStorage.getItem('token');
-    if (!storedToken) {
-      setUser(null);
-      setIsAuthenticated(false);
-      setToken(null);
-      setLoading(false);
-      return;
-    }
-
     try {
-      setToken(storedToken);
       const res = await api.get('/users/profile');
       if (res.data.success) {
         setUser(res.data.data);
         setIsAuthenticated(true);
       } else {
-        // Token is invalid/expired
-        logout();
+        setUser(null);
+        setIsAuthenticated(false);
       }
     } catch (err: any) {
-      console.error('Error loading user profile:', err);
-      logout();
+      setUser(null);
+      setIsAuthenticated(false);
     } finally {
       setLoading(false);
     }
@@ -65,9 +54,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       const res = await api.post('/auth/login', { email, password, accessKey });
       if (res.data.success) {
-        const userToken = res.data.token;
-        localStorage.setItem('token', userToken);
-        setToken(userToken);
         setUser(res.data.data);
         setIsAuthenticated(true);
         setLoading(false);
@@ -95,9 +81,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       const res = await api.post('/auth/register', { fullName, username, email, password, accessKey });
       if (res.data.success) {
-        const userToken = res.data.token;
-        localStorage.setItem('token', userToken);
-        setToken(userToken);
         setUser(res.data.data);
         setIsAuthenticated(true);
       }
@@ -114,14 +97,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  // Logout Handler
-  const logout = () => {
-    localStorage.removeItem('token');
-    setToken(null);
-    setUser(null);
-    setIsAuthenticated(false);
-    setError(null);
-    setLoading(false);
+  // Logout Handler (clears cookie via backend endpoint and resets client state)
+  const logout = async () => {
+    try {
+      await api.post('/auth/logout');
+    } catch (err) {
+      console.error('Logout error:', err);
+    } finally {
+      setUser(null);
+      setIsAuthenticated(false);
+      setError(null);
+      setLoading(false);
+    }
   };
 
   // Update Profile Handler
@@ -161,7 +148,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     <AuthContext.Provider
       value={{
         user,
-        token,
+        token: null,
         isAuthenticated,
         loading,
         error,

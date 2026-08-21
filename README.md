@@ -83,6 +83,13 @@ MONGO_URI=mongodb+srv://<username>:<password>@cluster.mongodb.net/wagr?retryWrit
 JWT_SECRET=your_super_secret_jwt_key_here_change_this_in_production
 JWT_EXPIRES_IN=7d
 
+# Access Key Protection (never checked into version control)
+SPECIAL_ACCESS_KEY=<your-own-secret-value>
+
+# Admin Seeding (leave unset to skip auto-seeding an admin account)
+SEED_ADMIN_EMAIL=admin@yourdomain.com
+SEED_ADMIN_PASSWORD=ChangeThisToAStrongPassword123!
+
 # Groq AI API Keys (Obtain free API key from https://console.groq.com)
 LONG_TERM_MARKET_API_KEY=gsk_your_groq_api_key_here
 SHORT_TREM_MARKET_API_KEY=gsk_your_groq_api_key_here
@@ -172,13 +179,12 @@ npm run dev
 - **Backend Server:** Runs on `http://localhost:5050`
 - **Frontend App:** Runs on `http://localhost:3003`
 
-### 5. Default Admin Credentials
-When connected to MongoDB, the system automatically seeds default administrator accounts:
-- **Email:** `admin@wagr.io` | **Password:** `AdminPassword123!`
-- **Email:** `apurv@gmail.com` | **Password:** `AdminPassword123!`
+### 5. Admin Seeding
+Set `SEED_ADMIN_EMAIL` and `SEED_ADMIN_PASSWORD` in `backend/.env` to seed an administrator account on first run. No default credentials are shipped with this project.
 
 ---
 
 ## 📄 License & Intellectual Property
 
 © 2026 **Wagr.io** — All Rights Reserved. Built with React, Node.js, Express, MongoDB, TailwindCSS, and Framer Motion.
+

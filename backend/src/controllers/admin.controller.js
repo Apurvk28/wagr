@@ -7,6 +7,7 @@ import { checkExpiredMarkets, archiveShortTermMarkets } from '../services/cron.s
 import { generateMarketsSuggestions } from '../services/aiGeneration.service.js';
 import { syncAiNewsFromGroq } from '../services/aiNews.service.js';
 import { createAndSendNotification } from '../services/notification.service.js';
+import { escapeRegex } from '../utils/escapeRegex.js';
 
 /**
  * @desc    Get admin dashboard statistics
@@ -71,12 +72,13 @@ export const getAllUsers = async (req, res, next) => {
   try {
     const { search = '' } = req.query;
 
+    const safeSearch = escapeRegex(search);
     const query = search
       ? {
           $or: [
-            { fullName: { $regex: search, $options: 'i' } },
-            { username: { $regex: search, $options: 'i' } },
-            { email: { $regex: search, $options: 'i' } },
+            { fullName: { $regex: safeSearch, $options: 'i' } },
+            { username: { $regex: safeSearch, $options: 'i' } },
+            { email: { $regex: safeSearch, $options: 'i' } },
           ],
         }
       : {};

@@ -4,6 +4,7 @@ import User from '../models/user.model.js';
 import { createAndSendNotification } from '../services/notification.service.js';
 import { updateUserStatsAndCheckAchievements } from '../services/achievement.service.js';
 import { executeMarketResolution } from '../services/marketResolution.service.js';
+import { escapeRegex } from '../utils/escapeRegex.js';
 
 /**
  * @desc    Get all prediction markets (with search/filters)
@@ -23,9 +24,10 @@ export const getMarkets = async (req, res, next) => {
 
     // Filter by search keyword
     if (search) {
+      const safeSearch = escapeRegex(search);
       query.$or = [
-        { title: { $regex: search, $options: 'i' } },
-        { description: { $regex: search, $options: 'i' } },
+        { title: { $regex: safeSearch, $options: 'i' } },
+        { description: { $regex: safeSearch, $options: 'i' } },
       ];
     }
 

@@ -3,6 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
+import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 
 // Load environment variables immediately before other imports
@@ -20,7 +21,6 @@ import searchRoutes from './routes/search.routes.js';
 import leaderboardRoutes from './routes/leaderboard.routes.js';
 
 const app = express();
-
 
 // Security HTTP headers
 app.use(helmet());
@@ -41,9 +41,10 @@ if (process.env.NODE_ENV === 'development') {
   app.use(morgan('combined'));
 }
 
-// Body parsers
+// Body parsers & Cookie parser
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 // Global rate limiting
 const apiLimiter = rateLimit({
@@ -56,10 +57,23 @@ const apiLimiter = rateLimit({
     message: 'Too many requests from this IP, please try again after 15 minutes.',
   },
 });
+
+// Stricter rate limiter scoped specifically to authentication endpoints
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 20, // max 20 login/register attempts per IP per 15 min
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    message: 'Too many authentication attempts. Please try again after 15 minutes.',
+  },
+});
+
 app.use('/api/', apiLimiter);
 
 // Mount API Routes
-app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/auth', authLimiter, authRoutes);
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/markets', marketRoutes);
 app.use('/api/v1/news', newsRoutes);

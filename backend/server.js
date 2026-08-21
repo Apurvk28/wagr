@@ -33,6 +33,12 @@ startCronJobs();
 // Set global Socket.io instance for routes/services usage
 app.set('io', io);
 
+// Production check for SPECIAL_ACCESS_KEY
+if (process.env.NODE_ENV === 'production' && !process.env.SPECIAL_ACCESS_KEY) {
+  console.error('❌ SPECIAL_ACCESS_KEY is required in production. Exiting.');
+  process.exit(1);
+}
+
 // Start server
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {

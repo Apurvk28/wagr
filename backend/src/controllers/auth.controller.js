@@ -14,11 +14,16 @@ export const register = async (req, res, next) => {
 
   try {
     // 0. Access Key Check
-    const expectedKey = process.env.SPECIAL_ACCESS_KEY || 'Apurvsk';
-    if (!accessKey || accessKey.trim() !== expectedKey) {
+    if (!process.env.SPECIAL_ACCESS_KEY) {
+      return res.status(500).json({
+        success: false,
+        message: 'Server misconfiguration. Please contact support.',
+      });
+    }
+    if (!accessKey || accessKey.trim() !== process.env.SPECIAL_ACCESS_KEY) {
       return res.status(403).json({
         success: false,
-        message: 'Invalid Special Access Key. You are not authorized to access Wagr.io.',
+        message: 'Invalid access key.',
       });
     }
 
@@ -59,9 +64,8 @@ export const register = async (req, res, next) => {
     }
 
     // 5. Create User (immediately verified and credited)
-    const isApurv = emailLower === 'apurv@gmail.com';
-    const role = isApurv ? 'Admin' : 'User';
-    const initialBalance = isApurv ? 100000000 : 500;
+    const role = 'User';
+    const initialBalance = 500;
 
     const user = await User.create({
       fullName,
@@ -74,8 +78,15 @@ export const register = async (req, res, next) => {
       portfolioValue: initialBalance,
     });
 
-    // 6. Generate JWT immediately
+    // 6. Generate JWT immediately & Set httpOnly cookie
     const jwtToken = user.generateJWT();
+
+    res.cookie('wagr_jwt', jwtToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
 
     res.status(201).json({
       success: true,
@@ -107,11 +118,16 @@ export const login = async (req, res, next) => {
 
   try {
     // 0. Access Key Check
-    const expectedKey = process.env.SPECIAL_ACCESS_KEY || 'Apurvsk';
-    if (!accessKey || accessKey.trim() !== expectedKey) {
+    if (!process.env.SPECIAL_ACCESS_KEY) {
+      return res.status(500).json({
+        success: false,
+        message: 'Server misconfiguration. Please contact support.',
+      });
+    }
+    if (!accessKey || accessKey.trim() !== process.env.SPECIAL_ACCESS_KEY) {
       return res.status(403).json({
         success: false,
-        message: 'Invalid Special Access Key. You are not authorized to access Wagr.io.',
+        message: 'Invalid access key.',
       });
     }
 
@@ -143,8 +159,15 @@ export const login = async (req, res, next) => {
       });
     }
 
-    // 4. Generate JWT token
+    // 4. Generate JWT token & Set httpOnly cookie
     const jwtToken = user.generateJWT();
+
+    res.cookie('wagr_jwt', jwtToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
 
     res.status(200).json({
       success: true,
