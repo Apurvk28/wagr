@@ -10,27 +10,27 @@ import { AnimatedBorderButton } from '../components/ui/AnimatedBorderButton';
 
 const PrivacyPolicy: React.FC = () => {
   return (
-    <div className="min-h-screen bg-dark flex flex-col justify-between animate-fade-in">
+    <div className="min-h-screen bg-dark flex flex-col justify-between animate-fade-in font-sans text-dark-muted selection:bg-brand-success/30 selection:text-white">
       <Navbar />
 
-      <div className="flex-grow max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <div className="flex-grow max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-16">
         
         {/* Document Header */}
         <div className="text-center mb-14 space-y-4">
           <span className="text-[10px] font-extrabold bg-brand-success/10 text-brand-success border border-brand-success/25 px-4 py-1.5 rounded-full uppercase tracking-widest shadow-md">
-            OFFICIAL DATA PROTECTION &amp; PRIVACY SPECIFICATION
+            OFFICIAL DATA PROTECTION &amp; PRIVACY SPECIFICATION ✦
           </span>
           <h1 className="text-4xl sm:text-6xl font-black text-white tracking-tight leading-none font-display">
             Privacy Policy<span className="text-brand-success">.</span>
           </h1>
           <p className="text-xs sm:text-sm text-dark-muted font-medium max-w-2xl mx-auto leading-relaxed">
-            Effective Date: July 2026 &bull; Version 3.4 &bull; Exhaustive specifications governing user data protection, algorithmic boundary controls, cryptographic hashing, and privacy rights across Wagr.io.
+            Effective Date: July 2026 &bull; Version 4.0 &bull; Exhaustive specifications governing user data protection, algorithmic boundary controls, cryptographic hashing, and privacy rights across Wagr.io.
           </p>
 
           <div className="pt-2">
             <AnimatedBorderButton
               onClick={exportPrivacyPolicyPDF}
-              className="!px-6 !py-3 text-xs text-brand-success shadow-lg"
+              className="!px-6 !py-3 text-xs text-brand-success shadow-lg hover:scale-[1.02] transition-transform"
             >
               <Download size={15} />
               <span>Download Official Privacy Policy PDF</span>
@@ -38,26 +38,26 @@ const PrivacyPolicy: React.FC = () => {
           </div>
         </div>
 
-        {/* Executive Summary Banner */}
-        <div className="bg-dark-card border border-dark-border/70 rounded-3xl p-6 sm:p-8 mb-12 shadow-2xl relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-80 h-80 bg-brand-success/5 rounded-full blur-3xl pointer-events-none" />
-          <h2 className="text-base sm:text-lg font-black text-white uppercase tracking-wider mb-3 flex items-center space-x-2.5">
-            <FileText className="text-brand-success" size={22} />
+        {/* Executive Privacy Statement Banner */}
+        <div className="bg-dark-card border border-dark-border/70 rounded-3xl p-6 sm:p-10 mb-12 shadow-2xl relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-brand-success/5 rounded-full blur-3xl pointer-events-none" />
+          <h2 className="text-lg sm:text-xl font-black text-white uppercase tracking-wider mb-3 flex items-center space-x-2.5">
+            <FileText className="text-brand-success" size={24} />
             <span>Executive Privacy Statement &amp; Commitment</span>
           </h2>
-          <p className="text-xs sm:text-sm text-dark-muted leading-relaxed font-medium mb-5">
+          <p className="text-xs sm:text-sm text-dark-muted leading-relaxed font-medium mb-6">
             At Wagr.io, we believe user data privacy is a fundamental digital right. Because our prediction exchange operates exclusively on a virtual sandbox points model (Market Exchange Points / MXP), we maintain a strictly minimal data collection footprint. We do not accept, process, or store credit cards, bank accounts, or sensitive identity verification documents. This Privacy Policy details the exact specifications by which your data is processed, safeguarded, and governed.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t border-dark-border/40 text-[11px] font-bold text-white/90">
-            <div className="flex items-center space-x-2 bg-dark/40 p-3 rounded-xl border border-dark-border/40">
+            <div className="flex items-center space-x-2.5 bg-dark/50 p-3.5 rounded-xl border border-dark-border/40">
               <CheckCircle2 size={16} className="text-brand-success shrink-0" />
               <span>Zero Banking / Payment Card Records</span>
             </div>
-            <div className="flex items-center space-x-2 bg-dark/40 p-3 rounded-xl border border-dark-border/40">
+            <div className="flex items-center space-x-2.5 bg-dark/50 p-3.5 rounded-xl border border-dark-border/40">
               <CheckCircle2 size={16} className="text-brand-success shrink-0" />
               <span>End-to-End Cryptographic Protection</span>
             </div>
-            <div className="flex items-center space-x-2 bg-dark/40 p-3 rounded-xl border border-dark-border/40">
+            <div className="flex items-center space-x-2.5 bg-dark/50 p-3.5 rounded-xl border border-dark-border/40">
               <CheckCircle2 size={16} className="text-brand-success shrink-0" />
               <span>Zero Third-Party Data Monetization</span>
             </div>
@@ -70,8 +70,8 @@ const PrivacyPolicy: React.FC = () => {
           {/* Section 1 */}
           <section className="bg-dark-card border border-dark-border/70 rounded-3xl p-6 sm:p-8 shadow-xl space-y-4 hover:border-brand-success/30 transition-all">
             <div className="flex items-center space-x-3 border-b border-dark-border/40 pb-4">
-              <Database className="text-brand-purple shrink-0" size={22} />
-              <h2 className="text-base font-black text-white uppercase tracking-wider">
+              <Database className="text-brand-purple shrink-0" size={24} />
+              <h2 className="text-base sm:text-lg font-black text-white uppercase tracking-wider">
                 1. Information We Collect &amp; Data Classification Architecture
               </h2>
             </div>
@@ -109,8 +109,8 @@ const PrivacyPolicy: React.FC = () => {
           {/* Section 2 */}
           <section className="bg-dark-card border border-dark-border/70 rounded-3xl p-6 sm:p-8 shadow-xl space-y-4 hover:border-brand-blue/30 transition-all">
             <div className="flex items-center space-x-3 border-b border-dark-border/40 pb-4">
-              <Server className="text-brand-blue shrink-0" size={22} />
-              <h2 className="text-base font-black text-white uppercase tracking-wider">
+              <Server className="text-brand-blue shrink-0" size={24} />
+              <h2 className="text-base sm:text-lg font-black text-white uppercase tracking-wider">
                 2. Purpose &amp; Lawful Basis for Data Processing
               </h2>
             </div>
@@ -118,7 +118,7 @@ const PrivacyPolicy: React.FC = () => {
               Wagr.io processes data under Legitimate Interest and Contractual Performance grounds (GDPR Article 6) to deliver our simulated forecasting ecosystem:
             </p>
             <ul className="list-disc pl-5 text-xs text-dark-muted space-y-2.5 leading-relaxed font-medium">
-              <li>Authenticate sign-in requests and maintain active user sessions via secure JSON Web Tokens (JWT).</li>
+              <li>Authenticate sign-in requests and maintain active user sessions via secure `httpOnly` JWT cookies (`wagr_jwt`).</li>
               <li>Maintain real-time synchronization of your MXP virtual balance, active position P&amp;L stats, and trade history logs.</li>
               <li>Compute global leaderboard rankings, win rates, and prediction accuracy percentages based on settled resolutions.</li>
               <li>Power the internal search engine allowing users to locate prediction topics, news briefings, and community profiles.</li>
@@ -130,8 +130,8 @@ const PrivacyPolicy: React.FC = () => {
           {/* Section 3 */}
           <section className="bg-dark-card border border-dark-border/70 rounded-3xl p-6 sm:p-8 shadow-xl space-y-4 hover:border-brand-success/30 transition-all">
             <div className="flex items-center space-x-3 border-b border-dark-border/40 pb-4">
-              <KeyRound className="text-brand-success shrink-0" size={22} />
-              <h2 className="text-base font-black text-white uppercase tracking-wider">
+              <KeyRound className="text-brand-success shrink-0" size={24} />
+              <h2 className="text-base sm:text-lg font-black text-white uppercase tracking-wider">
                 3. Non-Financial Economy &amp; Zero Payment Processing Guarantee
               </h2>
             </div>
@@ -164,8 +164,8 @@ const PrivacyPolicy: React.FC = () => {
           {/* Section 4 */}
           <section className="bg-dark-card border border-dark-border/70 rounded-3xl p-6 sm:p-8 shadow-xl space-y-4 hover:border-brand-purple/30 transition-all">
             <div className="flex items-center space-x-3 border-b border-dark-border/40 pb-4">
-              <Shield className="text-brand-purple shrink-0" size={22} />
-              <h2 className="text-base font-black text-white uppercase tracking-wider">
+              <Shield className="text-brand-purple shrink-0" size={24} />
+              <h2 className="text-base sm:text-lg font-black text-white uppercase tracking-wider">
                 4. Cryptographic Security Standards &amp; Infrastructure Safeguards
               </h2>
             </div>
@@ -188,9 +188,9 @@ const PrivacyPolicy: React.FC = () => {
               </div>
 
               <div className="bg-dark/50 border border-dark-border/50 p-4 rounded-2xl space-y-1">
-                <h4 className="font-extrabold text-white uppercase tracking-wider">Stateless JWT Authorization</h4>
+                <h4 className="font-extrabold text-white uppercase tracking-wider">httpOnly Cookie Authorization</h4>
                 <p className="text-dark-muted text-[11px] leading-relaxed">
-                  User requests are authorized via cryptographically signed JWT tokens with 7-day expiration limits.
+                  User authentication is secured via `httpOnly` double-cookie flags (`wagr_jwt`), protecting sessions against XSS token theft.
                 </p>
               </div>
 
@@ -206,8 +206,8 @@ const PrivacyPolicy: React.FC = () => {
           {/* Section 5 */}
           <section className="bg-dark-card border border-dark-border/70 rounded-3xl p-6 sm:p-8 shadow-xl space-y-4 hover:border-brand-blue/30 transition-all">
             <div className="flex items-center space-x-3 border-b border-dark-border/40 pb-4">
-              <Globe className="text-brand-blue shrink-0" size={22} />
-              <h2 className="text-base font-black text-white uppercase tracking-wider">
+              <Globe className="text-brand-blue shrink-0" size={24} />
+              <h2 className="text-base sm:text-lg font-black text-white uppercase tracking-wider">
                 5. Artificial Intelligence Processing &amp; Zero PII Transfer Policy
               </h2>
             </div>
@@ -225,8 +225,8 @@ const PrivacyPolicy: React.FC = () => {
           {/* Section 6 */}
           <section className="bg-dark-card border border-dark-border/70 rounded-3xl p-6 sm:p-8 shadow-xl space-y-4 hover:border-brand-purple/30 transition-all">
             <div className="flex items-center space-x-3 border-b border-dark-border/40 pb-4">
-              <Layers className="text-brand-purple shrink-0" size={22} />
-              <h2 className="text-base font-black text-white uppercase tracking-wider">
+              <Layers className="text-brand-purple shrink-0" size={24} />
+              <h2 className="text-base sm:text-lg font-black text-white uppercase tracking-wider">
                 6. Automated Market Maker (AMM) Data Isolation
               </h2>
             </div>
@@ -238,26 +238,26 @@ const PrivacyPolicy: React.FC = () => {
           {/* Section 7 */}
           <section className="bg-dark-card border border-dark-border/70 rounded-3xl p-6 sm:p-8 shadow-xl space-y-4 hover:border-amber-400/30 transition-all">
             <div className="flex items-center space-x-3 border-b border-dark-border/40 pb-4">
-              <Eye className="text-amber-400 shrink-0" size={22} />
-              <h2 className="text-base font-black text-white uppercase tracking-wider">
+              <Eye className="text-amber-400 shrink-0" size={24} />
+              <h2 className="text-base sm:text-lg font-black text-white uppercase tracking-wider">
                 7. Cookies, Local Storage Telemetry &amp; Zero Ad-Tracker Guarantee
               </h2>
             </div>
             <p className="text-xs sm:text-sm text-dark-muted leading-relaxed font-medium">
-              We utilize HTML5 Local Storage and minimal session cookies exclusively to provide core functionality:
+              We utilize session cookies and minimal browser telemetry exclusively to provide core platform functionality:
             </p>
             <ul className="list-disc pl-5 text-xs text-dark-muted space-y-2 leading-relaxed font-medium">
-              <li><strong className="text-white">Session Authentication:</strong> We store an encrypted JWT auth token (`auth_token`) in browser local storage to maintain your session across page refreshes.</li>
+              <li><strong className="text-white">Session Authentication:</strong> We issue an `httpOnly` secure cookie (`wagr_jwt`) to maintain your session across page refreshes.</li>
               <li><strong className="text-white">Zero Advertising Trackers:</strong> We do NOT use advertising cookies, Google Remarketing pixels, Meta Pixels, or behavioral fingerprinting scripts.</li>
-              <li><strong className="text-white">User Storage Control:</strong> You can clear browser local storage at any time, which immediately logs out your active session.</li>
+              <li><strong className="text-white">User Storage Control:</strong> You can clear browser cookies at any time, which immediately logs out your active session.</li>
             </ul>
           </section>
 
           {/* Section 8 */}
           <section className="bg-dark-card border border-dark-border/70 rounded-3xl p-6 sm:p-8 shadow-xl space-y-4 hover:border-brand-success/30 transition-all">
             <div className="flex items-center space-x-3 border-b border-dark-border/40 pb-4">
-              <RefreshCw className="text-brand-success shrink-0" size={22} />
-              <h2 className="text-base font-black text-white uppercase tracking-wider">
+              <RefreshCw className="text-brand-success shrink-0" size={24} />
+              <h2 className="text-base sm:text-lg font-black text-white uppercase tracking-wider">
                 8. Data Retention Schedule &amp; Archival Schedules
               </h2>
             </div>
@@ -269,8 +269,8 @@ const PrivacyPolicy: React.FC = () => {
           {/* Section 9 */}
           <section className="bg-dark-card border border-dark-border/70 rounded-3xl p-6 sm:p-8 shadow-xl space-y-4 hover:border-brand-purple/30 transition-all">
             <div className="flex items-center space-x-3 border-b border-dark-border/40 pb-4">
-              <UserCheck className="text-brand-purple shrink-0" size={22} />
-              <h2 className="text-base font-black text-white uppercase tracking-wider">
+              <UserCheck className="text-brand-purple shrink-0" size={24} />
+              <h2 className="text-base sm:text-lg font-black text-white uppercase tracking-wider">
                 9. User Data Rights &amp; Permanent Account Erasure (Right to be Forgotten)
               </h2>
             </div>
@@ -287,8 +287,8 @@ const PrivacyPolicy: React.FC = () => {
           {/* Section 10 */}
           <section className="bg-dark-card border border-dark-border/70 rounded-3xl p-6 sm:p-8 shadow-xl space-y-4 hover:border-brand-blue/30 transition-all">
             <div className="flex items-center space-x-3 border-b border-dark-border/40 pb-4">
-              <Globe className="text-brand-blue shrink-0" size={22} />
-              <h2 className="text-base font-black text-white uppercase tracking-wider">
+              <Globe className="text-brand-blue shrink-0" size={24} />
+              <h2 className="text-base sm:text-lg font-black text-white uppercase tracking-wider">
                 10. International Transfers &amp; Global Infrastructure
               </h2>
             </div>
@@ -300,8 +300,8 @@ const PrivacyPolicy: React.FC = () => {
           {/* Section 11 */}
           <section className="bg-dark-card border border-dark-border/70 rounded-3xl p-6 sm:p-8 shadow-xl space-y-4 hover:border-brand-danger/30 transition-all">
             <div className="flex items-center space-x-3 border-b border-dark-border/40 pb-4">
-              <AlertTriangle className="text-brand-danger shrink-0" size={22} />
-              <h2 className="text-base font-black text-white uppercase tracking-wider">
+              <AlertTriangle className="text-brand-danger shrink-0" size={24} />
+              <h2 className="text-base sm:text-lg font-black text-white uppercase tracking-wider">
                 11. Protection of Minors &amp; Children's Online Privacy (COPPA)
               </h2>
             </div>
@@ -313,8 +313,8 @@ const PrivacyPolicy: React.FC = () => {
           {/* Section 12 */}
           <section className="bg-dark-card border border-dark-border/70 rounded-3xl p-6 sm:p-8 shadow-xl space-y-4 hover:border-brand-success/30 transition-all">
             <div className="flex items-center space-x-3 border-b border-dark-border/40 pb-4">
-              <Mail className="text-brand-success shrink-0" size={22} />
-              <h2 className="text-base font-black text-white uppercase tracking-wider">
+              <Mail className="text-brand-success shrink-0" size={24} />
+              <h2 className="text-base sm:text-lg font-black text-white uppercase tracking-wider">
                 12. Data Protection Officer (DPO) Contact &amp; Escalation
               </h2>
             </div>

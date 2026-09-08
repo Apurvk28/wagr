@@ -10,27 +10,27 @@ import { AnimatedBorderButton } from '../components/ui/AnimatedBorderButton';
 
 const TermsConditions: React.FC = () => {
   return (
-    <div className="min-h-screen bg-dark flex flex-col justify-between animate-fade-in">
+    <div className="min-h-screen bg-dark flex flex-col justify-between animate-fade-in font-sans text-dark-muted selection:bg-brand-danger/30 selection:text-white">
       <Navbar />
 
-      <div className="flex-grow max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <div className="flex-grow max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-16">
         
         {/* Document Header */}
         <div className="text-center mb-14 space-y-4">
           <span className="text-[10px] font-extrabold bg-brand-danger/10 text-brand-danger border border-brand-danger/25 px-4 py-1.5 rounded-full uppercase tracking-widest shadow-md">
-            BINDING PLATFORM USAGE AGREEMENT
+            BINDING PLATFORM USAGE AGREEMENT ✦
           </span>
           <h1 className="text-4xl sm:text-6xl font-black text-white tracking-tight leading-none font-display">
             Terms &amp; Conditions<span className="text-brand-danger">.</span>
           </h1>
           <p className="text-xs sm:text-sm text-dark-muted font-medium max-w-2xl mx-auto leading-relaxed">
-            Effective Date: July 2026 &bull; Version 4.2 &bull; Operational agreement, virtual points governance, AMM liquidity simulation rules, and platform code of conduct.
+            Effective Date: July 2026 &bull; Version 4.5 &bull; Operational agreement, virtual points governance, AMM liquidity simulation rules, and platform code of conduct.
           </p>
 
           <div className="pt-2">
             <AnimatedBorderButton
               onClick={exportTermsConditionsPDF}
-              className="!px-6 !py-3 text-xs text-brand-danger shadow-lg"
+              className="!px-6 !py-3 text-xs text-brand-danger shadow-lg hover:scale-[1.02] transition-transform"
             >
               <Download size={15} />
               <span>Download Official Terms &amp; Conditions PDF</span>
@@ -38,26 +38,26 @@ const TermsConditions: React.FC = () => {
           </div>
         </div>
 
-        {/* Highlight Banner */}
-        <div className="bg-dark-card border border-dark-border/70 rounded-3xl p-6 sm:p-8 mb-12 shadow-2xl relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-80 h-80 bg-brand-danger/5 rounded-full blur-3xl pointer-events-none" />
-          <h2 className="text-base sm:text-lg font-black text-white uppercase tracking-wider mb-3 flex items-center space-x-2.5">
-            <FileText className="text-brand-danger" size={22} />
+        {/* Master Operating Agreement Overview Banner */}
+        <div className="bg-dark-card border border-dark-border/70 rounded-3xl p-6 sm:p-10 mb-12 shadow-2xl relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-brand-danger/5 rounded-full blur-3xl pointer-events-none" />
+          <h2 className="text-lg sm:text-xl font-black text-white uppercase tracking-wider mb-3 flex items-center space-x-2.5">
+            <FileText className="text-brand-danger" size={24} />
             <span>Master Platform Operating Agreement Overview</span>
           </h2>
-          <p className="text-xs sm:text-sm text-dark-muted leading-relaxed font-medium mb-5">
+          <p className="text-xs sm:text-sm text-dark-muted leading-relaxed font-medium mb-6">
             Welcome to Wagr.io. By registering an account, placing virtual predictions, requesting MXP credit allocations, or interacting with community feeds, you agree to be bound by these Terms &amp; Conditions. Wagr.io is a simulated prediction exchange built strictly for educational, analytical, and social entertainment purposes. If you do not agree with every provision herein, you must refrain from accessing or using the platform.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t border-dark-border/40 text-[11px] font-bold text-white/90">
-            <div className="flex items-center space-x-2 bg-dark/40 p-3 rounded-xl border border-dark-border/40">
+            <div className="flex items-center space-x-2.5 bg-dark/50 p-3.5 rounded-xl border border-dark-border/40">
               <CheckCircle2 size={16} className="text-brand-danger shrink-0" />
               <span>Zero Cash / Real Money Liabilities</span>
             </div>
-            <div className="flex items-center space-x-2 bg-dark/40 p-3 rounded-xl border border-dark-border/40">
+            <div className="flex items-center space-x-2.5 bg-dark/50 p-3.5 rounded-xl border border-dark-border/40">
               <CheckCircle2 size={16} className="text-brand-danger shrink-0" />
               <span>Non-Transferable Virtual MXP Points</span>
             </div>
-            <div className="flex items-center space-x-2 bg-dark/40 p-3 rounded-xl border border-dark-border/40">
+            <div className="flex items-center space-x-2.5 bg-dark/50 p-3.5 rounded-xl border border-dark-border/40">
               <CheckCircle2 size={16} className="text-brand-danger shrink-0" />
               <span>Strict Anti-Abuse Code of Conduct</span>
             </div>
@@ -70,8 +70,8 @@ const TermsConditions: React.FC = () => {
           {/* Section 1 */}
           <section className="bg-dark-card border border-dark-border/70 rounded-3xl p-6 sm:p-8 shadow-xl space-y-4 hover:border-brand-danger/30 transition-all">
             <div className="flex items-center space-x-3 border-b border-dark-border/40 pb-4">
-              <ShieldAlert className="text-brand-danger shrink-0" size={22} />
-              <h2 className="text-base font-black text-white uppercase tracking-wider">
+              <ShieldAlert className="text-brand-danger shrink-0" size={24} />
+              <h2 className="text-base sm:text-lg font-black text-white uppercase tracking-wider">
                 1. Absolute Virtual Currency Disclaimer (Zero Real Money Value)
               </h2>
             </div>
@@ -103,8 +103,8 @@ const TermsConditions: React.FC = () => {
           {/* Section 2 */}
           <section className="bg-dark-card border border-dark-border/70 rounded-3xl p-6 sm:p-8 shadow-xl space-y-4 hover:border-brand-purple/30 transition-all">
             <div className="flex items-center space-x-3 border-b border-dark-border/40 pb-4">
-              <UserX className="text-brand-purple shrink-0" size={22} />
-              <h2 className="text-base font-black text-white uppercase tracking-wider">
+              <UserX className="text-brand-purple shrink-0" size={24} />
+              <h2 className="text-base sm:text-lg font-black text-white uppercase tracking-wider">
                 2. User Eligibility, Account Registration &amp; Credential Security
               </h2>
             </div>
@@ -122,8 +122,8 @@ const TermsConditions: React.FC = () => {
           {/* Section 3 */}
           <section className="bg-dark-card border border-dark-border/70 rounded-3xl p-6 sm:p-8 shadow-xl space-y-4 hover:border-brand-blue/30 transition-all">
             <div className="flex items-center space-x-3 border-b border-dark-border/40 pb-4">
-              <Cpu className="text-brand-blue shrink-0" size={22} />
-              <h2 className="text-base font-black text-white uppercase tracking-wider">
+              <Cpu className="text-brand-blue shrink-0" size={24} />
+              <h2 className="text-base sm:text-lg font-black text-white uppercase tracking-wider">
                 3. Automated Market Maker (AMM) Mechanics &amp; Virtual Pool Buffer
               </h2>
             </div>
@@ -139,10 +139,10 @@ const TermsConditions: React.FC = () => {
           </section>
 
           {/* Section 4 */}
-          <section className="bg-dark-card border border-dark-border/70 rounded-3xl p-6 sm:p-8 shadow-xl space-y-4 hover:border-emerald-500/30 transition-all">
+          <section className="bg-dark-card border border-dark-border/70 rounded-3xl p-6 sm:p-8 shadow-xl space-y-4 hover:border-emerald-400/30 transition-all">
             <div className="flex items-center space-x-3 border-b border-dark-border/40 pb-4">
-              <RefreshCw className="text-emerald-400 shrink-0" size={22} />
-              <h2 className="text-base font-black text-white uppercase tracking-wider">
+              <RefreshCw className="text-emerald-400 shrink-0" size={24} />
+              <h2 className="text-base sm:text-lg font-black text-white uppercase tracking-wider">
                 4. AI Sentiment Ingestion &amp; Autonomous Market Simulation Declaration
               </h2>
             </div>
@@ -158,8 +158,8 @@ const TermsConditions: React.FC = () => {
           {/* Section 5 */}
           <section className="bg-dark-card border border-dark-border/70 rounded-3xl p-6 sm:p-8 shadow-xl space-y-4 hover:border-brand-purple/30 transition-all">
             <div className="flex items-center space-x-3 border-b border-dark-border/40 pb-4">
-              <Scale className="text-brand-purple shrink-0" size={22} />
-              <h2 className="text-base font-black text-white uppercase tracking-wider">
+              <Scale className="text-brand-purple shrink-0" size={24} />
+              <h2 className="text-base sm:text-lg font-black text-white uppercase tracking-wider">
                 5. Market Resolutions, Primary Sources &amp; Settlement Protocols
               </h2>
             </div>
@@ -175,8 +175,8 @@ const TermsConditions: React.FC = () => {
           {/* Section 6 */}
           <section className="bg-dark-card border border-dark-border/70 rounded-3xl p-6 sm:p-8 shadow-xl space-y-4 hover:border-amber-400/30 transition-all">
             <div className="flex items-center space-x-3 border-b border-dark-border/40 pb-4">
-              <AlertCircle className="text-amber-400 shrink-0" size={22} />
-              <h2 className="text-base font-black text-white uppercase tracking-wider">
+              <AlertCircle className="text-amber-400 shrink-0" size={24} />
+              <h2 className="text-base sm:text-lg font-black text-white uppercase tracking-wider">
                 6. Ambiguous Events, Postponements, Cancellations &amp; Refund Policy
               </h2>
             </div>
@@ -188,8 +188,8 @@ const TermsConditions: React.FC = () => {
           {/* Section 7 */}
           <section className="bg-dark-card border border-dark-border/70 rounded-3xl p-6 sm:p-8 shadow-xl space-y-4 hover:border-brand-danger/30 transition-all">
             <div className="flex items-center space-x-3 border-b border-dark-border/40 pb-4">
-              <UserX className="text-brand-danger shrink-0" size={22} />
-              <h2 className="text-base font-black text-white uppercase tracking-wider">
+              <UserX className="text-brand-danger shrink-0" size={24} />
+              <h2 className="text-base sm:text-lg font-black text-white uppercase tracking-wider">
                 7. User Code of Conduct, Anti-Abuse &amp; Account Termination
               </h2>
             </div>
@@ -210,8 +210,8 @@ const TermsConditions: React.FC = () => {
           {/* Section 8 */}
           <section className="bg-dark-card border border-dark-border/70 rounded-3xl p-6 sm:p-8 shadow-xl space-y-4 hover:border-brand-success/30 transition-all">
             <div className="flex items-center space-x-3 border-b border-dark-border/40 pb-4">
-              <Lock className="text-brand-success shrink-0" size={22} />
-              <h2 className="text-base font-black text-white uppercase tracking-wider">
+              <Lock className="text-brand-success shrink-0" size={24} />
+              <h2 className="text-base sm:text-lg font-black text-white uppercase tracking-wider">
                 8. Wallet Credit Requests &amp; Admin Allocation Discretion
               </h2>
             </div>
@@ -223,8 +223,8 @@ const TermsConditions: React.FC = () => {
           {/* Section 9 */}
           <section className="bg-dark-card border border-dark-border/70 rounded-3xl p-6 sm:p-8 shadow-xl space-y-4 hover:border-brand-purple/30 transition-all">
             <div className="flex items-center space-x-3 border-b border-dark-border/40 pb-4">
-              <Globe className="text-brand-purple shrink-0" size={22} />
-              <h2 className="text-base font-black text-white uppercase tracking-wider">
+              <Globe className="text-brand-purple shrink-0" size={24} />
+              <h2 className="text-base sm:text-lg font-black text-white uppercase tracking-wider">
                 9. Intellectual Property &amp; User Content Licensing
               </h2>
             </div>
@@ -236,8 +236,8 @@ const TermsConditions: React.FC = () => {
           {/* Section 10 */}
           <section className="bg-dark-card border border-dark-border/70 rounded-3xl p-6 sm:p-8 shadow-xl space-y-4 hover:border-amber-400/30 transition-all">
             <div className="flex items-center space-x-3 border-b border-dark-border/40 pb-4">
-              <AlertCircle className="text-amber-400 shrink-0" size={22} />
-              <h2 className="text-base font-black text-white uppercase tracking-wider">
+              <AlertCircle className="text-amber-400 shrink-0" size={24} />
+              <h2 className="text-base sm:text-lg font-black text-white uppercase tracking-wider">
                 10. Limitation of Liability &amp; "AS IS" Warranty Disclaimer
               </h2>
             </div>
@@ -249,8 +249,8 @@ const TermsConditions: React.FC = () => {
           {/* Section 11 */}
           <section className="bg-dark-card border border-dark-border/70 rounded-3xl p-6 sm:p-8 shadow-xl space-y-4 hover:border-brand-blue/30 transition-all">
             <div className="flex items-center space-x-3 border-b border-dark-border/40 pb-4">
-              <ShieldCheck className="text-brand-blue shrink-0" size={22} />
-              <h2 className="text-base font-black text-white uppercase tracking-wider">
+              <ShieldCheck className="text-brand-blue shrink-0" size={24} />
+              <h2 className="text-base sm:text-lg font-black text-white uppercase tracking-wider">
                 11. User Indemnification Agreement
               </h2>
             </div>
@@ -262,8 +262,8 @@ const TermsConditions: React.FC = () => {
           {/* Section 12 */}
           <section className="bg-dark-card border border-dark-border/70 rounded-3xl p-6 sm:p-8 shadow-xl space-y-4 hover:border-brand-danger/30 transition-all">
             <div className="flex items-center space-x-3 border-b border-dark-border/40 pb-4">
-              <Gavel className="text-brand-danger shrink-0" size={22} />
-              <h2 className="text-base font-black text-white uppercase tracking-wider">
+              <Gavel className="text-brand-danger shrink-0" size={24} />
+              <h2 className="text-base sm:text-lg font-black text-white uppercase tracking-wider">
                 12. Governing Law, Amendments &amp; Binding Dispute Resolution
               </h2>
             </div>
