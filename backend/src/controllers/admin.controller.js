@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import User from '../models/user.model.js';
 import Market from '../models/market.model.js';
 import Position from '../models/position.model.js';
@@ -266,19 +267,24 @@ export const getAdminMxpRequests = async (req, res, next) => {
  * @access  Private/Admin
  */
 export const approveMxpRequest = async (req, res, next) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
   try {
     const { id } = req.params;
     const adminNote = req.body.adminNote || 'Approved by Administrator';
 
-    // 1. Atomically transition request from 'Pending' to 'Approved'
-    // Guarantees that only ONE concurrent process can claim and approve the request.
+    // 1. Atomically transition request from 'Pending' to 'Approved' within transaction
     const request = await MxpRequest.findOneAndUpdate(
       { _id: id, status: 'Pending' },
       { $set: { status: 'Approved', adminNote } },
-      { new: true }
+      { new: true, session }
     );
 
     if (!request) {
+      await session.abortTransaction();
+      session.endSession();
+
       const existingRequest = await MxpRequest.findById(id);
       if (!existingRequest) {
         return res.status(404).json({ success: false, message: 'MXP request not found.' });
@@ -286,17 +292,24 @@ export const approveMxpRequest = async (req, res, next) => {
       return res.status(400).json({ success: false, message: `Request is already ${existingRequest.status}.` });
     }
 
-    // 2. Atomically credit user's MXP balance
+    // 2. Atomically credit user's MXP balance within same transaction
     const user = await User.findByIdAndUpdate(
       request.userId,
       { $inc: { mxpBalance: request.amount } },
-      { new: true }
+      { new: true, session }
     );
 
     if (!user) {
+      await session.abortTransaction();
+      session.endSession();
       return res.status(404).json({ success: false, message: 'User account not found.' });
     }
 
+    // Commit transaction cleanly
+    await session.commitTransaction();
+    session.endSession();
+
+    // 3. Post-commit notification delivery
     await createAndSendNotification({
       userId: user._id,
       title: '🎁 MXP Request Approved!',
@@ -311,6 +324,8 @@ export const approveMxpRequest = async (req, res, next) => {
       data: request,
     });
   } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
     next(error);
   }
 };

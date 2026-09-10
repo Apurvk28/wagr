@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import Market from '../models/market.model.js';
 import Position from '../models/position.model.js';
 import User from '../models/user.model.js';
@@ -10,6 +11,8 @@ import { getIo } from './socket.service.js';
  * Settles all open positions, credits winning user balances, 
  * sends win/loss notifications, updates stats, and emits socket events.
  * 
+ * Fully atomic and idempotent via Mongoose session transaction.
+ * 
  * @param {string} marketId 
  * @param {string} outcome - 'YES' | 'NO'
  * @param {string} [resolutionSource] 
@@ -19,51 +22,60 @@ export const executeMarketResolution = async (marketId, outcome, resolutionSourc
   const yesProb = outcome === 'YES' ? 100 : 0;
   const noProb = outcome === 'NO' ? 100 : 0;
 
-  // 1. Atomically claim and transition market status from 'Live'/'Pending Approval' to 'Resolving'
-  // This guarantees only ONE execution thread/process can acquire the market for settlement.
-  const market = await Market.findOneAndUpdate(
-    {
-      _id: marketId,
-      status: { $in: ['Live', 'Pending Approval'] },
-    },
-    {
-      $set: {
-        status: 'Resolving',
-        resolutionResult: outcome,
-        resolutionSource: resolutionSource,
-        yesProbability: yesProb,
-        noProbability: noProb,
-      },
-      $push: {
-        probabilityHistory: {
-          yesProbability: yesProb,
-          timestamp: new Date(),
-        },
-      },
-    },
-    { new: true }
-  );
-
-  if (!market) {
-    // If update returned null, the market was either non-existent or ALREADY Resolving, Resolved, or Cancelled.
-    const existingMarket = await Market.findById(marketId);
-    if (!existingMarket) {
-      throw new Error('Prediction market not found.');
-    }
-    // Return existing document safely without re-executing payouts or position loops!
-    return existingMarket;
-  }
+  const session = await mongoose.startSession();
+  session.startTransaction();
 
   try {
-    // 2. Fetch all active open positions in this market
+    // 1. Atomically claim and transition market status from 'Live'/'Pending Approval' to 'Resolving' within transaction
+    const market = await Market.findOneAndUpdate(
+      {
+        _id: marketId,
+        status: { $in: ['Live', 'Pending Approval'] },
+      },
+      {
+        $set: {
+          status: 'Resolving',
+          resolutionResult: outcome,
+          resolutionSource: resolutionSource,
+          yesProbability: yesProb,
+          noProbability: noProb,
+        },
+        $push: {
+          probabilityHistory: {
+            yesProbability: yesProb,
+            timestamp: new Date(),
+          },
+        },
+      },
+      { new: true, session }
+    );
+
+    if (!market) {
+      await session.abortTransaction();
+      session.endSession();
+
+      // If update returned null, the market was either non-existent or ALREADY Resolving, Resolved, or Cancelled.
+      const existingMarket = await Market.findById(marketId);
+      if (!existingMarket) {
+        throw new Error('Prediction market not found.');
+      }
+      if (existingMarket.status === 'Resolved' || existingMarket.status === 'Resolving') {
+        return existingMarket;
+      }
+      if (existingMarket.status === 'Cancelled') {
+        throw new Error('Cannot resolve a cancelled prediction market.');
+      }
+      return existingMarket;
+    }
+
+    // 2. Fetch all active open positions in this market inside session
     const openPositions = await Position.find({
       marketId: market._id,
       status: 'Open',
-    });
+    }).session(session);
 
     // 3. Group positions by userId to calculate aggregated payouts & results
     const userPositionsMap = new Map();
-
     for (const position of openPositions) {
       const uid = position.userId.toString();
       if (!userPositionsMap.has(uid)) {
@@ -72,7 +84,9 @@ export const executeMarketResolution = async (marketId, outcome, resolutionSourc
       userPositionsMap.get(uid).push(position);
     }
 
-    // 4. Process settlements per user
+    const userNotificationsToDeliver = [];
+
+    // 4. Process settlements per user within transaction
     for (const [userIdStr, positions] of userPositionsMap.entries()) {
       let totalPayout = 0;
       let totalInvested = 0;
@@ -87,7 +101,7 @@ export const executeMarketResolution = async (marketId, outcome, resolutionSourc
         const payout = isWin ? Math.round(position.investedAmount * (100 / entryProb)) : 0;
         const profitLoss = isWin ? payout - position.investedAmount : -position.investedAmount;
 
-        // Atomically claim position settlement to prevent position-level race conditions
+        // Update position status inside session
         const settledPosition = await Position.findOneAndUpdate(
           { _id: position._id, status: 'Open' },
           {
@@ -98,11 +112,10 @@ export const executeMarketResolution = async (marketId, outcome, resolutionSourc
               closedAt: new Date(),
             },
           },
-          { new: true }
+          { new: true, session }
         );
 
         if (!settledPosition) {
-          // Position was already settled or closed concurrently
           continue;
         }
 
@@ -113,43 +126,64 @@ export const executeMarketResolution = async (marketId, outcome, resolutionSourc
         netProfitLoss += profitLoss;
       }
 
-      // Credit winning user's wallet atomically
+      // Credit winning user's balance inside session
       if (totalPayout > 0) {
-        await User.findByIdAndUpdate(userIdStr, {
-          $inc: { mxpBalance: totalPayout },
-        });
+        await User.findByIdAndUpdate(
+          userIdStr,
+          { $inc: { mxpBalance: totalPayout } },
+          { session }
+        );
       }
 
-      const userObj = await User.findById(userIdStr);
+      userNotificationsToDeliver.push({
+        userId: userIdStr,
+        totalPayout,
+        netProfitLoss,
+        wonCount,
+      });
+    }
+
+    // 5. Finalize market status to 'Resolved' inside session
+    const resolvedMarket = await Market.findByIdAndUpdate(
+      market._id,
+      { $set: { status: 'Resolved' } },
+      { new: true, session }
+    );
+
+    // Commit transaction cleanly
+    await session.commitTransaction();
+    session.endSession();
+
+    // 6. Post-transaction side-effects: notifications, stats, and real-time socket events
+    for (const item of userNotificationsToDeliver) {
+      const userObj = await User.findById(item.userId);
       if (userObj) {
-        // Send personalized Win or Loss Notification
-        if (wonCount > 0) {
+        if (item.wonCount > 0) {
           await createAndSendNotification({
             userId: userObj._id,
             title: `🎉 You Won! Market Resolved: ${outcome}`,
-            message: `"${market.title}" has closed. Your prediction was CORRECT! You won ${totalPayout} MXP.`,
+            message: `"${resolvedMarket.title}" has closed. Your prediction was CORRECT! You won ${item.totalPayout} MXP.`,
             type: 'Market Resolved',
-            redirectUrl: `/markets/${market._id}`,
+            redirectUrl: `/markets/${resolvedMarket._id}`,
           });
         } else {
-          const lostAmount = Math.abs(netProfitLoss);
+          const lostAmount = Math.abs(item.netProfitLoss);
           await createAndSendNotification({
             userId: userObj._id,
             title: `❌ Market Resolved: ${outcome}`,
-            message: `"${market.title}" has closed. Your prediction was INCORRECT.${lostAmount > 0 ? ` You lost ${lostAmount} MXP.` : ''}`,
+            message: `"${resolvedMarket.title}" has closed. Your prediction was INCORRECT.${lostAmount > 0 ? ` You lost ${lostAmount} MXP.` : ''}`,
             type: 'Market Resolved',
-            redirectUrl: `/markets/${market._id}`,
+            redirectUrl: `/markets/${resolvedMarket._id}`,
           });
         }
 
-        // Asynchronously update stats & check achievements
         updateUserStatsAndCheckAchievements(userObj._id, 'TRADE_RESOLVE').catch(console.error);
       }
     }
 
-    // 5. Notify followers who had no open positions
+    // Notify followers who had no open positions
     const followersToNotify = await User.find({
-      followedMarkets: market._id,
+      followedMarkets: resolvedMarket._id,
       _id: { $nin: Array.from(userPositionsMap.keys()) },
     }).select('_id');
 
@@ -157,39 +191,34 @@ export const executeMarketResolution = async (marketId, outcome, resolutionSourc
       await createAndSendNotification({
         userId: follower._id,
         title: `Market Closed: ${outcome}`,
-        message: `"${market.title}" that you follow has closed and resolved ${outcome}.`,
+        message: `"${resolvedMarket.title}" that you follow has closed and resolved ${outcome}.`,
         type: 'Followed Market Updated',
-        redirectUrl: `/markets/${market._id}`,
+        redirectUrl: `/markets/${resolvedMarket._id}`,
       });
     }
 
-    // 6. Finalize market status to 'Resolved'
-    market.status = 'Resolved';
-    await market.save();
-
-    // 7. Emit real-time Socket.IO resolution events
+    // Emit real-time Socket.IO resolution events
     const io = getIo();
     if (io) {
       io.emit('market_resolved', {
-        marketId: market._id,
+        marketId: resolvedMarket._id,
         outcome,
-        yesProbability: market.yesProbability,
-        noProbability: market.noProbability,
+        yesProbability: resolvedMarket.yesProbability,
+        noProbability: resolvedMarket.noProbability,
       });
       io.emit('market_update', {
-        marketId: market._id,
-        status: market.status,
-        yesProbability: market.yesProbability,
-        noProbability: market.noProbability,
+        marketId: resolvedMarket._id,
+        status: resolvedMarket.status,
+        yesProbability: resolvedMarket.yesProbability,
+        noProbability: resolvedMarket.noProbability,
       });
     }
 
-    console.log(`✅ Market "${market.title}" automatically resolved as ${outcome}. Notified ${userPositionsMap.size} traders.`);
-    return market;
+    console.log(`✅ Market "${resolvedMarket.title}" resolved as ${outcome}. Notified ${userPositionsMap.size} traders.`);
+    return resolvedMarket;
   } catch (err) {
-    // Revert status if error occurred during settlement
-    market.status = 'Live';
-    await market.save();
+    await session.abortTransaction();
+    session.endSession();
     throw err;
   }
 };
