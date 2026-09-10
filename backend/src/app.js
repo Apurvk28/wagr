@@ -19,6 +19,7 @@ import notificationRoutes from './routes/notification.routes.js';
 import adminRoutes from './routes/admin.routes.js';
 import searchRoutes from './routes/search.routes.js';
 import leaderboardRoutes from './routes/leaderboard.routes.js';
+import { csrfProtection } from './middleware/csrf.middleware.js';
 
 const app = express();
 
@@ -30,7 +31,7 @@ const corsOptions = {
   origin: process.env.CLIENT_URL || 'http://localhost:5173',
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'X-Wagr-CSRF'],
 };
 app.use(cors(corsOptions));
 
@@ -45,6 +46,9 @@ if (process.env.NODE_ENV === 'development') {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+
+// CSRF Defense Middleware for state-changing requests
+app.use(csrfProtection);
 
 // Global rate limiting
 const apiLimiter = rateLimit({

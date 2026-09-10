@@ -84,7 +84,7 @@ const getMockShortTermSuggestions = (adminId) => {
  */
 export const generateMarketsSuggestions = async (marketType) => {
   try {
-    const admin = await User.findOne({ email: 'admin@wagr.io' }) || await User.findOne({ role: 'Admin' });
+    const admin = (process.env.SEED_ADMIN_EMAIL ? await User.findOne({ email: process.env.SEED_ADMIN_EMAIL }) : null) || await User.findOne({ role: 'Admin' });
     if (!admin) {
       console.warn('⚠️ No Admin user found to assign as creator of AI markets.');
       return [];

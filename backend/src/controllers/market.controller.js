@@ -308,20 +308,40 @@ export const closeTrade = async (req, res, next) => {
     const { positionId } = req.body;
     const user = req.user;
 
-    // 1. Fetch active open position
-    const query = { userId: user._id, status: 'Open' };
-    if (positionId || req.query.positionId) {
-      query._id = positionId || req.query.positionId;
-    } else {
-      query.marketId = marketId;
+    const targetPositionId = positionId || req.query.positionId;
+
+    // 1. Fetch active open position, enforcing user ownership, market ownership, and open status
+    const query = {
+      userId: user._id,
+      marketId: marketId,
+      status: 'Open',
+    };
+
+    if (targetPositionId) {
+      query._id = targetPositionId;
     }
 
     const position = await Position.findOne(query);
 
     if (!position) {
+      // Check if position exists under this user but belongs to a different market
+      if (targetPositionId) {
+        const crossMarketPosition = await Position.findById(targetPositionId);
+        if (
+          crossMarketPosition &&
+          crossMarketPosition.userId.toString() === user._id.toString() &&
+          crossMarketPosition.marketId.toString() !== marketId.toString()
+        ) {
+          return res.status(400).json({
+            success: false,
+            message: 'Invalid position closure request: Position does not belong to the specified market.',
+          });
+        }
+      }
+
       return res.status(400).json({
         success: false,
-        message: 'No active open position found in this prediction market.',
+        message: 'No active open position found matching this market and request criteria.',
       });
     }
 

@@ -33,8 +33,11 @@ export const initSocket = (io) => {
     }
 
     socket.on('join_user', (userId) => {
-      if (userId) {
-        socket.join(userId.toString());
+      // Only allow joining own user room if authenticated AND userId matches socket.data.userId
+      if (socket.data.userId && userId && userId.toString() === socket.data.userId.toString()) {
+        socket.join(socket.data.userId.toString());
+      } else {
+        console.warn(`[Socket Security Alert] Unauthorized room join attempt by socket ${socket.id} (user: ${socket.data.userId || 'Guest'}) for target room: ${userId}`);
       }
     });
 

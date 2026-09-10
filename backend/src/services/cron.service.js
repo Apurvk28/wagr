@@ -128,7 +128,7 @@ export const startCronJobs = () => {
       await syncAiNewsFromGroq();
       await simulateMarketSentiment();
       // Ensure we keep at least 6 of each type
-      const admin = await User.findOne({ email: 'admin@wagr.io' }) || await User.findOne({ role: 'Admin' });
+      const admin = (process.env.SEED_ADMIN_EMAIL ? await User.findOne({ email: process.env.SEED_ADMIN_EMAIL }) : null) || await User.findOne({ role: 'Admin' });
       if (admin) {
         // Enforce 6 active markets
         const ltCount = await Market.countDocuments({ status: 'Live', marketType: 'Long-Term' });

@@ -12,7 +12,7 @@ router.post('/logout', (req, res) => {
   res.clearCookie('wagr_jwt', {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    sameSite: process.env.COOKIE_SAME_SITE || 'lax',
   });
   res.status(200).json({
     success: true,

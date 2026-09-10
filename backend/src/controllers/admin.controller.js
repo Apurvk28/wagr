@@ -268,32 +268,41 @@ export const getAdminMxpRequests = async (req, res, next) => {
 export const approveMxpRequest = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const request = await MxpRequest.findById(id).populate('userId');
+    const adminNote = req.body.adminNote || 'Approved by Administrator';
+
+    // 1. Atomically transition request from 'Pending' to 'Approved'
+    // Guarantees that only ONE concurrent process can claim and approve the request.
+    const request = await MxpRequest.findOneAndUpdate(
+      { _id: id, status: 'Pending' },
+      { $set: { status: 'Approved', adminNote } },
+      { new: true }
+    );
+
     if (!request) {
-      return res.status(404).json({ success: false, message: 'MXP request not found.' });
+      const existingRequest = await MxpRequest.findById(id);
+      if (!existingRequest) {
+        return res.status(404).json({ success: false, message: 'MXP request not found.' });
+      }
+      return res.status(400).json({ success: false, message: `Request is already ${existingRequest.status}.` });
     }
 
-    if (request.status !== 'Pending') {
-      return res.status(400).json({ success: false, message: `Request is already ${request.status}.` });
-    }
+    // 2. Atomically credit user's MXP balance
+    const user = await User.findByIdAndUpdate(
+      request.userId,
+      { $inc: { mxpBalance: request.amount } },
+      { new: true }
+    );
 
-    const user = await User.findById(request.userId._id);
     if (!user) {
       return res.status(404).json({ success: false, message: 'User account not found.' });
     }
-
-    user.mxpBalance += request.amount;
-    await user.save();
-
-    request.status = 'Approved';
-    request.adminNote = req.body.adminNote || 'Approved by Administrator';
-    await request.save();
 
     await createAndSendNotification({
       userId: user._id,
       title: '🎁 MXP Request Approved!',
       message: `Your request for ${request.amount.toLocaleString()} MXP has been approved by Admin! Your new balance is ${user.mxpBalance.toLocaleString()} MXP.`,
-      type: 'Market_Settlement',
+      type: 'Admin Announcement',
+      redirectUrl: '/wallet',
     });
 
     res.status(200).json({
@@ -314,24 +323,29 @@ export const approveMxpRequest = async (req, res, next) => {
 export const rejectMxpRequest = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const request = await MxpRequest.findById(id).populate('userId');
+    const adminNote = req.body.adminNote || 'Declined by Administrator';
+
+    // Atomically transition request from 'Pending' to 'Rejected'
+    const request = await MxpRequest.findOneAndUpdate(
+      { _id: id, status: 'Pending' },
+      { $set: { status: 'Rejected', adminNote } },
+      { new: true }
+    );
+
     if (!request) {
-      return res.status(404).json({ success: false, message: 'MXP request not found.' });
+      const existingRequest = await MxpRequest.findById(id);
+      if (!existingRequest) {
+        return res.status(404).json({ success: false, message: 'MXP request not found.' });
+      }
+      return res.status(400).json({ success: false, message: `Request is already ${existingRequest.status}.` });
     }
-
-    if (request.status !== 'Pending') {
-      return res.status(400).json({ success: false, message: `Request is already ${request.status}.` });
-    }
-
-    request.status = 'Rejected';
-    request.adminNote = req.body.adminNote || 'Declined by Administrator';
-    await request.save();
 
     await createAndSendNotification({
-      userId: request.userId._id,
+      userId: request.userId,
       title: '⚠️ MXP Request Update',
       message: `Your request for ${request.amount.toLocaleString()} MXP was reviewed and declined by Admin.`,
-      type: 'System',
+      type: 'Admin Announcement',
+      redirectUrl: '/wallet',
     });
 
     res.status(200).json({
