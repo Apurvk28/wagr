@@ -4,7 +4,7 @@ import Market from '../models/market.model.js';
 import Position from '../models/position.model.js';
 import Post from '../models/post.model.js';
 import MxpRequest from '../models/mxpRequest.model.js';
-import { checkExpiredMarkets, archiveShortTermMarkets } from '../services/cron.service.js';
+import { checkExpiredMarkets } from '../services/cron.service.js';
 import { generateMarketsSuggestions } from '../services/aiGeneration.service.js';
 import { syncAiNewsFromGroq } from '../services/aiNews.service.js';
 import { createAndSendNotification } from '../services/notification.service.js';
@@ -227,7 +227,6 @@ export const triggerCronJobs = async (req, res, next) => {
   try {
     console.log('⚡ Manually triggering simulated V1.1 cron background tasks...');
     await checkExpiredMarkets();
-    await archiveShortTermMarkets();
     await generateMarketsSuggestions('Short-Term');
     await generateMarketsSuggestions('Long-Term');
     await syncAiNewsFromGroq();

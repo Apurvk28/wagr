@@ -658,6 +658,13 @@ const MarketDetails: React.FC = () => {
                                   -{tradeAmount} MXP
                                 </span>
                               </div>
+
+                              <div className="flex justify-between text-[11px] pt-1.5 border-t border-dark-border/20">
+                                <span className="text-dark-muted font-medium">Resolution Schedule</span>
+                                <span className="text-white font-bold">
+                                  Resolves {formatDate(market.resolutionDate)}
+                                </span>
+                              </div>
                             </div>
                           </div>
                         );
@@ -708,6 +715,13 @@ const MarketDetails: React.FC = () => {
                                 </span>
                                 <span className="text-[10px] text-dark-muted font-bold">
                                   Entry: +{entryRate}%
+                                </span>
+                              </div>
+
+                              <div className="flex justify-between items-center text-[10px] text-dark-muted font-medium border-t border-b border-dark-border/20 py-1">
+                                <span>Resolution:</span>
+                                <span className="text-white font-bold">
+                                  Resolves {formatDate(market.resolutionDate)}
                                 </span>
                               </div>
 

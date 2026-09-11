@@ -38,6 +38,10 @@ const faqData: FaqItem[] = [
     answer: 'If your MXP balance runs low, you can submit a credit request directly to system administrators through your Wallet page (/wallet). Admin approvals credit extra MXP to your balance instantly.',
   },
   {
+    question: 'What is the difference between Short-Term and Long-Term markets?',
+    answer: 'Short-Term daily markets refresh every morning at 12:05 AM in the Wagr application timezone and close/expire at 11:00 PM on the exact same day (with a 65-minute break from 11:00 PM to 12:05 AM for settlement). Long-Term strategic markets remain open 24/7 without daily resets, tracking multi-week or multi-month milestones (e.g. AI releases, Fed interest rate decisions, elections) with fixed target resolution dates.',
+  },
+  {
     question: 'How does AI news linking work on Wagr?',
     answer: 'Wagr continuously indexes verified news articles using natural language processing to extract market sentiment. These breaking news briefs are linked directly to related prediction topics, providing instant context before placing positions.',
   },

@@ -7,6 +7,7 @@ import Insight from '../models/insight.model.js';
 import MxpRequest from '../models/mxpRequest.model.js';
 import { createAndSendNotification } from '../services/notification.service.js';
 import { updateUserStatsAndCheckAchievements } from '../services/achievement.service.js';
+import { getStartOfToday, getUpcomingMidnight } from '../utils/dateUtils.js';
 
 /**
  * @desc    Get current user profile
@@ -493,10 +494,8 @@ Rules:
 export const getHomepageSummary = async (req, res, next) => {
   try {
     const userId = req.user._id;
-    const startOfToday = new Date();
-    startOfToday.setHours(0, 0, 0, 0);
-    const endOfToday = new Date();
-    endOfToday.setHours(23, 59, 59, 999);
+    const startOfToday = getStartOfToday(new Date());
+    const endOfToday = getUpcomingMidnight(new Date());
 
     // 1. Fetch Today's Summary Counts
     const [

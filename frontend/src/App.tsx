@@ -23,6 +23,7 @@ import ContactSupport from './pages/ContactSupport';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsConditions from './pages/TermsConditions';
 import WalletPage from './pages/Wallet';
+import HowToPlayPage from './pages/HowToPlayPage';
 
 import ScrollToTop from './components/ScrollToTop';
 
@@ -49,6 +50,7 @@ function App() {
             <Route path="/support" element={<ContactSupport />} />
             <Route path="/privacy" element={<PrivacyPolicy />} />
             <Route path="/terms" element={<TermsConditions />} />
+            <Route path="/how-to-play" element={<HowToPlayPage />} />
 
             {/* Guest-only Auth routes */}
             <Route element={<GuestRoute />}>

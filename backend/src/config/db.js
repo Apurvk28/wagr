@@ -4,6 +4,7 @@ import User from '../models/user.model.js';
 import Market from '../models/market.model.js';
 import News from '../models/news.model.js';
 import { mockMarkets } from '../utils/mockData.js';
+import { getUpcomingMidnight } from '../utils/dateUtils.js';
 
 const seedDatabase = async () => {
   try {
@@ -44,8 +45,7 @@ const seedDatabase = async () => {
 
     console.log('🌱 Seeding database with default event contracts...');
 
-    const endOfToday = new Date();
-    endOfToday.setHours(23, 59, 59, 999);
+    const endOfToday = getUpcomingMidnight(new Date());
 
     const adminId = admin ? admin._id : null;
 

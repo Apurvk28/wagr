@@ -25,17 +25,17 @@ interface ExtendedNewsArticle extends NewsArticle {
 
 const NewsHub: React.FC = () => {
   const { user } = useAuth();
-  
+
   const [articles, setArticles] = useState<ExtendedNewsArticle[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Search & Filter States
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [showFilters, setShowFilters] = useState(false);
   const [sortBy, setSortBy] = useState<'newest' | 'visited'>('newest');
-  
+
   // Administrative States
   const [syncing, setSyncing] = useState(false);
   const [syncSuccess, setSyncSuccess] = useState<string | null>(null);
@@ -47,9 +47,9 @@ const NewsHub: React.FC = () => {
       const params: any = {};
       if (searchTerm) params.search = searchTerm;
       if (selectedCategory !== 'All') params.category = selectedCategory;
-      
+
       const data = await getNewsFeed(params);
-      
+
       // Inject mock views for sorting by popularity/visits
       const enrichedData = data.map((art) => {
         // Deterministic views based on ID to avoid shifts on re-renders
@@ -71,7 +71,7 @@ const NewsHub: React.FC = () => {
     const delayDebounce = setTimeout(() => {
       fetchNews();
     }, 300); // 300ms search debounce
-    
+
     return () => clearTimeout(delayDebounce);
   }, [searchTerm, selectedCategory]);
 
@@ -165,15 +165,14 @@ const NewsHub: React.FC = () => {
                 className="w-full bg-dark/60 border border-dark-border rounded-xl pl-11 pr-4 py-2.5 text-sm text-white placeholder-dark-muted focus:outline-none focus:border-brand-blue/70 transition-colors"
               />
             </div>
-            
+
             {/* Filter Toggle Button */}
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className={`inline-flex items-center justify-center space-x-2 border rounded-xl px-5 py-2.5 text-xs font-bold uppercase tracking-wider transition-all ${
-                showFilters 
+              className={`inline-flex items-center justify-center space-x-2 border rounded-xl px-5 py-2.5 text-xs font-bold uppercase tracking-wider transition-all ${showFilters
                   ? 'bg-brand-blue/10 border-brand-blue/45 text-brand-blue'
                   : 'bg-dark/40 border-dark-border/60 text-dark-muted hover:text-white hover:border-dark-border'
-              }`}
+                }`}
             >
               <SlidersHorizontal size={14} />
               <span>Filters</span>
@@ -191,21 +190,19 @@ const NewsHub: React.FC = () => {
                 <div className="flex space-x-2">
                   <button
                     onClick={() => setSortBy('newest')}
-                    className={`text-xs font-semibold px-4 py-2 rounded-xl border transition-all ${
-                      sortBy === 'newest'
+                    className={`text-xs font-semibold px-4 py-2 rounded-xl border transition-all ${sortBy === 'newest'
                         ? 'bg-brand-blue/10 border-brand-blue/45 text-brand-blue'
                         : 'bg-dark/40 border-dark-border/60 text-dark-muted hover:text-white'
-                    }`}
+                      }`}
                   >
                     Newest
                   </button>
                   <button
                     onClick={() => setSortBy('visited')}
-                    className={`text-xs font-semibold px-4 py-2 rounded-xl border transition-all ${
-                      sortBy === 'visited'
+                    className={`text-xs font-semibold px-4 py-2 rounded-xl border transition-all ${sortBy === 'visited'
                         ? 'bg-brand-blue/10 border-brand-blue/45 text-brand-blue'
                         : 'bg-dark/40 border-dark-border/60 text-dark-muted hover:text-white'
-                    }`}
+                      }`}
                   >
                     Most Visited
                   </button>
@@ -224,11 +221,10 @@ const NewsHub: React.FC = () => {
                       <button
                         key={category}
                         onClick={() => setSelectedCategory(category)}
-                        className={`text-xs font-semibold px-4 py-2 rounded-xl border transition-all duration-200 ${
-                          active
+                        className={`text-xs font-semibold px-4 py-2 rounded-xl border transition-all duration-200 ${active
                             ? 'bg-brand-blue/20 border-brand-blue/60 text-brand-blue'
                             : 'bg-dark/40 border-dark-border/60 text-dark-muted hover:text-white hover:border-dark-border'
-                        }`}
+                          }`}
                       >
                         {category}
                       </button>
@@ -260,29 +256,25 @@ const NewsHub: React.FC = () => {
           <SkeletonLoader />
         ) : processedArticles.length > 0 ? (
           (() => {
-            const shortTermNews = processedArticles.filter(
-              (art) => art.relatedMarket && art.relatedMarket.marketType === 'Short-Term'
-            );
-            const longTermNews = processedArticles.filter(
-              (art) => !art.relatedMarket || art.relatedMarket.marketType === 'Long-Term'
-            );
+            const marketNews = processedArticles.filter((art) => art.relatedMarket != null).slice(0, 10);
+            const generalNews = processedArticles.filter((art) => !art.relatedMarket).slice(0, 15);
 
             return (
               <div className="space-y-12 animate-fade-in">
-                {/* Short-Term News Section */}
+                {/* Market-Related News Section */}
                 <div className="space-y-6">
                   <div className="flex items-center space-x-2 border-b border-dark-border/20 pb-2">
-                    <span className="text-xl">⚡</span>
+                    <span className="text-xl">🎯</span>
                     <h2 className="text-base font-extrabold text-white tracking-tight leading-none uppercase">
-                      Short-Term News Briefings
+                      Market-Related News
                     </h2>
-                    <span className="text-[10px] bg-brand-blue/10 border border-brand-blue/35 text-brand-blue font-bold uppercase tracking-wider px-2 py-0.5 rounded">
-                      Daily Updates
+                    <span className="text-[10px] bg-brand-purple/10 border border-brand-purple/35 text-brand-purple font-bold uppercase tracking-wider px-2 py-0.5 rounded">
+                      Linked to Active Contracts
                     </span>
                   </div>
-                  {shortTermNews.length > 0 ? (
+                  {marketNews.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                      {shortTermNews.map((article) => (
+                      {marketNews.map((article) => (
                         <div
                           key={article._id}
                           className="bg-dark-card border border-dark-border/60 rounded-2xl p-6 shadow-xl flex flex-col justify-between group relative overflow-hidden transition-all duration-250 hover:border-dark-border/100 hover:scale-[1.01]"
@@ -349,25 +341,25 @@ const NewsHub: React.FC = () => {
                     </div>
                   ) : (
                     <div className="bg-dark-card/30 border border-dark-border/40 rounded-2xl py-10 text-center">
-                      <p className="text-xs text-dark-muted">No daily short-term news briefings currently synced.</p>
+                      <p className="text-xs text-dark-muted">No market-related news briefings available right now.</p>
                     </div>
                   )}
                 </div>
 
-                {/* Long-Term News Section */}
+                {/* General / Latest News Section */}
                 <div className="space-y-6">
                   <div className="flex items-center space-x-2 border-b border-dark-border/20 pb-2">
-                    <span className="text-xl">📅</span>
+                    <span className="text-xl">🌐</span>
                     <h2 className="text-base font-extrabold text-white tracking-tight leading-none uppercase">
-                      Long-Term News Timelines
+                      Latest News
                     </h2>
-                    <span className="text-[10px] bg-brand-purple/10 border border-brand-purple/35 text-brand-purple font-bold uppercase tracking-wider px-2 py-0.5 rounded">
-                      Contracts Timelines
+                    <span className="text-[10px] bg-brand-blue/10 border border-brand-blue/35 text-brand-blue font-bold uppercase tracking-wider px-2 py-0.5 rounded">
+                      Broader Coverage
                     </span>
                   </div>
-                  {longTermNews.length > 0 ? (
+                  {generalNews.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                      {longTermNews.map((article) => (
+                      {generalNews.map((article) => (
                         <div
                           key={article._id}
                           className="bg-dark-card border border-dark-border/60 rounded-2xl p-6 shadow-xl flex flex-col justify-between group relative overflow-hidden transition-all duration-250 hover:border-dark-border/100 hover:scale-[1.01]"
@@ -440,7 +432,7 @@ const NewsHub: React.FC = () => {
                 </div>
 
                 {/* Empty State after filter */}
-                {shortTermNews.length === 0 && longTermNews.length === 0 && (
+                {marketNews.length === 0 && generalNews.length === 0 && (
                   <div className="bg-dark-card/30 border border-dark-border/40 rounded-2xl py-14 text-center">
                     <p className="text-sm text-white font-bold mb-1">No news briefings matched</p>
                     <p className="text-xs text-dark-muted">Try adjusting your filters.</p>

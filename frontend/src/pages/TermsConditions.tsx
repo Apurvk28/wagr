@@ -3,7 +3,7 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { 
   ShieldAlert, Cpu, Scale, Globe, AlertCircle, FileText, CheckCircle2, 
-  Lock, Gavel, UserX, Download, ShieldCheck, RefreshCw
+  Lock, Gavel, UserX, Download, ShieldCheck
 } from 'lucide-react';
 import { exportTermsConditionsPDF } from '../utils/pdfExporter';
 import { AnimatedBorderButton } from '../components/ui/AnimatedBorderButton';
@@ -139,19 +139,34 @@ const TermsConditions: React.FC = () => {
           </section>
 
           {/* Section 4 */}
-          <section className="bg-dark-card border border-dark-border/70 rounded-3xl p-6 sm:p-8 shadow-xl space-y-4 hover:border-emerald-400/30 transition-all">
+          <section className="bg-dark-card border-2 border-brand-purple/60 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-4 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-96 h-96 bg-brand-purple/10 rounded-full blur-3xl pointer-events-none" />
             <div className="flex items-center space-x-3 border-b border-dark-border/40 pb-4">
-              <RefreshCw className="text-emerald-400 shrink-0" size={24} />
+              <Cpu className="text-brand-purple shrink-0" size={26} />
               <h2 className="text-base sm:text-lg font-black text-white uppercase tracking-wider">
-                4. AI Sentiment Ingestion &amp; Autonomous Market Simulation Declaration
+                4. AI Market Simulation &amp; Probability Adjustments Disclosure (Binding Notice)
               </h2>
             </div>
+
+            {/* High-visibility Callout Banner */}
+            <div className="bg-brand-purple/15 border border-brand-purple/40 rounded-2xl p-5 space-y-2">
+              <div className="flex items-center space-x-2 text-brand-purple font-black text-xs uppercase tracking-wider">
+                <AlertCircle size={16} />
+                <span>PROMINENT LEGAL DISCLOSURE — AUTOMATED AI MARKET MANIPULATION &amp; SENTIMENT ADJUSTMENT</span>
+              </div>
+              <p className="text-xs text-white/90 leading-relaxed font-semibold">
+                Wagr.io utilizes Artificial Intelligence (AI) algorithms, Large Language Models (LLM microservices), and automated background agents to analyze news feeds, simulate probability movements, generate new market proposals, and dynamically adjust YES/NO contract liquidity pools and market probabilities.
+              </p>
+            </div>
+
             <p className="text-xs sm:text-sm text-dark-muted leading-relaxed">
-              To reflect real-world market dynamics, Wagr incorporates automated AI news sentiment integration:
+              By accessing or trading on Wagr.io, users explicitly acknowledge, understand, and agree to the following AI integration terms:
             </p>
-            <ul className="list-disc pl-5 text-xs text-dark-muted space-y-2.5 leading-relaxed">
-              <li><strong className="text-white">Liquidity Pool Adjustments:</strong> AI sentiment routines may adjust YES/NO liquidity pools to reflect breaking news events prior to market expiration.</li>
-              <li><strong className="text-white">Outcome Integrity Safeguard:</strong> AI market sentiment simulations strictly influence probability pricing prior to expiration. AI routines DO NOT resolve final market outcomes. Final resolutions depend strictly on real-world verification.</li>
+
+            <ul className="list-disc pl-5 text-xs text-dark-muted space-y-2.5 leading-relaxed font-medium">
+              <li><strong className="text-white">AI-Driven Probability Adjustments:</strong> AI sentiment algorithms continuously evaluate breaking news and market momentum, automatically adjusting contract odds and liquidity pool ratios prior to market resolution.</li>
+              <li><strong className="text-white">Synthetic Market Sentiment:</strong> Contract probabilities displayed on Wagr.io reflect a combination of user trade volumes and automated AI sentiment simulations.</li>
+              <li><strong className="text-white">Grounding in Verifiable Facts:</strong> While AI routines dynamically simulate probability fluctuations prior to expiration, final outcome resolutions (YES/NO settlement) remain strictly grounded in verifiable real-world primary sources and are verified by administrators.</li>
             </ul>
           </section>
 

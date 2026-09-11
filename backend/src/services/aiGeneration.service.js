@@ -1,86 +1,125 @@
 import Market from '../models/market.model.js';
 import User from '../models/user.model.js';
+import { getUpcomingMidnight } from '../utils/dateUtils.js';
 
-// Fallback markets list if Groq API call fails or key is missing
-const getMockLongTermSuggestions = (adminId) => {
-  const topics = [
-    {
-      title: 'Will OpenAI release GPT-6 before 2027?',
-      description: 'Resolves to YES if OpenAI officially announces and launches the GPT-6 model for public or API developer access before January 1, 2027.',
-      category: 'Artificial Intelligence',
-    },
-    {
-      title: 'Will Apple launch a commercial foldable iPhone in 2026?',
-      description: 'Resolves to YES if Apple Inc. commercially releases a foldable display smartphone (commonly referred to as foldable iPhone) by December 31, 2026.',
-      category: 'Technology',
-    },
-    {
-      title: 'Will SpaceX land a human on Mars before 2030?',
-      description: 'Resolves to YES if SpaceX successfully lands at least one human being on the surface of Mars by December 31, 2029.',
-      category: 'Technology',
-    },
-    {
-      title: 'Will the Federal Reserve cut interest rates below 3.0% in 2026?',
-      description: 'Resolves to YES if the US Federal Reserve lowers the benchmark federal funds rate below 3.0% at any point during the calendar year 2026.',
-      category: 'Finance',
-    },
-  ];
+/**
+ * Event-aware post-generation validator.
+ * Validates AI output against current runtime date, historical product launches,
+ * past events, and logical consistency.
+ * 
+ * @param {Object} market - Market draft proposal
+ * @param {string} marketType - 'Short-Term' | 'Long-Term'
+ * @returns {boolean} True if market is valid and fresh, false if stale/invalid.
+ */
+/**
+ * Event-aware post-generation validator.
+ * Generic validation against current runtime date, past years, historical phrasing,
+ * and logical date consistency without hardcoded keyword blacklists.
+ * 
+ * @param {Object} market - Market draft proposal
+ * @param {string} marketType - 'Short-Term' | 'Long-Term'
+ * @returns {boolean} True if market is valid and fresh, false if stale/invalid.
+ */
+export const validateGeneratedMarket = (market, marketType) => {
+  if (!market || !market.title || typeof market.title !== 'string') {
+    return false;
+  }
 
-  return topics.map((t) => ({
-    title: t.title,
-    description: t.description,
-    category: t.category,
-    marketType: 'Long-Term',
-    status: 'Pending Approval',
-    resolutionDate: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000), // ~6 months
-    createdBy: adminId,
-  }));
+  const titleLower = market.title.trim().toLowerCase();
+  const descLower = (market.description || '').toLowerCase();
+  const combinedText = `${titleLower} ${descLower}`;
+
+  // 1. Must be a clear prediction question starting with 'Will', 'Is', 'Can', 'Should', or 'Would'
+  const validStarts = ['will', 'is', 'can', 'should', 'would'];
+  const hasValidStart = validStarts.some(start => titleLower.startsWith(start));
+  if (!hasValidStart) {
+    console.warn(`[Validation Rejected] Title does not start with a valid prediction query: "${market.title}"`);
+    return false;
+  }
+
+  // 2. Reject historical past-tense phrasing indicating past/completed events
+  const pastPhrases = ['was announced', 'was released', 'was launched', 'occurred in', 'happened in', 'launched in 20'];
+  for (const phrase of pastPhrases) {
+    if (combinedText.includes(phrase)) {
+      console.warn(`[Validation Rejected] Historical past-tense phrase detected ("${phrase}") in: "${market.title}"`);
+      return false;
+    }
+  }
+
+  // 3. Generic Year Check: Reject any past 4-digit years prior to current runtime year
+  const currentYear = new Date().getUTCFullYear();
+  const yearMatches = combinedText.match(/\b(20[0-9]{2})\b/g);
+  if (yearMatches) {
+    for (const yStr of yearMatches) {
+      const y = parseInt(yStr, 10);
+      if (y < currentYear) {
+        console.warn(`[Validation Rejected] Past year reference (${y} < ${currentYear}) detected in: "${market.title}"`);
+        return false;
+      }
+    }
+  }
+
+  // 4. Expiration date check: resolutionDate must be a valid Date strictly in the future
+  const resDate = market.resolutionDate instanceof Date 
+    ? market.resolutionDate 
+    : new Date(market.resolutionDate || market.resolutionDateISO);
+
+  if (!resDate || isNaN(resDate.getTime())) {
+    console.warn(`[Validation Rejected] Invalid or missing resolutionDate in: "${market.title}"`);
+    return false;
+  }
+
+  if (resDate.getTime() <= Date.now()) {
+    console.warn(`[Validation Rejected] Resolution date is in past/now for: "${market.title}"`);
+    return false;
+  }
+
+  return true;
 };
 
-const getMockShortTermSuggestions = (adminId) => {
-  const stockTickers = ['NVIDIA', 'Apple', 'Tesla', 'Microsoft', 'Google', 'Meta'];
-  const ticker = stockTickers[Math.floor(Math.random() * stockTickers.length)];
+/**
+ * Token-overlap deduplication helper to prevent near-duplicate questions.
+ * 
+ * @param {string} newTitle 
+ * @param {Array<Object>} existingMarkets 
+ * @returns {boolean} True if a duplicate or near-duplicate market exists.
+ */
+export const isDuplicateMarket = (newTitle, existingMarkets) => {
+  const normalize = (str) =>
+    str.toLowerCase()
+      .replace(/[^a-z0-9\s]/g, '')
+      .split(/\s+/)
+      .filter(t => t.length > 2 && !['will', 'that', 'this', 'with', 'from', 'today'].includes(t));
 
-  const topics = [
-    {
-      title: `Will ${ticker} stock finish green today?`,
-      description: `Resolves to YES if the official closing price of ${ticker} common stock (NASDAQ) is higher than its previous trading day close.`,
-      category: 'Finance',
-    },
-    {
-      title: 'Will Bitcoin close above $115,000 today?',
-      description: 'Resolves to YES if Bitcoin (BTC/USD) closing price is reported above $115,000 at 23:59 UTC today on Binance.',
-      category: 'Finance',
-    },
-    {
-      title: 'Will SpaceX successfully launch a Falcon 9 rocket today?',
-      description: 'Resolves to YES if SpaceX successfully launches and completes first stage recovery of a Falcon 9 mission today.',
-      category: 'Technology',
-    },
-    {
-      title: 'Will OpenAI announce a new product update today?',
-      description: 'Resolves to YES if OpenAI issues an official press release or conducts a product announcement today.',
-      category: 'Artificial Intelligence',
-    },
-  ];
+  const newTokens = new Set(normalize(newTitle));
+  if (newTokens.size === 0) return false;
 
-  // Pick 2 random topics for daily variety
-  const shuffled = topics.sort(() => 0.5 - Math.random()).slice(0, 2);
+  for (const m of existingMarkets) {
+    const existingTokens = normalize(m.title);
+    let overlapCount = 0;
+    for (const token of existingTokens) {
+      if (newTokens.has(token)) {
+        overlapCount++;
+      }
+    }
+    const similarity = overlapCount / Math.max(newTokens.size, existingTokens.length);
+    if (similarity >= 0.65) {
+      console.warn(`[Deduplication Rejected] High similarity (${(similarity * 100).toFixed(0)}%) between "${newTitle}" and existing "${m.title}"`);
+      return true;
+    }
+  }
 
-  return shuffled.map((t) => ({
-    title: t.title,
-    description: t.description,
-    category: t.category,
-    marketType: 'Short-Term',
-    status: 'Pending Approval',
-    resolutionDate: new Date(Date.now() + 24 * 60 * 60 * 1000), // Exactly 24 hours
-    createdBy: adminId,
-  }));
+  return false;
 };
 
 /**
  * AI-powered automated market generation service.
- * Runs on cron schedules to draft new market suggestions for admin review.
+ * Grounded dynamically in runtime Date and strict event-aware validation.
+ * Long-Term resolution dates are event-driven from AI output.
+ * Does NOT generate fake fallback data on API failure.
+ * 
+ * @param {string} marketType - 'Short-Term' | 'Long-Term'
+ * @returns {Promise<Array>} Array of inserted Market documents
  */
 export const generateMarketsSuggestions = async (marketType) => {
   try {
@@ -90,41 +129,45 @@ export const generateMarketsSuggestions = async (marketType) => {
       return [];
     }
 
-    // Load appropriate API Key based on market type
     const apiKey = marketType === 'Long-Term'
       ? process.env.LONG_TERM_MARKET_API_KEY
       : process.env.SHORT_TREM_MARKET_API_KEY;
 
     if (!apiKey || apiKey.startsWith('your_') || apiKey.includes('placeholder')) {
-      const fallbackList = marketType === 'Long-Term' 
-        ? getMockLongTermSuggestions(admin._id) 
-        : getMockShortTermSuggestions(admin._id);
-      
-      const created = await insertMarketsSafely(fallbackList);
-      return created;
+      console.warn(`⚠️ Groq API key missing or placeholder for ${marketType}. Skipping market generation.`);
+      return [];
     }
 
-    // Call Groq API to generate fresh market drafts
-    console.log(`📡 Fetching AI ${marketType} market suggestions from Groq using dedicated key...`);
+    const currentDate = new Date();
+    const currentDateISO = currentDate.toISOString();
+    const currentYear = currentDate.getUTCFullYear();
+    const currentMonth = currentDate.toLocaleString('en-US', { month: 'long', timeZone: 'UTC' });
+    const currentDay = currentDate.getUTCDate();
+
+    console.log(`📡 Fetching AI ${marketType} market suggestions from Groq (Grounded: ${currentMonth} ${currentDay}, ${currentYear})...`);
+
     const prompt = `
-You are an expert prediction analyst for a forecasting exchange.
-Generate exactly two realistic, high-quality, real-world prediction market contract proposals for the category '${marketType}'.
+You are an expert prediction exchange analyst generating real-world binary prediction contracts.
+Current Runtime Date: ${currentDateISO} (Day: ${currentDay}, Month: ${currentMonth}, Year: ${currentYear}).
 
-CRITICAL QUALITY COMPLIANCE:
-- The current year is 2026 (July). All generated questions must pertain to future, unresolved, real-world events occurring in late 2026, 2027, or 2028.
-- NEVER generate questions for milestones that have already occurred (e.g. Do NOT generate questions about GPT-5 release as that already launched in 2025; instead forecast GPT-6 or Claude 4.5/5).
-- Ensure the event is highly relevant to current public interest and has a verifiable resolution source.
-- Avoid duplicate markets.
-- For Long-Term: focus on major developments in AI, tech, finance, global affairs, or business (e.g. specific space flights, future CPU launches, election outcomes) resolving in months/years.
-- For Short-Term: focus on daily financial indexes, corporate stock closing prices (e.g., Apple, NVIDIA, Tesla), major daily launches, or immediate breaking statements resolving in 24 hours.
+Generate exactly two realistic, high-quality, real-world prediction market proposals for category '${marketType}'.
 
-Return exactly a JSON object matching this schema:
+STRICT COMPLIANCE RULES:
+- Ground questions strictly in current or future real-world events occurring after ${currentMonth} ${currentDay}, ${currentYear}.
+- NEVER generate questions for historical product launches or milestones that already occurred prior to ${currentYear}.
+- Ensure the outcome is verifiable from reputable news sources (e.g. Reuters, Bloomberg, SEC, official announcements).
+- Avoid vague, untestable, or subjective claims.
+- For Short-Term (${marketType}): Focus on events, corporate announcements, daily asset closes, or immediate technology releases that resolve today by midnight UTC.
+- For Long-Term (${marketType}): Focus on major industry milestones, regulatory decisions, space missions, or next-generation tech releases resolving in future months/years (${currentYear+1}-${currentYear+2}). Provide an explicit, accurate ISO-8601 resolutionDateISO matching the question condition.
+
+Return ONLY a valid JSON object matching this schema:
 {
   "markets": [
     {
-      "title": "A punchy, clear binary prediction question starting with 'Will'",
-      "description": "Clear verification criteria, sources, and specifications for resolving the market.",
-      "category": "One of: 'Artificial Intelligence', 'Technology', 'Finance', 'Sports', 'Politics'"
+      "title": "Clear binary prediction question starting with 'Will'",
+      "description": "Exact verification criteria and source specification for resolving YES or NO.",
+      "category": "One of: 'Artificial Intelligence', 'Technology', 'Finance', 'Sports', 'Politics'",
+      "resolutionDateISO": "An explicit ISO-8601 UTC date string (e.g. '2026-12-31T23:59:59.000Z') representing the exact event resolution condition date."
     }
   ]
 }
@@ -139,55 +182,95 @@ Return exactly a JSON object matching this schema:
       body: JSON.stringify({
         model: 'llama-3.1-8b-instant',
         messages: [
-          { role: 'system', content: 'You are an API service returning only raw, valid JSON.' },
+          { role: 'system', content: 'You are a professional JSON-only API. You output raw parseable JSON objects without markdown fences.' },
           { role: 'user', content: prompt }
         ],
-        temperature: 0.8,
+        temperature: 0.7,
         response_format: { type: 'json_object' }
       })
     });
 
     if (!response.ok) {
-      throw new Error(`Groq API error status: ${response.status}`);
+      const errBody = await response.text();
+      throw new Error(`Groq API returned HTTP ${response.status}: ${errBody}`);
     }
 
     const resJson = await response.json();
     const content = resJson?.choices?.[0]?.message?.content;
+    if (!content) {
+      throw new Error('Empty message content received from Groq.');
+    }
+
     const parsed = JSON.parse(content);
-
     if (!parsed.markets || !Array.isArray(parsed.markets)) {
-      throw new Error('Markets array missing in parsed response.');
+      throw new Error('Parsed response missing "markets" array.');
     }
 
-    const mapped = parsed.markets.map(m => ({
-      title: m.title,
-      description: m.description,
-      category: m.category || 'Technology',
-      marketType,
-      status: 'Pending Approval',
-      resolutionDate: marketType === 'Long-Term'
-        ? new Date(Date.now() + 90 * 24 * 60 * 60 * 1000) // 90 days out
-        : new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours out
-      createdBy: admin._id
-    }));
+    // Fetch existing active markets to check for deduplication
+    const existingActiveMarkets = await Market.find({ status: { $in: ['Live', 'Pending Approval'] } }).select('title');
 
-    return await insertMarketsSafely(mapped);
+    const validProposals = [];
+
+    for (const m of parsed.markets) {
+      let resDate = null;
+      if (marketType === 'Short-Term') {
+        // Short-Term: Expire at the upcoming 11:59:59.999 PM in Wagr application timezone
+        resDate = getUpcomingMidnight(currentDate);
+      } else {
+        // Long-Term: Event-driven resolution date from AI proposal
+        if (m.resolutionDateISO) {
+          const parsedAiDate = new Date(m.resolutionDateISO);
+          if (!isNaN(parsedAiDate.getTime()) && parsedAiDate > currentDate) {
+            resDate = parsedAiDate;
+          }
+        }
+      }
+
+      // If Long-Term market date is missing, invalid, or in the past, reject proposal
+      if (!resDate || resDate.getTime() <= currentDate.getTime()) {
+        console.warn(`[Validation Rejected] Event-driven resolutionDate for Long-Term market "${m.title}" is invalid or in the past: ${m.resolutionDateISO}`);
+        continue;
+      }
+
+      const candidate = {
+        title: m.title ? m.title.trim() : '',
+        description: m.description ? m.description.trim() : '',
+        category: m.category || 'Technology',
+        marketType,
+        status: 'Pending Approval',
+        resolutionDate: resDate,
+        createdBy: admin._id,
+      };
+
+      // 1. Freshness & Validity check
+      if (!validateGeneratedMarket(candidate, marketType)) {
+        continue;
+      }
+
+      // 2. Semantic & Token Deduplication check
+      if (isDuplicateMarket(candidate.title, existingActiveMarkets)) {
+        continue;
+      }
+
+      validProposals.push(candidate);
+    }
+
+    if (validProposals.length === 0) {
+      console.warn(`[AI Generation] All ${marketType} proposals failed validation or were duplicates.`);
+      return [];
+    }
+
+    const inserted = await insertMarketsSafely(validProposals);
+    return inserted;
   } catch (error) {
-    console.error('❌ AI market suggestions generation failed:', error.message);
-    // Execute fallback
-    const admin = await User.findOne({ email: 'admin@wagr.io' }) || await User.findOne({ role: 'Admin' });
-    if (admin) {
-      const fallbackList = marketType === 'Long-Term' 
-        ? getMockLongTermSuggestions(admin._id) 
-        : getMockShortTermSuggestions(admin._id);
-      return await insertMarketsSafely(fallbackList);
-    }
+    console.error(`❌ AI ${marketType} market generation failed:`, error.message);
+    // Controlled failure state: DO NOT generate fake fallback markets.
     return [];
   }
 };
 
 /**
- * Helper to write generated markets to DB, checking for duplicate titles first
+ * Safely inserts generated markets into database, ensuring no duplicate title exists
  */
 const insertMarketsSafely = async (markets) => {
   const created = [];
@@ -198,6 +281,6 @@ const insertMarketsSafely = async (markets) => {
       created.push(inserted);
     }
   }
-  console.log(`🤖 Generated ${created.length} new draft ${markets[0]?.marketType} markets.`);
+  console.log(`🤖 Successfully saved ${created.length} fresh ${markets[0]?.marketType} markets.`);
   return created;
 };

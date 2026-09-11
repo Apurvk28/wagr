@@ -19,15 +19,56 @@ export const formatProbability = (value: number): string => {
 };
 
 /**
- * Formats a date string to a human-readable representation
+ * Formats a market resolution date string including exact resolution time
+ * respecting the user's 12h/24h format and timezone preference.
  * @param dateString ISO Date string
- * @returns Formatted date string (e.g., "July 6, 2026")
+ * @param includeTime Whether to include resolution time (defaults to true)
+ * @returns Formatted date & time string (e.g. "Sep 11, 11:00 PM" or "Sep 11, 23:00")
+ */
+export const formatResolutionDate = (dateString: string, includeTime: boolean = true): string => {
+  if (!dateString) return '—';
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return '—';
+
+  const format = (localStorage.getItem('wagr_clock_format') as '12' | '24') || '12';
+  const timezone = localStorage.getItem('wagr_clock_timezone') || 'Asia/Kolkata';
+
+  try {
+    const month = new Intl.DateTimeFormat('en-US', { month: 'short', timeZone: timezone }).format(date);
+    const day = new Intl.DateTimeFormat('en-US', { day: 'numeric', timeZone: timezone }).format(date);
+    
+    if (!includeTime) {
+      return `${month} ${day}`;
+    }
+
+    const timeStr = new Intl.DateTimeFormat('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: format === '12',
+      timeZone: timezone,
+    }).format(date);
+
+    return `${month} ${day}, ${timeStr}`;
+  } catch (e) {
+    return date.toLocaleDateString();
+  }
+};
+
+/**
+ * Formats a date string to a human-readable representation with time
+ * @param dateString ISO Date string
+ * @returns Formatted date string (e.g., "Sep 11, 11:00 PM")
  */
 export const formatDate = (dateString: string): string => {
-  const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', {
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric',
-  });
+  return formatResolutionDate(dateString, true);
+};
+
+/**
+ * Formats the daily Short-Term market refresh time (12:05 AM)
+ * according to the user's 12h/24h format preference.
+ * @returns Formatted time string (e.g., "12:05 AM" or "00:05")
+ */
+export const formatOpeningTime = (): string => {
+  const format = (localStorage.getItem('wagr_clock_format') as '12' | '24') || '12';
+  return format === '24' ? '00:05' : '12:05 AM';
 };

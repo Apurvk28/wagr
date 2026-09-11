@@ -8,20 +8,21 @@ import { syncAiNewsFromGroq } from '../services/aiNews.service.js';
  */
 export const getNewsFeed = async (req, res, next) => {
   try {
-    const { search, category, marketId } = req.query;
+    const { search, category, marketId, type } = req.query;
 
     const query = {};
 
     // Filter by search keywords in headline or summary
     if (search) {
+      const safeSearch = search.trim();
       query.$or = [
-        { headline: { $regex: search, $options: 'i' } },
-        { summary: { $regex: search, $options: 'i' } },
+        { headline: { $regex: safeSearch, $options: 'i' } },
+        { summary: { $regex: safeSearch, $options: 'i' } },
       ];
     }
 
     // Filter by category
-    if (category) {
+    if (category && category !== 'All') {
       query.category = category;
     }
 
@@ -30,15 +31,36 @@ export const getNewsFeed = async (req, res, next) => {
       query.relatedMarket = marketId;
     }
 
+    // Handle explicit news section types: 'market' (Market-Related News) vs 'general' (General News)
+    if (type === 'market') {
+      query.relatedMarket = { $ne: null };
+    } else if (type === 'general') {
+      query.$or = [
+        { relatedMarket: null },
+        { relatedMarket: { $exists: false } }
+      ];
+    }
+
+    const limitCap = type === 'market' ? 10 : (type === 'general' ? 15 : 25);
+
     // Fetch news sorted by published date (newest first)
     const newsFeed = await News.find(query)
-      .populate('relatedMarket', 'title status yesProbability noProbability marketType')
-      .sort({ publishedDate: -1, createdAt: -1 });
+      .populate({
+        path: 'relatedMarket',
+        select: 'title status yesProbability noProbability marketType resolutionDate',
+      })
+      .sort({ publishedDate: -1, createdAt: -1 })
+      .limit(limitCap);
+
+    // Filter out articles where relatedMarket populate failed or market is not Live (for market-type queries)
+    const filteredData = type === 'market' 
+      ? newsFeed.filter(n => n.relatedMarket && n.relatedMarket.status === 'Live') 
+      : newsFeed;
 
     res.status(200).json({
       success: true,
       message: 'News feed retrieved successfully.',
-      data: newsFeed,
+      data: filteredData,
     });
   } catch (error) {
     next(error);

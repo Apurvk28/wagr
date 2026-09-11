@@ -31,7 +31,7 @@ const Register: React.FC = () => {
       upper: /[A-Z]/.test(password),
       lower: /[a-z]/.test(password),
       number: /\d/.test(password),
-      special: /[@$!%*?&]/.test(password),
+      special: /[^A-Za-z0-9]/.test(password),
     });
   }, [password]);
 
@@ -204,7 +204,7 @@ const Register: React.FC = () => {
                   <span className={checks.special ? "text-brand-success" : "text-dark-muted"}>
                     {checks.special ? '✓' : '○'}
                   </span>
-                  <span className={checks.special ? "text-white/80" : "text-dark-muted"}>1 Special Char (@$!%*?&)</span>
+                  <span className={checks.special ? "text-white/80" : "text-dark-muted"}>1 Special Character (!@#$%^&*)</span>
                 </div>
               </div>
             </div>

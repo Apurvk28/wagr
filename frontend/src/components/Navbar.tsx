@@ -7,14 +7,14 @@ import { globalSearch, type SearchResults } from '../services/searchService';
 import { Menu, X, Wallet, User as UserIcon, LogOut, ChevronDown, Search, ShieldAlert, HelpCircle, PieChart } from 'lucide-react';
 import NotificationBell from './NotificationBell';
 import { AnimatedBorderButton } from './ui/AnimatedBorderButton';
-import { HowToPlayModal } from './HowToPlayModal';
+import { QuickHowToPlayPopover } from './QuickHowToPlayPopover';
 
 const Navbar: React.FC = () => {
   const { user, isAuthenticated, logout, reloadProfile } = useAuth();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
-  const [howToPlayOpen, setHowToPlayOpen] = useState(false);
+  const [quickHowToPlayOpen, setQuickHowToPlayOpen] = useState(false);
 
   // Global Search state
   const [searchOpen, setSearchOpen] = useState(false);
@@ -87,7 +87,7 @@ const Navbar: React.FC = () => {
 
           {/* Centered Desktop Menu */}
           <div className="hidden md:flex items-center justify-center flex-1 px-8">
-            <div className="flex items-center space-x-8 lg:space-x-10 text-xs sm:text-sm font-semibold tracking-wide text-dark-muted">
+            <div className="flex items-center space-x-6 lg:space-x-8 text-xs sm:text-sm font-semibold tracking-wide text-dark-muted">
               <Link to="/markets" className="hover:text-white transition-colors duration-150 py-2">
                 Prediction Markets
               </Link>
@@ -104,19 +104,35 @@ const Navbar: React.FC = () => {
           </div>
 
           {/* User Controls / Auth Controls */}
-          <div className="hidden md:flex items-center space-x-4">
-            {isAuthenticated && user ? (
-              <div className="flex items-center space-x-3.5 pl-4 border-l border-dark-border/40">
-                {/* Global Search Button */}
-                <button
-                  id="global-search-btn"
-                  onClick={() => setSearchOpen(true)}
-                  className="w-8 h-8 flex items-center justify-center rounded-lg text-dark-muted hover:text-white hover:bg-dark-card border border-transparent hover:border-dark-border/60 transition-all cursor-pointer"
-                  title="Search markets, users, news..."
-                >
-                  <Search size={15} />
-                </button>
+          <div className="hidden md:flex items-center space-x-3">
+            {/* Global Search & Quick How to Play Buttons (Shown for all users) */}
+            <div className="flex items-center space-x-1.5">
+              {/* Global Search Button */}
+              <button
+                id="global-search-btn"
+                onClick={() => setSearchOpen(true)}
+                className="w-8 h-8 flex items-center justify-center rounded-lg text-dark-muted hover:text-white hover:bg-dark-card border border-transparent hover:border-dark-border/60 transition-all cursor-pointer"
+                title="Search markets, users, news..."
+              >
+                <Search size={15} />
+              </button>
 
+              {/* (?) How to Play Icon Button - Placed right next to Search */}
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setQuickHowToPlayOpen(!quickHowToPlayOpen)}
+                  className="w-8 h-8 flex items-center justify-center rounded-lg text-dark-muted hover:text-white hover:bg-dark-card border border-transparent hover:border-dark-border/60 transition-all cursor-pointer group"
+                  title="Quick How to Play Guide"
+                >
+                  <HelpCircle size={15} className="group-hover:text-brand-purple transition-colors" />
+                </button>
+                <QuickHowToPlayPopover isOpen={quickHowToPlayOpen} onClose={() => setQuickHowToPlayOpen(false)} />
+              </div>
+            </div>
+
+            {isAuthenticated && user ? (
+              <div className="flex items-center space-x-3 pl-3 border-l border-dark-border/40">
                 {/* Notification Bell */}
                 <NotificationBell />
 
@@ -166,16 +182,6 @@ const Navbar: React.FC = () => {
                         <PieChart size={13} />
                         <span>My Portfolio</span>
                       </Link>
-                      <button
-                        onClick={() => {
-                          setProfileDropdownOpen(false);
-                          setHowToPlayOpen(true);
-                        }}
-                        className="flex items-center space-x-2 w-full text-left px-4 py-2 text-xs text-brand-purple hover:bg-dark/45 hover:text-white transition-colors cursor-pointer"
-                      >
-                        <HelpCircle size={13} />
-                        <span>How to Play</span>
-                      </button>
                       {user.role === 'Admin' && (
                         <Link
                           to="/admin"
@@ -260,15 +266,13 @@ const Navbar: React.FC = () => {
           >
             Leaderboard
           </Link>
-          <button
-            onClick={() => {
-              setMobileMenuOpen(false);
-              setHowToPlayOpen(true);
-            }}
-            className="block w-full text-left text-sm text-brand-purple font-bold py-1 cursor-pointer"
+          <Link
+            to="/how-to-play"
+            onClick={() => setMobileMenuOpen(false)}
+            className="block text-sm text-brand-purple font-bold py-1"
           >
             How to Play 📖
-          </button>
+          </Link>
           {isAuthenticated && (
             <>
               <Link
@@ -499,8 +503,6 @@ const Navbar: React.FC = () => {
         </div>
       )}
 
-      {/* How to Play Interactive Modal */}
-      <HowToPlayModal isOpen={howToPlayOpen} onClose={() => setHowToPlayOpen(false)} />
     </nav>
   );
 };

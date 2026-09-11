@@ -9,7 +9,11 @@ import Post from '../models/post.model.js';
  */
 export const getTrendingMarkets = async (req, res, next) => {
   try {
-    const trending = await Market.find({ status: 'Live' })
+    const now = new Date();
+    const trending = await Market.find({
+      status: 'Live',
+      resolutionDate: { $gt: now }
+    })
       .sort({ volume: -1 })
       .limit(6);
 
@@ -30,7 +34,11 @@ export const getTrendingMarkets = async (req, res, next) => {
  */
 export const getActiveMarkets = async (req, res, next) => {
   try {
-    const active = await Market.find({ status: 'Live' })
+    const now = new Date();
+    const active = await Market.find({
+      status: 'Live',
+      resolutionDate: { $gt: now }
+    })
       .sort({ participantsCount: -1, volume: -1 })
       .limit(3);
 

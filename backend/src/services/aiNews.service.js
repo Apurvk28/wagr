@@ -4,43 +4,46 @@ import User from '../models/user.model.js';
 import { createAndSendNotification } from './notification.service.js';
 
 /**
- * Generate mock news fallback in case Groq call fails or key is missing
+ * Validates AI-generated news item against publication date, headline quality, and market validity.
+ * 
+ * @param {Object} article 
+ * @returns {boolean}
  */
-const generateMockNewsFallback = (markets, marketType) => {
-  console.log(`⚠️ Using mock fallback news generator for ${marketType} markets.`);
-  const sources = ['Bloomberg', 'TechCrunch', 'Reuters', 'ESPN', 'Wired', 'Financial Times', 'BBC Global'];
-  const categories = ['Artificial Intelligence', 'Technology', 'Finance', 'Sports', 'Politics'];
-  
-  return markets.map((market, index) => {
-    const marketId = market._id.toString();
-    const cleanTitle = market.title.replace(/Will |Is |Are |Would |Should /g, '').replace(/\?/g, '');
-    
-    const headlines = marketType === 'Short-Term' ? [
-      `Intraday trading metrics surge for ${cleanTitle}`,
-      `Immediate market volatility observed regarding ${cleanTitle}`,
-      `Breaking updates today: Shifting sentiment on ${cleanTitle}`,
-      `Daily forecast summary for ${cleanTitle}`
-    ] : [
-      `Significant development reported on ${cleanTitle}`,
-      `New regulation might impact progress on ${cleanTitle}`,
-      `Major industry consensus emerges regarding ${cleanTitle}`,
-      `Experts debate feasibility and timeline of ${cleanTitle}`
-    ];
-    
-    const randomHeadline = headlines[index % headlines.length];
-    const mockUrl = `https://wagr.io/news/mock/${marketId}-${index}-${Date.now()}`;
+export const validateNewsArticle = async (article) => {
+  if (!article || !article.headline || typeof article.headline !== 'string' || article.headline.trim().length < 5) {
+    return false;
+  }
+  if (!article.summary || article.summary.trim().length < 10) {
+    return false;
+  }
+  // Check publishedDate is not in the future
+  if (article.publishedDate && article.publishedDate instanceof Date) {
+    if (article.publishedDate.getTime() > Date.now() + 5 * 60 * 1000) { // allow 5 min clock skew
+      console.warn(`[News Validation Rejected] Future publication date in article: "${article.headline}"`);
+      return false;
+    }
+  }
 
-    return {
-      headline: randomHeadline,
-      summary: `Wagr news desk analysis confirms active fluctuations surrounding ${market.title}. Staked pool indicators shift dynamically as traders express their positions.`,
-      source: sources[index % sources.length],
-      url: mockUrl,
-      category: market.category || categories[index % categories.length],
-      relatedMarket: market._id,
-      publishedDate: new Date(),
-      aiSummary: `AI Forecast: Briefings suggest moving odds for this contract. Verify daily metrics before staking points.`
-    };
-  });
+  // Related market validation:
+  // If relatedMarket exists, verify that the market is Live and resolutionDate is in the future.
+  // If relatedMarket is null or undefined, allow as valid General News.
+  if (article.relatedMarket) {
+    try {
+      const market = typeof article.relatedMarket === 'object' && article.relatedMarket._id
+        ? article.relatedMarket
+        : await Market.findById(article.relatedMarket);
+
+      if (!market || market.status !== 'Live' || new Date(market.resolutionDate) <= new Date()) {
+        console.warn(`[News Validation Rejected] Article linked to non-Live or expired market: "${article.headline}"`);
+        return false;
+      }
+    } catch (err) {
+      console.warn(`[News Validation Rejected] Market lookup failed for article: "${article.headline}"`);
+      return false;
+    }
+  }
+
+  return true;
 };
 
 /**
@@ -49,28 +52,38 @@ const generateMockNewsFallback = (markets, marketType) => {
 const fetchNewsFromGroq = async (markets, marketType, apiKey) => {
   if (markets.length === 0) return [];
 
+  const currentDate = new Date();
+  const currentDateISO = currentDate.toISOString();
+
   const marketsDataString = markets.map((m) => {
     return `Market ID: ${m._id}\nTitle: "${m.title}"\nDescription: "${m.description}"\nCategory: "${m.category}"`;
   }).join('\n---\n');
 
   const prompt = `
-You are an expert news editor and prediction analyst for a forecasting exchange.
-The current year is 2026. For each of the following active ${marketType} prediction markets, generate exactly one highly realistic and contextualized news article briefing that would directly impact its forecasting probability.
+You are a professional financial and technology news editor for a prediction exchange.
+Current Runtime Date: ${currentDateISO}.
+
+For each of the following active ${marketType} prediction markets, generate exactly one highly realistic, news briefing that directly impacts its odds.
 
 Active ${marketType} Markets:
 ${marketsDataString}
 
-You MUST return exactly a valid JSON object matching this schema, with no additional markdown fences, conversational greetings, or trailing texts. Output ONLY valid JSON:
+STRICT COMPLIANCE RULES:
+- Use current real-world news context.
+- Do NOT invent historical headlines from prior years.
+- Do NOT set publication dates in the future.
+
+Return ONLY a valid JSON object matching this schema:
 {
   "articles": [
     {
-      "headline": "A realistic, punchy, news headline related to the market theme",
-      "summary": "A concise paragraph (2-3 sentences) describing the news development.",
-      "source": "A trusted source name like TechCrunch, Reuters, Bloomberg, or ESPN",
-      "url": "A unique, realistic mock URL starting with https://",
-      "category": "The exact category of the market (must be one of: 'Artificial Intelligence', 'Technology', 'Finance', 'Sports', 'Politics')",
+      "headline": "A realistic, punchy headline related to the market topic",
+      "summary": "Concise paragraph (2-3 sentences) summarizing recent news developments.",
+      "source": "A trusted source like TechCrunch, Reuters, Bloomberg, Financial Times, or ESPN",
+      "url": "A valid unique URL string starting with https://",
+      "category": "The exact category of the market",
       "relatedMarketId": "The corresponding Market ID string from above",
-      "aiSummary": "AI Sentiment Analysis: A 1-2 sentence summary explaining how this news impacts the market probabilities (e.g. 'Positive progress increases the likelihood of a YES outcome.')"
+      "aiSummary": "AI Probability Impact: 1-2 sentence analysis on market odds."
     }
   ]
 }
@@ -90,7 +103,7 @@ You MUST return exactly a valid JSON object matching this schema, with no additi
         messages: [
           {
             role: 'system',
-            content: 'You are a professional API service that outputs raw JSON objects. You must never output markdown formatting, code fences, or headers. Only return valid parseable JSON.'
+            content: 'You are a professional API service returning raw JSON objects only without markdown fences.'
           },
           {
             role: 'user',
@@ -119,87 +132,73 @@ You MUST return exactly a valid JSON object matching this schema, with no additi
     throw new Error('Invalid JSON format: articles array is missing.');
   }
 
-  return parsedData.articles.map((art) => ({
-    headline: art.headline,
-    summary: art.summary,
-    source: art.source,
-    url: art.url || `https://wagr.io/news/ai/${art.relatedMarketId}-${Date.now()}`,
-    category: art.category,
-    relatedMarket: art.relatedMarketId,
-    publishedDate: new Date(),
-    aiSummary: art.aiSummary
-  }));
+  const validArticles = [];
+  for (const art of parsedData.articles) {
+    const candidate = {
+      headline: art.headline ? art.headline.trim() : '',
+      summary: art.summary ? art.summary.trim() : '',
+      source: art.source || 'Wagr Intelligence',
+      url: art.url || `https://wagr.io/news/ai/${art.relatedMarketId}-${Date.now()}`,
+      category: art.category || 'Technology',
+      relatedMarket: art.relatedMarketId || null,
+      publishedDate: new Date(),
+      aiSummary: art.aiSummary || 'AI Forecast: Probability shifts based on market sentiment.'
+    };
+
+    if (await validateNewsArticle(candidate)) {
+      validArticles.push(candidate);
+    }
+  }
+
+  return validArticles;
 };
 
 /**
  * Sync AI News via Groq API.
  * Uses dedicated API keys for short-term and long-term markets news.
+ * Does NOT generate fake news fallback on API error.
  */
 export const syncAiNewsFromGroq = async () => {
   let allInserted = [];
-  
-  // 1. Sync Short-Term News
+
+  // 1. Sync Short-Term Market-Related News
   try {
-    const shortTermMarkets = await Market.find({ status: 'Live', marketType: 'Short-Term' })
+    const shortTermMarkets = await Market.find({ status: 'Live', marketType: 'Short-Term', resolutionDate: { $gt: new Date() } })
       .select('_id title description category')
       .limit(5);
 
     if (shortTermMarkets.length > 0) {
       const apiKey = process.env.SHORT_TERM_MARKET_NEWS_API_KEY;
-      if (!apiKey || apiKey.startsWith('your_') || apiKey.includes('placeholder')) {
-        const fallback = generateMockNewsFallback(shortTermMarkets, 'Short-Term');
-        const inserted = await insertNewsSafely(fallback);
-        allInserted = [...allInserted, ...inserted];
-      } else {
+      if (apiKey && !apiKey.startsWith('your_') && !apiKey.includes('placeholder')) {
         const articles = await fetchNewsFromGroq(shortTermMarkets, 'Short-Term', apiKey);
         const inserted = await insertNewsSafely(articles);
         allInserted = [...allInserted, ...inserted];
+      } else {
+        console.warn('⚠️ SHORT_TERM_MARKET_NEWS_API_KEY missing or placeholder. Skipping AI news sync.');
       }
     }
   } catch (error) {
     console.error('❌ Short-Term news sync failed:', error.message);
-    // Fallback sync
-    try {
-      const shortTermMarkets = await Market.find({ status: 'Live', marketType: 'Short-Term' })
-        .select('_id title description category');
-      const fallback = generateMockNewsFallback(shortTermMarkets, 'Short-Term');
-      const inserted = await insertNewsSafely(fallback);
-      allInserted = [...allInserted, ...inserted];
-    } catch (fErr) {
-      console.error('❌ Short-Term fallback sync failed:', fErr.message);
-    }
   }
 
-  // 2. Sync Long-Term News
+  // 2. Sync Long-Term Market-Related News
   try {
-    const longTermMarkets = await Market.find({ status: 'Live', marketType: 'Long-Term' })
+    const longTermMarkets = await Market.find({ status: 'Live', marketType: 'Long-Term', resolutionDate: { $gt: new Date() } })
       .select('_id title description category')
       .limit(5);
 
     if (longTermMarkets.length > 0) {
       const apiKey = process.env.LONG_TERM_MARKET_NEWS_API_KEY;
-      if (!apiKey || apiKey.startsWith('your_') || apiKey.includes('placeholder')) {
-        const fallback = generateMockNewsFallback(longTermMarkets, 'Long-Term');
-        const inserted = await insertNewsSafely(fallback);
-        allInserted = [...allInserted, ...inserted];
-      } else {
+      if (apiKey && !apiKey.startsWith('your_') && !apiKey.includes('placeholder')) {
         const articles = await fetchNewsFromGroq(longTermMarkets, 'Long-Term', apiKey);
         const inserted = await insertNewsSafely(articles);
         allInserted = [...allInserted, ...inserted];
+      } else {
+        console.warn('⚠️ LONG_TERM_MARKET_NEWS_API_KEY missing or placeholder. Skipping AI news sync.');
       }
     }
   } catch (error) {
     console.error('❌ Long-Term news sync failed:', error.message);
-    // Fallback sync
-    try {
-      const longTermMarkets = await Market.find({ status: 'Live', marketType: 'Long-Term' })
-        .select('_id title description category');
-      const fallback = generateMockNewsFallback(longTermMarkets, 'Long-Term');
-      const inserted = await insertNewsSafely(fallback);
-      allInserted = [...allInserted, ...inserted];
-    } catch (fErr) {
-      console.error('❌ Long-Term fallback sync failed:', fErr.message);
-    }
   }
 
   return allInserted;
@@ -210,16 +209,15 @@ export const syncAiNewsFromGroq = async () => {
  */
 const insertNewsSafely = async (articles) => {
   const insertedArticles = [];
-  
+
   for (const article of articles) {
     try {
-      // Check if duplicate url already exists
       const existing = await News.findOne({ url: article.url });
       if (!existing) {
         const created = await News.create(article);
         insertedArticles.push(created);
 
-        // Notify users who follow this market
+        // Send notifications to users who follow this market
         if (article.relatedMarket) {
           const marketFollowers = await User.find({
             followedMarkets: article.relatedMarket,
@@ -239,11 +237,10 @@ const insertNewsSafely = async (articles) => {
         }
       }
     } catch (err) {
-      // Ignore validation errors (e.g. duplicate key index)
       console.warn(`Duplicate or invalid article URL skipped: ${article.url}`);
     }
   }
-  
+
   console.log(`📰 AI News Sync completed: saved ${insertedArticles.length} new articles.`);
   return insertedArticles;
 };

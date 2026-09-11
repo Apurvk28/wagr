@@ -3,7 +3,7 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { 
   Eye, Database, Globe, Shield, AlertTriangle, FileText, CheckCircle2, 
-  Server, KeyRound, UserCheck, Download, RefreshCw, Layers, Mail
+  Server, KeyRound, UserCheck, Download, RefreshCw, Layers, Mail, Cpu
 } from 'lucide-react';
 import { exportPrivacyPolicyPDF } from '../utils/pdfExporter';
 import { AnimatedBorderButton } from '../components/ui/AnimatedBorderButton';
@@ -204,20 +204,30 @@ const PrivacyPolicy: React.FC = () => {
           </section>
 
           {/* Section 5 */}
-          <section className="bg-dark-card border border-dark-border/70 rounded-3xl p-6 sm:p-8 shadow-xl space-y-4 hover:border-brand-blue/30 transition-all">
+          <section className="bg-dark-card border-2 border-brand-success/60 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-4 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-96 h-96 bg-brand-success/10 rounded-full blur-3xl pointer-events-none" />
             <div className="flex items-center space-x-3 border-b border-dark-border/40 pb-4">
-              <Globe className="text-brand-blue shrink-0" size={24} />
+              <Cpu className="text-brand-success shrink-0" size={26} />
               <h2 className="text-base sm:text-lg font-black text-white uppercase tracking-wider">
-                5. Artificial Intelligence Processing &amp; Zero PII Transfer Policy
+                5. Artificial Intelligence (AI) Market Simulation &amp; Data Boundary Policy
               </h2>
             </div>
-            <p className="text-xs sm:text-sm text-dark-muted leading-relaxed font-medium">
-              Wagr.io leverages AI language models (Groq LLM completions) to automate news indexing, formulate event titles, and generate daily briefings.
-            </p>
+
+            {/* High-visibility Callout Banner */}
+            <div className="bg-brand-success/15 border border-brand-success/40 rounded-2xl p-5 space-y-2">
+              <div className="flex items-center space-x-2 text-brand-success font-black text-xs uppercase tracking-wider">
+                <AlertTriangle size={16} />
+                <span>AI MARKET SIMULATION &amp; SENTIMENT ADJUSTMENT DISCLOSURE</span>
+              </div>
+              <p className="text-xs text-white/90 leading-relaxed font-semibold">
+                Wagr.io incorporates Artificial Intelligence (AI) microservices and Large Language Model (LLM) completion pipelines to index real-world news feeds, formulate market contract proposals, and autonomously simulate market probability shifts based on real-time news sentiment.
+              </p>
+            </div>
+
             <div className="bg-dark/50 border border-dark-border/50 rounded-2xl p-5 space-y-2">
-              <h4 className="text-xs font-extrabold text-white uppercase tracking-wider">AI API Boundary Isolation:</h4>
+              <h4 className="text-xs font-extrabold text-white uppercase tracking-wider">AI API Boundary &amp; Privacy Isolation Guarantee:</h4>
               <p className="text-xs text-dark-muted leading-relaxed">
-                When communicating with external LLM inference microservices, only public news headlines, generic category names, and market titles are transmitted. <strong className="text-white">Zero personal user identifiers, email addresses, IP logs, or portfolio metadata are ever shared with third-party AI API providers.</strong>
+                While AI agents process news sentiment and adjust simulated probability metrics across prediction contracts, external AI processing pipelines strictly evaluate public data (headlines, market titles, and topic categories). <strong className="text-white">Zero Personal Identifiable Information (PII), email addresses, passwords, IP logs, or personal account metadata are ever transmitted to or processed by third-party AI API providers.</strong>
               </p>
             </div>
           </section>

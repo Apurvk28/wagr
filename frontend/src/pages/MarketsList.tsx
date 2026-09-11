@@ -9,6 +9,8 @@ import { Search, SlidersHorizontal, Plus, Bell, BellOff } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { AnimatedBorderButton } from '../components/ui/AnimatedBorderButton';
+import { LiveClock } from '../components/LiveClock';
+import { formatOpeningTime } from '../utils';
 
 const Categories = [
   'All',
@@ -118,14 +120,17 @@ const MarketsList: React.FC = () => {
             </p>
           </div>
 
-          {isAuthenticated && user?.role === 'Admin' && (
-            <Link to="/markets/create">
-              <AnimatedBorderButton className="!px-5 !py-3 text-xs" rounded="rounded-xl">
-                <Plus size={14} />
-                <span>Create Market</span>
-              </AnimatedBorderButton>
-            </Link>
-          )}
+          <div className="flex items-center space-x-3">
+            <LiveClock />
+            {isAuthenticated && user?.role === 'Admin' && (
+              <Link to="/markets/create">
+                <AnimatedBorderButton className="!px-5 !py-3 text-xs" rounded="rounded-xl">
+                  <Plus size={14} />
+                  <span>Create Market</span>
+                </AnimatedBorderButton>
+              </Link>
+            )}
+          </div>
         </div>
 
         {/* Search & Filters Controls */}
@@ -317,7 +322,7 @@ const MarketsList: React.FC = () => {
                         Short-Term Markets
                       </h2>
                       <span className="text-[10px] bg-brand-danger/10 border border-brand-danger/35 text-brand-danger font-bold uppercase tracking-wider px-2 py-0.5 rounded">
-                        closes in 24h
+                        Closes Today
                       </span>
                     </div>
                     {shortTerm.length > 0 ? (
@@ -327,8 +332,29 @@ const MarketsList: React.FC = () => {
                         ))}
                       </div>
                     ) : (
-                      <div className="bg-dark-card/30 border border-dark-border/40 rounded-2xl py-10 text-center">
-                        <p className="text-xs text-dark-muted">No active Short-Term markets available today.</p>
+                      <div className="bg-dark-card/60 border border-brand-purple/35 rounded-3xl p-8 text-center space-y-4 relative overflow-hidden shadow-2xl">
+                        <div className="absolute top-0 right-0 w-64 h-64 bg-brand-purple/10 rounded-full blur-3xl pointer-events-none" />
+                        
+                        <div className="w-12 h-12 rounded-2xl bg-brand-purple/10 border border-brand-purple/30 flex items-center justify-center mx-auto text-2xl">
+                          ☕
+                        </div>
+
+                        <div className="space-y-1.5 max-w-md mx-auto">
+                          <h3 className="text-base font-black text-white uppercase tracking-wider">
+                            Short-Term Markets Are Taking a Quick Break
+                          </h3>
+                          <p className="text-xs text-dark-muted leading-relaxed">
+                            Today's Short-Term markets closed at <strong className="text-white">11:00 PM</strong>.
+                            New Short-Term markets will open at <strong className="text-brand-purple font-mono font-bold">{formatOpeningTime()}</strong>.
+                          </p>
+                        </div>
+
+                        <div className="pt-1">
+                          <span className="inline-flex items-center space-x-2 bg-dark/70 border border-dark-border/80 px-4 py-1.5 rounded-full text-xs font-bold text-white/90 shadow-inner">
+                            <span className="text-dark-muted">⏰ New Short-Term markets open at:</span>
+                            <span className="text-brand-purple font-mono">{formatOpeningTime()}</span>
+                          </span>
+                        </div>
                       </div>
                     )}
                   </div>
@@ -363,11 +389,13 @@ const MarketsList: React.FC = () => {
             );
           })()
         ) : (
-          <div className="bg-dark-card/30 border border-dark-border/40 rounded-2xl py-20 text-center flex flex-col items-center justify-center">
-            <span className="text-3xl mb-4">🔍</span>
-            <p className="text-sm text-white font-bold mb-1">No markets found</p>
-            <p className="text-xs text-dark-muted max-w-xs leading-relaxed">
-              We couldn't find any event contracts matching your criteria. Try adjusting your search query or selected category.
+          <div className="bg-dark-card/40 border border-brand-purple/30 rounded-2xl py-16 px-6 text-center flex flex-col items-center justify-center my-6">
+            <div className="w-12 h-12 rounded-full bg-brand-purple/15 flex items-center justify-center text-2xl mb-3 border border-brand-purple/30">
+              ⚡
+            </div>
+            <h3 className="text-base font-bold text-white mb-1">It's not you, it's us.</h3>
+            <p className="text-xs text-dark-muted max-w-sm leading-relaxed">
+              We're updating the markets right now. Please check back soon.
             </p>
           </div>
         )}

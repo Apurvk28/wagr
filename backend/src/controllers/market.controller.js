@@ -37,11 +37,16 @@ export const getMarkets = async (req, res, next) => {
       query.category = category;
     }
 
-    // Filter by status (default is not Draft)
+    // Filter by status (default is Live)
+    const now = new Date();
     if (status) {
       query.status = status;
+      if (status === 'Live') {
+        query.resolutionDate = { $gt: now };
+      }
     } else {
-      query.status = { $ne: 'Draft' };
+      query.status = 'Live';
+      query.resolutionDate = { $gt: now };
     }
 
     // Fetch markets sorted by status (Live first), then resolution date with pagination
@@ -358,6 +363,13 @@ export const closeTrade = async (req, res, next) => {
       return res.status(400).json({
         success: false,
         message: 'Manual position closure is disabled because the market is not active.',
+      });
+    }
+
+    if (new Date(market.resolutionDate) <= new Date()) {
+      return res.status(400).json({
+        success: false,
+        message: 'This market has reached its resolution date and is locked.',
       });
     }
 
