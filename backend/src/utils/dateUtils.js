@@ -15,7 +15,7 @@ export const APP_TIMEZONE = process.env.APP_TIMEZONE || 'Asia/Kolkata';
  * @param {string} [timeZone]
  * @returns {Date}
  */
-export const getShortTermResolutionDate = (refDate = new Date(), timeZone = APP_TIMEZONE) => {
+export const getISTParts = (refDate = new Date(), timeZone = APP_TIMEZONE) => {
   const formatter = new Intl.DateTimeFormat('en-US', {
     timeZone,
     year: 'numeric',
@@ -34,6 +34,23 @@ export const getShortTermResolutionDate = (refDate = new Date(), timeZone = APP_
   const day = +getPart('day');
   let hour = +getPart('hour');
   if (hour === 24) hour = 0;
+  const minute = +getPart('minute');
+  const second = +getPart('second');
+  return { year, month, day, hour, minute, second };
+};
+
+/**
+ * Returns a Date object set to 11:00:00.000 PM (23:00:00.000) of the current calendar day
+ * in Wagr's configured application timezone (Asia/Kolkata).
+ * 
+ * Used for Short-Term market resolution dates (daily 11:00 PM resolution schedule).
+ * 
+ * @param {Date} [refDate]
+ * @param {string} [timeZone]
+ * @returns {Date}
+ */
+export const getShortTermResolutionDate = (refDate = new Date(), timeZone = APP_TIMEZONE) => {
+  const { year, month, day, hour } = getISTParts(refDate, timeZone);
 
   let targetYear = year;
   let targetMonth = month;
@@ -47,23 +64,9 @@ export const getShortTermResolutionDate = (refDate = new Date(), timeZone = APP_
     targetDay = nextDayUtc.getUTCDate();
   }
 
-  // Target wall-clock time is 23:00:00.000 on target calendar day in target timezone
-  const targetTimeMs = Date.UTC(targetYear, targetMonth - 1, targetDay, 23, 0, 0, 0);
-
-  const testDate = new Date(targetTimeMs);
-  const tzParts = formatter.formatToParts(testDate);
-  const tzYear = +tzParts.find((p) => p.type === 'year').value;
-  const tzMonth = +tzParts.find((p) => p.type === 'month').value;
-  const tzDay = +tzParts.find((p) => p.type === 'day').value;
-  let tzHour = +tzParts.find((p) => p.type === 'hour').value;
-  if (tzHour === 24) tzHour = 0;
-  const tzMinute = +tzParts.find((p) => p.type === 'minute').value;
-  const tzSecond = +tzParts.find((p) => p.type === 'second').value;
-
-  const tzAsUtcMs = Date.UTC(tzYear, tzMonth - 1, tzDay, tzHour, tzMinute, tzSecond, 0);
-  const offsetMs = tzAsUtcMs - targetTimeMs;
-
-  return new Date(targetTimeMs - offsetMs);
+  // Target wall-clock time is 23:00:00.000 IST. Since IST is UTC+5:30, 23:00 IST = 17:30 UTC on target date
+  const targetUtcMs = Date.UTC(targetYear, targetMonth - 1, targetDay, 17, 30, 0, 0);
+  return new Date(targetUtcMs);
 };
 
 /**
@@ -74,26 +77,22 @@ export const getUpcomingMidnight = (refDate = new Date(), timeZone = APP_TIMEZON
 };
 
 /**
- * Checks if current time is inside the Short-Term daily maintenance window (11:00 PM - 12:05 AM).
+ * Checks if current time is inside the Short-Term daily maintenance/break window (23:00:01 IST - 00:04:59 IST).
  * @param {Date} [refDate]
  * @param {string} [timeZone]
  * @returns {boolean}
  */
 export const isInShortTermMaintenanceWindow = (refDate = new Date(), timeZone = APP_TIMEZONE) => {
-  const formatter = new Intl.DateTimeFormat('en-US', {
-    timeZone,
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false,
-  });
+  const { hour, minute, second } = getISTParts(refDate, timeZone);
 
-  const parts = formatter.formatToParts(refDate);
-  let hour = +parts.find((p) => p.type === 'hour')?.value;
-  if (hour === 24) hour = 0;
-  const minute = +parts.find((p) => p.type === 'minute')?.value;
-
-  // Window is 11:00 PM (23:00) to 12:04 AM (00:04)
-  return hour === 23 || (hour === 0 && minute < 5);
+  // Break window is strictly 11:00:01 PM (23:00:01) to 12:04:59 AM (00:04:59) IST
+  if (hour === 23 && (minute > 0 || second > 0)) {
+    return true;
+  }
+  if (hour === 0 && minute < 5) {
+    return true;
+  }
+  return false;
 };
 
 /**
@@ -105,39 +104,11 @@ export const isInShortTermMaintenanceWindow = (refDate = new Date(), timeZone = 
  * @returns {Date}
  */
 export const getStartOfToday = (refDate = new Date(), timeZone = APP_TIMEZONE) => {
-  const formatter = new Intl.DateTimeFormat('en-US', {
-    timeZone,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: false,
-  });
+  const { year, month, day } = getISTParts(refDate, timeZone);
 
-  const parts = formatter.formatToParts(refDate);
-  const getPart = (type) => parts.find((p) => p.type === type)?.value;
-  const year = +getPart('year');
-  const month = +getPart('month');
-  const day = +getPart('day');
-
-  const targetTimeMs = Date.UTC(year, month - 1, day, 0, 0, 0, 0);
-
-  const testDate = new Date(targetTimeMs);
-  const tzParts = formatter.formatToParts(testDate);
-  const tzYear = +tzParts.find((p) => p.type === 'year').value;
-  const tzMonth = +tzParts.find((p) => p.type === 'month').value;
-  const tzDay = +tzParts.find((p) => p.type === 'day').value;
-  let tzHour = +tzParts.find((p) => p.type === 'hour').value;
-  if (tzHour === 24) tzHour = 0;
-  const tzMinute = +tzParts.find((p) => p.type === 'minute').value;
-  const tzSecond = +tzParts.find((p) => p.type === 'second').value;
-
-  const tzAsUtcMs = Date.UTC(tzYear, tzMonth - 1, tzDay, tzHour, tzMinute, tzSecond, 0);
-  const offsetMs = tzAsUtcMs - targetTimeMs;
-
-  return new Date(targetTimeMs - offsetMs);
+  // Start of today in IST (00:00 IST = previous day 18:30 UTC)
+  const targetUtcMs = Date.UTC(year, month - 1, day, 0, 0, 0, 0) - (5 * 60 + 30) * 60 * 1000;
+  return new Date(targetUtcMs);
 };
 
 /**

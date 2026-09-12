@@ -10,11 +10,11 @@ interface Toast {
   title: string;
   message: string;
   type: string;
+  result?: 'win' | 'loss';
   redirectUrl?: string;
 }
 
 const TYPE_ICONS: Record<string, React.ReactNode> = {
-  'Market Resolved': <Award size={16} className="text-brand-success" />,
   'Market Cancelled': <AlertCircle size={16} className="text-brand-danger" />,
   'Followed Market Updated': <TrendingUp size={16} className="text-brand-blue" />,
   'New Market': <TrendingUp size={16} className="text-brand-purple" />,
@@ -26,6 +26,18 @@ const TYPE_ICONS: Record<string, React.ReactNode> = {
   'Verification': <ShieldCheck size={16} className="text-brand-success" />,
   'Security': <ShieldCheck size={16} className="text-brand-danger" />,
   'Admin Announcement': <AlertCircle size={16} className="text-brand-danger" />,
+};
+
+const getToastIcon = (toast: Toast) => {
+  if (toast.type === 'Market Resolved') {
+    const isWin = toast.result === 'win' || (toast.result !== 'loss' && toast.title.includes('You Won'));
+    return isWin ? (
+      <Award size={16} className="text-brand-success" />
+    ) : (
+      <AlertCircle size={16} className="text-brand-danger" />
+    );
+  }
+  return TYPE_ICONS[toast.type] ?? <Bell size={16} className="text-brand-purple" />;
 };
 
 const MAX_TOASTS = 3;
@@ -51,6 +63,7 @@ const ToastNotification: React.FC = () => {
         title: notification.title,
         message: notification.message,
         type: notification.type,
+        result: notification.result,
         redirectUrl: notification.redirectUrl,
       };
 
@@ -101,7 +114,7 @@ const ToastNotification: React.FC = () => {
 
             <div className="toast-inner">
               <div className="toast-icon">
-                {TYPE_ICONS[toast.type] ?? <Bell size={16} className="text-brand-purple" />}
+                {getToastIcon(toast)}
               </div>
 
               <div className="toast-content">

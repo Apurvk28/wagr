@@ -5,6 +5,9 @@ import User from '../models/user.model.js';
 import { createAndSendNotification } from '../services/notification.service.js';
 import { updateUserStatsAndCheckAchievements } from '../services/achievement.service.js';
 import { executeMarketResolution } from '../services/marketResolution.service.js';
+import { ensureMinimumMarkets } from '../services/cron.service.js';
+import { recordMxpTransaction } from '../services/wallet.service.js';
+import { isInShortTermMaintenanceWindow } from '../utils/dateUtils.js';
 import { escapeRegex } from '../utils/escapeRegex.js';
 
 /**
@@ -14,6 +17,11 @@ import { escapeRegex } from '../utils/escapeRegex.js';
  */
 export const getMarkets = async (req, res, next) => {
   try {
+    // If outside break window, ensure minimum active short-term markets exist
+    if (!isInShortTermMaintenanceWindow()) {
+      await ensureMinimumMarkets('Short-Term').catch((err) => console.error('ensureMinimumMarkets error:', err));
+    }
+
     const { search, category, status, marketType } = req.query;
 
     const query = {};
@@ -265,6 +273,20 @@ export const openTrade = async (req, res, next) => {
       });
       await market.save({ session });
 
+      // Record TRADE_DEBIT transaction in ledger
+      await recordMxpTransaction({
+        userId: user._id,
+        type: 'TRADE_DEBIT',
+        direction: 'DEBIT',
+        amount: tradeAmount,
+        balanceAfter: user.mxpBalance,
+        description: `${outcome} position placed — ${market.title}`,
+        marketId: market._id,
+        positionId: position[0]?._id,
+        referenceId: `trade_${position[0]?._id}`,
+        session,
+      });
+
       await session.commitTransaction();
       session.endSession();
 
@@ -411,6 +433,20 @@ export const closeTrade = async (req, res, next) => {
       });
       await market.save({ session });
 
+      // Record POSITION_CLOSE ledger transaction
+      await recordMxpTransaction({
+        userId: user._id,
+        type: 'POSITION_CLOSE',
+        direction: 'CREDIT',
+        amount: exitVal,
+        balanceAfter: user.mxpBalance,
+        description: `Early position cashout — ${market.title}`,
+        marketId: market._id,
+        positionId: position._id,
+        referenceId: `close_${position._id}`,
+        session,
+      });
+
       await session.commitTransaction();
       session.endSession();
 
@@ -522,6 +558,18 @@ export const cancelMarket = async (req, res, next) => {
       if (participant) {
         participant.mxpBalance += position.investedAmount;
         await participant.save();
+
+        await recordMxpTransaction({
+          userId: participant._id,
+          type: 'MARKET_REFUND',
+          direction: 'CREDIT',
+          amount: position.investedAmount,
+          balanceAfter: participant.mxpBalance,
+          description: `Trade refund — ${market.title}`,
+          marketId: market._id,
+          positionId: position._id,
+          referenceId: `refund_${market._id}_${position._id}`,
+        }).catch((err) => console.error('Error recording refund transaction:', err.message));
       }
 
       // Close position with entry value (break-even refund)

@@ -1,9 +1,10 @@
 import mongoose from 'mongoose';
+import User from '../models/user.model.js';
 import Market from '../models/market.model.js';
 import Position from '../models/position.model.js';
-import User from '../models/user.model.js';
 import { createAndSendNotification } from './notification.service.js';
 import { updateUserStatsAndCheckAchievements } from './achievement.service.js';
+import { recordMxpTransaction } from './wallet.service.js';
 import { getIo } from './socket.service.js';
 
 /**
@@ -128,11 +129,23 @@ export const executeMarketResolution = async (marketId, outcome, resolutionSourc
 
       // Credit winning user's balance inside session
       if (totalPayout > 0) {
-        await User.findByIdAndUpdate(
+        const updatedUser = await User.findByIdAndUpdate(
           userIdStr,
           { $inc: { mxpBalance: totalPayout } },
-          { session }
+          { new: true, session }
         );
+
+        await recordMxpTransaction({
+          userId: userIdStr,
+          type: 'MARKET_PAYOUT',
+          direction: 'CREDIT',
+          amount: totalPayout,
+          balanceAfter: updatedUser.mxpBalance,
+          description: `Market payout — ${market.title}`,
+          marketId: market._id,
+          referenceId: `payout_${market._id}_${userIdStr}`,
+          session,
+        });
       }
 
       userNotificationsToDeliver.push({
@@ -164,15 +177,17 @@ export const executeMarketResolution = async (marketId, outcome, resolutionSourc
             title: `🎉 You Won! Market Resolved: ${outcome}`,
             message: `"${resolvedMarket.title}" has closed. Your prediction was CORRECT! You won ${item.totalPayout} MXP.`,
             type: 'Market Resolved',
+            result: 'win',
             redirectUrl: `/markets/${resolvedMarket._id}`,
           });
         } else {
           const lostAmount = Math.abs(item.netProfitLoss);
           await createAndSendNotification({
             userId: userObj._id,
-            title: `❌ Market Resolved: ${outcome}`,
+            title: `Market Resolved: ${outcome}`,
             message: `"${resolvedMarket.title}" has closed. Your prediction was INCORRECT.${lostAmount > 0 ? ` You lost ${lostAmount} MXP.` : ''}`,
             type: 'Market Resolved',
+            result: 'loss',
             redirectUrl: `/markets/${resolvedMarket._id}`,
           });
         }

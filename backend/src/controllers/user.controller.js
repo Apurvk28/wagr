@@ -5,8 +5,10 @@ import Market from '../models/market.model.js';
 import News from '../models/news.model.js';
 import Insight from '../models/insight.model.js';
 import MxpRequest from '../models/mxpRequest.model.js';
+import MxpTransaction from '../models/mxpTransaction.model.js';
 import { createAndSendNotification } from '../services/notification.service.js';
 import { updateUserStatsAndCheckAchievements } from '../services/achievement.service.js';
+import { recordMxpTransaction } from '../services/wallet.service.js';
 import { getStartOfToday, getUpcomingMidnight } from '../utils/dateUtils.js';
 
 /**
@@ -119,12 +121,73 @@ export const adjustAdminBalance = async (req, res, next) => {
     user.portfolioValue = Math.max(0, user.portfolioValue + diff);
     await user.save();
 
+    await recordMxpTransaction({
+      userId: user._id,
+      type: 'ADMIN_ADJUSTMENT',
+      direction: diff >= 0 ? 'CREDIT' : 'DEBIT',
+      amount: Math.abs(diff),
+      balanceAfter: user.mxpBalance,
+      description: `Admin MXP Balance Adjustment (${diff >= 0 ? '+' : ''}${diff} MXP)`,
+    }).catch((err) => console.error('Error recording admin adjustment transaction:', err.message));
+
     res.status(200).json({
       success: true,
       message: `Balance adjusted by ${diff >= 0 ? '+' : ''}${diff} MXP.`,
       data: {
         mxpBalance: user.mxpBalance,
         portfolioValue: user.portfolioValue,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * @desc    Get authenticated user's MXP transaction ledger history
+ * @route   GET /api/v1/users/transactions
+ * @access  Private
+ */
+export const getUserTransactions = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+
+    // Check if welcome grant exists for this user. If not, auto-backfill it
+    const welcomeExists = await MxpTransaction.findOne({ userId, type: 'WELCOME_GRANT' });
+    if (!welcomeExists) {
+      await recordMxpTransaction({
+        userId,
+        type: 'WELCOME_GRANT',
+        direction: 'CREDIT',
+        amount: 500,
+        balanceAfter: 500,
+        description: 'Initial Account Welcome Grant',
+        referenceId: `welcome_${userId}`,
+      }).catch((err) => console.error('Welcome backfill error:', err.message));
+    }
+
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 50));
+    const skip = (page - 1) * limit;
+
+    const [transactions, totalCount] = await Promise.all([
+      MxpTransaction.find({ userId })
+        .populate('marketId', 'title category marketType')
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit),
+      MxpTransaction.countDocuments({ userId }),
+    ]);
+
+    res.status(200).json({
+      success: true,
+      message: 'Transaction history retrieved successfully.',
+      data: transactions,
+      pagination: {
+        page,
+        limit,
+        totalCount,
+        totalPages: Math.ceil(totalCount / limit),
       },
     });
   } catch (error) {

@@ -11,6 +11,7 @@ import {
   getHomepageSummary,
   requestMxp,
   getUserMxpRequests,
+  getUserTransactions,
 } from '../controllers/user.controller.js';
 import { protect, optional, authorize } from '../middleware/auth.middleware.js';
 
@@ -25,6 +26,7 @@ router.post('/categories/follow', protect, toggleFollowCategory);
 
 router.get('/portfolio', protect, getPortfolio);
 router.get('/trades', protect, getTradingHistory);
+router.get('/transactions', protect, getUserTransactions);
 router.get('/homepage-summary', protect, getHomepageSummary);
 router.post('/request-mxp', protect, requestMxp);
 router.get('/mxp-requests', protect, getUserMxpRequests);

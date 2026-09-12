@@ -17,9 +17,21 @@ interface MxpRequestItem {
   createdAt: string;
 }
 
+interface MxpTransactionItem {
+  _id: string;
+  type: 'WELCOME_GRANT' | 'TRADE_DEBIT' | 'MARKET_PAYOUT' | 'POSITION_CLOSE' | 'MARKET_REFUND' | 'ADMIN_GRANT' | 'ADMIN_ADJUSTMENT';
+  direction: 'CREDIT' | 'DEBIT';
+  amount: number;
+  balanceAfter: number;
+  description: string;
+  marketId?: { _id: string; title: string; category?: string; marketType?: string } | string;
+  createdAt: string;
+}
+
 const WalletPage: React.FC = () => {
   const { user } = useAuth();
   const [requests, setRequests] = useState<MxpRequestItem[]>([]);
+  const [transactions, setTransactions] = useState<MxpTransactionItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Form State
@@ -30,20 +42,24 @@ const WalletPage: React.FC = () => {
   const [formError, setFormError] = useState<string | null>(null);
   const [formSuccess, setFormSuccess] = useState<string | null>(null);
 
-  const fetchRequests = async () => {
+  const fetchWalletData = async () => {
     try {
       setLoading(true);
-      const res = await api.get('/users/mxp-requests');
-      setRequests(res.data.data || []);
+      const [reqRes, txRes] = await Promise.all([
+        api.get('/users/mxp-requests'),
+        api.get('/users/transactions'),
+      ]);
+      setRequests(reqRes.data.data || []);
+      setTransactions(txRes.data.data || []);
     } catch (err) {
-      console.error('Failed to load MXP requests:', err);
+      console.error('Failed to load wallet data:', err);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchRequests();
+    fetchWalletData();
   }, []);
 
   const handleRequestSubmit = async (e: React.FormEvent) => {
@@ -69,7 +85,7 @@ const WalletPage: React.FC = () => {
       setFormSuccess('Your MXP request has been submitted to administrators for review!');
       setReason('');
       setAmount(5000);
-      await fetchRequests();
+      await fetchWalletData();
       setTimeout(() => {
         setShowRequestModal(false);
         setFormSuccess(null);
@@ -78,6 +94,28 @@ const WalletPage: React.FC = () => {
       setFormError(err.response?.data?.message || 'Failed to submit MXP request.');
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const getTransactionIcon = (type: string, direction: string) => {
+    switch (type) {
+      case 'WELCOME_GRANT':
+        return { emoji: '🎁', bg: 'bg-brand-success/15 text-brand-success border-brand-success/30' };
+      case 'TRADE_DEBIT':
+        return { emoji: '📈', bg: 'bg-brand-danger/15 text-brand-danger border-brand-danger/30' };
+      case 'MARKET_PAYOUT':
+        return { emoji: '🏆', bg: 'bg-brand-success/15 text-brand-success border-brand-success/30' };
+      case 'POSITION_CLOSE':
+        return { emoji: '💰', bg: 'bg-brand-blue/15 text-brand-blue border-brand-blue/30' };
+      case 'MARKET_REFUND':
+        return { emoji: '↩️', bg: 'bg-amber-500/15 text-amber-400 border-amber-500/30' };
+      case 'ADMIN_GRANT':
+      case 'ADMIN_ADJUSTMENT':
+        return { emoji: '⚡', bg: 'bg-brand-purple/15 text-brand-purple border-brand-purple/30' };
+      default:
+        return direction === 'CREDIT'
+          ? { emoji: '➕', bg: 'bg-brand-success/15 text-brand-success border-brand-success/30' }
+          : { emoji: '➖', bg: 'bg-brand-danger/15 text-brand-danger border-brand-danger/30' };
     }
   };
 
@@ -122,13 +160,13 @@ const WalletPage: React.FC = () => {
               MXP Wallet & Balances
             </h1>
             <p className="text-xs sm:text-sm text-dark-muted font-medium mt-1">
-              Manage your Market Exchange Points (MXP), track credit grants, and request points directly from administrators.
+              Manage your Market Exchange Points (MXP), track credit grants, and view your complete transaction ledger.
             </p>
           </div>
 
           <div className="flex items-center space-x-3 shrink-0">
             <AnimatedBorderButton
-              onClick={() => exportMxpHistoryPDF(user || {}, requests)}
+              onClick={() => exportMxpHistoryPDF(user || {}, transactions, requests)}
               className="!py-3.5 !px-4"
             >
               <Download size={15} />
@@ -203,57 +241,58 @@ const WalletPage: React.FC = () => {
           </div>
 
           <div className="divide-y divide-dark-border/20">
-            {/* Initial Registration Welcome Grant */}
-            <div className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="flex items-center space-x-3.5">
-                <div className="w-10 h-10 rounded-xl bg-brand-success/15 text-brand-success flex items-center justify-center font-bold text-sm shrink-0 border border-brand-success/30">
-                  🎁
-                </div>
-                <div>
-                  <div className="flex items-center space-x-2">
-                    <span className="text-sm font-black text-white">Initial Account Welcome Grant</span>
-                    <span className="text-[10px] font-extrabold uppercase bg-brand-success/15 text-brand-success border border-brand-success/30 px-2 py-0.5 rounded-full">
-                      Credited
-                    </span>
-                  </div>
-                  <p className="text-xs text-dark-muted font-medium mt-0.5">
-                    Signup welcome credit granted automatically upon account initialization
-                  </p>
-                </div>
+            {loading ? (
+              <div className="py-8 text-center text-xs text-dark-muted">
+                Loading transaction ledger...
               </div>
-
-              <div className="text-right shrink-0">
-                <span className="text-sm font-black text-brand-success">+500 MXP</span>
-                <p className="text-[10px] text-dark-muted font-medium">Account Creation</p>
-              </div>
-            </div>
-
-            {/* Approved Requests as Ledger Entries */}
-            {requests.filter(r => r.status === 'Approved').map(req => (
-              <div key={`ledger-${req._id}`} className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div className="flex items-center space-x-3.5">
-                  <div className="w-10 h-10 rounded-xl bg-brand-purple/15 text-brand-purple flex items-center justify-center font-bold text-sm shrink-0 border border-brand-purple/30">
-                    ⚡
-                  </div>
-                  <div>
-                    <div className="flex items-center space-x-2">
-                      <span className="text-sm font-black text-white">Admin Credit Grant</span>
-                      <span className="text-[10px] font-extrabold uppercase bg-brand-purple/15 text-brand-purple border border-brand-purple/30 px-2 py-0.5 rounded-full">
-                        Approved
-                      </span>
+            ) : transactions.length > 0 ? (
+              transactions.map((tx) => {
+                const icon = getTransactionIcon(tx.type, tx.direction);
+                const isCredit = tx.direction === 'CREDIT';
+                return (
+                  <div key={tx._id} className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="flex items-center space-x-3.5">
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm shrink-0 border ${icon.bg}`}>
+                        {icon.emoji}
+                      </div>
+                      <div>
+                        <div className="flex items-center space-x-2">
+                          <span className="text-sm font-black text-white">{tx.description}</span>
+                          <span className={`text-[10px] font-extrabold uppercase border px-2 py-0.5 rounded-full ${
+                            isCredit
+                              ? 'bg-brand-success/15 text-brand-success border-brand-success/30'
+                              : 'bg-brand-danger/15 text-brand-danger border-brand-danger/30'
+                          }`}>
+                            {tx.direction}
+                          </span>
+                        </div>
+                        <div className="flex items-center space-x-2 mt-0.5">
+                          <span className="text-[10px] text-dark-muted font-medium">{formatDate(tx.createdAt)}</span>
+                          {tx.balanceAfter !== undefined && (
+                            <span className="text-[10px] text-dark-muted/80 font-mono">
+                              • Balance after: {tx.balanceAfter.toLocaleString()} MXP
+                            </span>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                    <p className="text-xs text-dark-muted font-medium mt-0.5">
-                      "{req.reason}"
-                    </p>
-                  </div>
-                </div>
 
-                <div className="text-right shrink-0">
-                  <span className="text-sm font-black text-brand-purple">+{req.amount.toLocaleString()} MXP</span>
-                  <p className="text-[10px] text-dark-muted font-medium">{formatDate(req.createdAt)}</p>
-                </div>
+                    <div className="text-right shrink-0">
+                      <span className={`text-sm font-black ${isCredit ? 'text-brand-success' : 'text-brand-danger'}`}>
+                        {isCredit ? '+' : '-'}{tx.amount.toLocaleString()} MXP
+                      </span>
+                      <p className="text-[10px] text-dark-muted font-mono mt-0.5">
+                        {isCredit ? 'CREDIT' : 'DEBIT'}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <div className="py-8 text-center text-xs text-dark-muted">
+                No ledger transactions recorded yet.
               </div>
-            ))}
+            )}
           </div>
         </div>
 

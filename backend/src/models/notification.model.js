@@ -38,6 +38,11 @@ const notificationSchema = new mongoose.Schema(
         'Admin Announcement',
       ],
     },
+    result: {
+      type: String,
+      enum: ['win', 'loss'],
+      required: false,
+    },
     readStatus: {
       type: Boolean,
       default: false,

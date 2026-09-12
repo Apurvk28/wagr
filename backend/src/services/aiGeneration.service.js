@@ -131,7 +131,7 @@ export const generateMarketsSuggestions = async (marketType) => {
 
     const apiKey = marketType === 'Long-Term'
       ? process.env.LONG_TERM_MARKET_API_KEY
-      : process.env.SHORT_TREM_MARKET_API_KEY;
+      : (process.env.SHORT_TERM_MARKET_API_KEY || process.env.SHORT_TREM_MARKET_API_KEY);
 
     if (!apiKey || apiKey.startsWith('your_') || apiKey.includes('placeholder')) {
       console.warn(`⚠️ Groq API key missing or placeholder for ${marketType}. Skipping market generation.`);
@@ -283,4 +283,85 @@ const insertMarketsSafely = async (markets) => {
   }
   console.log(`🤖 Successfully saved ${created.length} fresh ${markets[0]?.marketType} markets.`);
   return created;
+};
+
+/**
+ * Generates standard high-quality Short-Term daily markets for today's trading session
+ * resolving at 11:00 PM IST today.
+ * 
+ * @param {ObjectId} adminId 
+ * @returns {Array<Object>}
+ */
+export const getFallbackShortTermMarkets = (adminId) => {
+  const resolutionDate = getUpcomingMidnight();
+  return [
+    {
+      title: 'Will the S&P 500 close green today?',
+      description: 'Resolves to YES if the S&P 500 Index closes higher than yesterday\'s close today. Resolves at 11:00 PM IST today.',
+      category: 'Finance',
+      marketType: 'Short-Term',
+      status: 'Live',
+      yesProbability: 51,
+      noProbability: 49,
+      volume: 32400,
+      resolutionDate,
+      createdBy: adminId,
+      participants: [],
+      probabilityHistory: [
+        { yesProbability: 50, timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000) },
+        { yesProbability: 51, timestamp: new Date() }
+      ]
+    },
+    {
+      title: 'Will Google announce a new Gemini update today?',
+      description: 'Resolves to YES if Google officially announces or releases an update to the Gemini model family today.',
+      category: 'Artificial Intelligence',
+      marketType: 'Short-Term',
+      status: 'Live',
+      yesProbability: 45,
+      noProbability: 55,
+      volume: 18900,
+      resolutionDate,
+      createdBy: adminId,
+      participants: [],
+      probabilityHistory: [
+        { yesProbability: 48, timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000) },
+        { yesProbability: 45, timestamp: new Date() }
+      ]
+    },
+    {
+      title: 'Will NVIDIA stock close above $135 today?',
+      description: 'Resolves to YES if NVIDIA common stock closes above $135 in normal Nasdaq trading hours today.',
+      category: 'Finance',
+      marketType: 'Short-Term',
+      status: 'Live',
+      yesProbability: 55,
+      noProbability: 45,
+      volume: 45000,
+      resolutionDate,
+      createdBy: adminId,
+      participants: [],
+      probabilityHistory: [
+        { yesProbability: 50, timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000) },
+        { yesProbability: 55, timestamp: new Date() }
+      ]
+    },
+    {
+      title: 'Will Bitcoin close above $120,000 today?',
+      description: 'Resolves to YES if the index price of Bitcoin closes above $120,000 at 23:59 UTC today on global feeds.',
+      category: 'Finance',
+      marketType: 'Short-Term',
+      status: 'Live',
+      yesProbability: 40,
+      noProbability: 60,
+      volume: 89000,
+      resolutionDate,
+      createdBy: adminId,
+      participants: [],
+      probabilityHistory: [
+        { yesProbability: 42, timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000) },
+        { yesProbability: 40, timestamp: new Date() }
+      ]
+    }
+  ];
 };

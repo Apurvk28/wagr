@@ -208,9 +208,12 @@ export const exportBetsHistoryPDF = (user: PDFUser, positions: any[]) => {
 /**
  * 2. Export MXP Balance & Admin Request History PDF
  */
-export const exportMxpHistoryPDF = (user: PDFUser, requests: any[]) => {
+/**
+ * 2. Export MXP Balance & Ledger History PDF
+ */
+export const exportMxpHistoryPDF = (user: PDFUser, transactions: any[] = [], requests: any[] = []) => {
   const doc = new jsPDF('p', 'mm', 'a4');
-  addPDFHeader(doc, 'MXP Wallet & Credit Log', `Current Balance: ${(user?.mxpBalance || 0).toLocaleString()} MXP`);
+  addPDFHeader(doc, 'MXP Transaction Ledger', `Current Balance: ${(user?.mxpBalance || 0).toLocaleString()} MXP`);
 
   let y = 42;
 
@@ -225,7 +228,7 @@ export const exportMxpHistoryPDF = (user: PDFUser, requests: any[]) => {
   doc.text(`Email: ${user?.email || 'N/A'}`, 18, y + 14);
 
   doc.text(`Available MXP Balance: ${(user?.mxpBalance || 0).toLocaleString()} MXP`, 110, y + 8);
-  doc.text(`Total Credit Submissions: ${requests.length} Requests`, 110, y + 14);
+  doc.text(`Total Ledger Entries: ${transactions.length} Records`, 110, y + 14);
 
   y += 28;
 
@@ -238,20 +241,23 @@ export const exportMxpHistoryPDF = (user: PDFUser, requests: any[]) => {
   doc.setTextColor(255, 255, 255);
 
   doc.text('DATE', 18, y + 5.5);
-  doc.text('REQUESTED AMOUNT', 55, y + 5.5);
-  doc.text('STATUS', 100, y + 5.5);
-  doc.text('REASON / ADMIN NOTE', 135, y + 5.5);
+  doc.text('TYPE', 45, y + 5.5);
+  doc.text('AMOUNT', 75, y + 5.5);
+  doc.text('DESCRIPTION', 105, y + 5.5);
+  doc.text('BALANCE', 170, y + 5.5);
 
   y += 10;
 
   doc.setFontSize(8);
   doc.setFont('helvetica', 'normal');
 
-  requests.forEach((req, idx) => {
+  const itemsToRender = transactions.length > 0 ? transactions : requests;
+
+  itemsToRender.forEach((item, idx) => {
     if (y > 230) {
       addPDFFooter(doc, doc.getNumberOfPages());
       doc.addPage();
-      addPDFHeader(doc, 'MXP Wallet & Credit Log', `Current Balance: ${(user?.mxpBalance || 0).toLocaleString()} MXP`);
+      addPDFHeader(doc, 'MXP Transaction Ledger', `Current Balance: ${(user?.mxpBalance || 0).toLocaleString()} MXP`);
       y = 42;
     }
 
@@ -260,26 +266,29 @@ export const exportMxpHistoryPDF = (user: PDFUser, requests: any[]) => {
       doc.rect(14, y - 4, 182, 8, 'F');
     }
 
-    const dateStr = req.createdAt ? new Date(req.createdAt).toLocaleDateString() : 'N/A';
-    const amountStr = `+${(req.amount || 0).toLocaleString()} MXP`;
-    const status = req.status || 'Pending';
-    const note = (req.adminNote || req.reason || 'N/A').substring(0, 38);
+    const dateStr = item.createdAt ? new Date(item.createdAt).toLocaleDateString() : 'N/A';
+    const isDebit = item.direction === 'DEBIT';
+    const amountStr = item.amount ? `${isDebit ? '-' : '+'}${item.amount.toLocaleString()} MXP` : 'N/A';
+    const typeStr = item.direction || item.status || 'CREDIT';
+    const descStr = (item.description || item.reason || 'Transaction').substring(0, 42);
+    const balanceStr = item.balanceAfter !== undefined ? `${item.balanceAfter.toLocaleString()} MXP` : '—';
 
     doc.setTextColor(31, 41, 55);
     doc.text(dateStr, 18, y);
-    doc.text(amountStr, 55, y);
 
-    if (status === 'Approved') {
-      doc.setTextColor(16, 185, 129);
-    } else if (status === 'Rejected') {
+    if (isDebit) {
       doc.setTextColor(239, 68, 68);
     } else {
-      doc.setTextColor(217, 119, 6);
+      doc.setTextColor(16, 185, 129);
     }
-    doc.text(status, 100, y);
+    doc.text(typeStr, 45, y);
+    doc.text(amountStr, 75, y);
+
+    doc.setTextColor(55, 65, 81);
+    doc.text(descStr, 105, y);
 
     doc.setTextColor(107, 114, 128);
-    doc.text(note, 135, y);
+    doc.text(balanceStr, 170, y);
 
     y += 8;
   });

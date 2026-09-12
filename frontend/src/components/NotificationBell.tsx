@@ -103,11 +103,16 @@ const NotificationBell: React.FC = () => {
     return `${Math.floor(hrs / 24)}d ago`;
   };
 
-  const getTypeIcon = (type: string) => {
+  const getTypeIcon = (notif: Notification) => {
+    if (notif.type === 'Market Resolved') {
+      if (notif.result === 'win') return '✅';
+      if (notif.result === 'loss') return '❌';
+      return notif.title.includes('You Won') ? '✅' : '❌';
+    }
+
     const icons: Record<string, string> = {
       'New Follower': '👤',
       'New Market': '📊',
-      'Market Resolved': '✅',
       'Market Cancelled': '❌',
       'Followed Market Updated': '📰',
       'Admin Announcement': '📢',
@@ -118,7 +123,7 @@ const NotificationBell: React.FC = () => {
       Verification: '✉️',
       Security: '🔒',
     };
-    return icons[type] || '🔔';
+    return icons[notif.type] || '🔔';
   };
 
   return (
@@ -165,7 +170,7 @@ const NotificationBell: React.FC = () => {
                   onClick={() => handleNotificationClick(notif)}
                   id={`notif-${notif._id}`}
                 >
-                  <span className="notif-item-icon">{getTypeIcon(notif.type)}</span>
+                  <span className="notif-item-icon">{getTypeIcon(notif)}</span>
                   <div className="notif-item-body">
                     <p className="notif-item-title">{notif.title}</p>
                     <p className="notif-item-message">{notif.message}</p>

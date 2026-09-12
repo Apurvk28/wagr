@@ -108,6 +108,7 @@ export interface Notification {
   title: string;
   message: string;
   type: NotificationType;
+  result?: 'win' | 'loss';
   isRead: boolean;
   redirectUrl?: string;
   createdAt: string;

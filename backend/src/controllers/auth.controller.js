@@ -1,4 +1,6 @@
 import User from '../models/user.model.js';
+import { createAndSendNotification } from '../services/notification.service.js';
+import { recordMxpTransaction } from '../services/wallet.service.js';
 
 // Minimum 8 characters, at least 1 uppercase letter, 1 lowercase letter, 1 number, and 1 special character
 const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
@@ -76,6 +78,17 @@ export const register = async (req, res, next) => {
       mxpBalance: initialBalance,
       portfolioValue: initialBalance,
     });
+
+    // Record Initial Account Welcome Grant ledger transaction
+    await recordMxpTransaction({
+      userId: user._id,
+      type: 'WELCOME_GRANT',
+      direction: 'CREDIT',
+      amount: initialBalance,
+      balanceAfter: initialBalance,
+      description: 'Initial Account Welcome Grant',
+      referenceId: `welcome_${user._id}`,
+    }).catch((err) => console.error('Error recording welcome grant transaction:', err.message));
 
     // 6. Generate JWT immediately & Set httpOnly cookie
     const jwtToken = user.generateJWT();

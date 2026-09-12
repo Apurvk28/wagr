@@ -8,6 +8,7 @@ import { checkExpiredMarkets } from '../services/cron.service.js';
 import { generateMarketsSuggestions } from '../services/aiGeneration.service.js';
 import { syncAiNewsFromGroq } from '../services/aiNews.service.js';
 import { createAndSendNotification } from '../services/notification.service.js';
+import { recordMxpTransaction } from '../services/wallet.service.js';
 import { escapeRegex } from '../utils/escapeRegex.js';
 
 /**
@@ -303,6 +304,19 @@ export const approveMxpRequest = async (req, res, next) => {
       session.endSession();
       return res.status(404).json({ success: false, message: 'User account not found.' });
     }
+
+    // Record ADMIN_GRANT transaction in ledger
+    await recordMxpTransaction({
+      userId: request.userId,
+      type: 'ADMIN_GRANT',
+      direction: 'CREDIT',
+      amount: request.amount,
+      balanceAfter: user.mxpBalance,
+      description: `Admin MXP Grant${request.reason ? `: "${request.reason}"` : ''}`,
+      requestId: request._id,
+      referenceId: `admin_grant_${request._id}`,
+      session,
+    });
 
     // Commit transaction cleanly
     await session.commitTransaction();

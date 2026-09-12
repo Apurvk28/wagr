@@ -10,7 +10,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { AnimatedBorderButton } from '../components/ui/AnimatedBorderButton';
 import { LiveClock } from '../components/LiveClock';
-import { formatOpeningTime } from '../utils';
+import { formatOpeningTime, isShortTermBreakWindow } from '../utils';
 
 const Categories = [
   'All',
@@ -307,9 +307,10 @@ const MarketsList: React.FC = () => {
             const shortTerm = sortedMarkets.filter(m => m.marketType === 'Short-Term');
             const longTerm = sortedMarkets.filter(m => m.marketType === 'Long-Term' || !m.marketType);
 
-            // 3. Apply Market Type filters
+            // 3. Apply Market Type filters & Break window check
             const showShortTerm = marketType === 'All' || marketType === 'Short-Term';
             const showLongTerm = marketType === 'All' || marketType === 'Long-Term';
+            const isBreakTime = isShortTermBreakWindow();
 
             return (
               <div className="space-y-12 animate-fade-in">
@@ -325,13 +326,7 @@ const MarketsList: React.FC = () => {
                         Closes Today
                       </span>
                     </div>
-                    {shortTerm.length > 0 ? (
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        {shortTerm.slice(0, 9).map((market) => (
-                          <MarketCard key={market._id} market={market} isDailyFlash={true} />
-                        ))}
-                      </div>
-                    ) : (
+                    {isBreakTime ? (
                       <div className="bg-dark-card/60 border border-brand-purple/35 rounded-3xl p-8 text-center space-y-4 relative overflow-hidden shadow-2xl">
                         <div className="absolute top-0 right-0 w-64 h-64 bg-brand-purple/10 rounded-full blur-3xl pointer-events-none" />
                         
@@ -355,6 +350,20 @@ const MarketsList: React.FC = () => {
                             <span className="text-brand-purple font-mono">{formatOpeningTime()}</span>
                           </span>
                         </div>
+                      </div>
+                    ) : shortTerm.length > 0 ? (
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        {shortTerm.slice(0, 9).map((market) => (
+                          <MarketCard key={market._id} market={market} isDailyFlash={true} />
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="bg-dark-card/30 border border-dark-border/40 rounded-2xl py-8 text-center">
+                        <p className="text-xs text-dark-muted">
+                          {searchTerm || selectedCategory !== 'All'
+                            ? 'No Short-Term contracts match your search or filter criteria.'
+                            : "Updating today's Short-Term markets... Please refresh in a moment."}
+                        </p>
                       </div>
                     )}
                   </div>

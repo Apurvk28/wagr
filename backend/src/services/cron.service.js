@@ -2,7 +2,7 @@ import cron from 'node-cron';
 import Market from '../models/market.model.js';
 import User from '../models/user.model.js';
 import { syncAiNewsFromGroq } from './aiNews.service.js';
-import { generateMarketsSuggestions } from './aiGeneration.service.js';
+import { generateMarketsSuggestions, getFallbackShortTermMarkets } from './aiGeneration.service.js';
 import { simulateMarketSentiment } from './aiSentiment.service.js';
 import { executeMarketResolution } from './marketResolution.service.js';
 import { APP_TIMEZONE, isInShortTermMaintenanceWindow } from '../utils/dateUtils.js';
@@ -59,6 +59,16 @@ export const ensureMinimumMarkets = async (marketType) => {
           { status: 'Pending Approval', marketType },
           { $set: { status: 'Live' } }
         );
+      } else if (marketType === 'Short-Term') {
+        const admin = (process.env.SEED_ADMIN_EMAIL ? await User.findOne({ email: process.env.SEED_ADMIN_EMAIL }) : null) || await User.findOne({ role: 'Admin' });
+        const adminId = admin ? admin._id : null;
+        const fallbacks = getFallbackShortTermMarkets(adminId);
+        for (const fb of fallbacks) {
+          const exists = await Market.findOne({ title: fb.title, status: 'Live', resolutionDate: { $gt: now } });
+          if (!exists) {
+            await Market.create(fb);
+          }
+        }
       }
     }
   } catch (error) {
@@ -71,6 +81,10 @@ export const ensureMinimumMarkets = async (marketType) => {
  */
 export const startCronJobs = () => {
   console.log('⏰ Initializing Wagr Cron Schedulers...');
+
+  // Run immediate initial check on boot
+  ensureMinimumMarkets('Short-Term').catch((err) => console.error('[Cron] Initial Short-Term check error:', err.message));
+  ensureMinimumMarkets('Long-Term').catch((err) => console.error('[Cron] Initial Long-Term check error:', err.message));
 
   // 1. Every Minute: Check for expired markets and resolve them
   cron.schedule('* * * * *', async () => {

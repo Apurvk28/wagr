@@ -13,7 +13,7 @@ import { getIo } from './socket.service.js';
  */
 export const createAndSendNotification = async (data) => {
   try {
-    const { userId, sender, title, message, type, redirectUrl } = data;
+    const { userId, sender, title, message, type, result, redirectUrl } = data;
 
     if (!userId || !title || !message || !type || !redirectUrl) {
       console.warn('⚠️ Missing required fields for notification creation:', data);
@@ -27,6 +27,7 @@ export const createAndSendNotification = async (data) => {
       title,
       message,
       type,
+      result: result || null,
       redirectUrl,
     });
 
