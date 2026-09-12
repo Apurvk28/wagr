@@ -80,17 +80,22 @@ export const register = async (req, res, next) => {
     // 6. Generate JWT immediately & Set httpOnly cookie
     const jwtToken = user.generateJWT();
 
+    const isProduction = process.env.NODE_ENV === 'production';
+    const cookieSecure = process.env.COOKIE_SECURE !== undefined
+      ? process.env.COOKIE_SECURE === 'true'
+      : isProduction;
+    const cookieSameSite = process.env.COOKIE_SAME_SITE || (cookieSecure ? 'none' : 'lax');
+
     res.cookie('wagr_jwt', jwtToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.COOKIE_SAME_SITE || 'lax',
+      secure: cookieSecure,
+      sameSite: cookieSameSite,
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
     res.status(201).json({
       success: true,
       message: 'Registration successful! Welcome to Wagr.io.',
-      token: jwtToken,
       data: {
         id: user._id,
         fullName: user.fullName,
@@ -149,7 +154,15 @@ export const login = async (req, res, next) => {
       });
     }
 
-    // 3. Compare passwords
+    // 3. Check suspension status
+    if (user.isSuspended) {
+      return res.status(403).json({
+        success: false,
+        message: 'Your account has been suspended.',
+      });
+    }
+
+    // 4. Compare passwords
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
       return res.status(401).json({
@@ -158,20 +171,25 @@ export const login = async (req, res, next) => {
       });
     }
 
-    // 4. Generate JWT token & Set httpOnly cookie
+    // 5. Generate JWT token & Set httpOnly cookie
     const jwtToken = user.generateJWT();
+
+    const isProduction = process.env.NODE_ENV === 'production';
+    const cookieSecure = process.env.COOKIE_SECURE !== undefined
+      ? process.env.COOKIE_SECURE === 'true'
+      : isProduction;
+    const cookieSameSite = process.env.COOKIE_SAME_SITE || (cookieSecure ? 'none' : 'lax');
 
     res.cookie('wagr_jwt', jwtToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.COOKIE_SAME_SITE || 'lax',
+      secure: cookieSecure,
+      sameSite: cookieSameSite,
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
     res.status(200).json({
       success: true,
       message: 'Login successful.',
-      token: jwtToken,
       data: {
         id: user._id,
         fullName: user.fullName,

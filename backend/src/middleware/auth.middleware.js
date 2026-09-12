@@ -36,6 +36,13 @@ export const protect = async (req, res, next) => {
       });
     }
 
+    if (user.isSuspended) {
+      return res.status(403).json({
+        success: false,
+        message: 'Your account has been suspended.',
+      });
+    }
+
     req.user = user;
     next();
   } catch (error) {
@@ -79,7 +86,7 @@ export const optional = async (req, res, next) => {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const user = await User.findById(decoded.id);
-    if (user) {
+    if (user && !user.isSuspended) {
       req.user = user;
     }
     next();

@@ -14,10 +14,15 @@ connectDB();
 // Create HTTP server
 const server = http.createServer(app);
 
+// Determine allowed origins for Socket.IO CORS
+const allowedOrigins = process.env.CLIENT_URL
+  ? process.env.CLIENT_URL.split(',').map((url) => url.trim().replace(/\/$/, ''))
+  : ['http://localhost:3003', 'http://localhost:5173'];
+
 // Integrate Socket.io
 const io = new Server(server, {
   cors: {
-    origin: process.env.CLIENT_URL || 'http://localhost:5173',
+    origin: allowedOrigins,
     methods: ['GET', 'POST'],
     credentials: true,
   },
@@ -33,10 +38,16 @@ startCronJobs();
 // Set global Socket.io instance for routes/services usage
 app.set('io', io);
 
-// Production check for SPECIAL_ACCESS_KEY
-if (process.env.NODE_ENV === 'production' && !process.env.SPECIAL_ACCESS_KEY) {
-  console.error('❌ SPECIAL_ACCESS_KEY is required in production. Exiting.');
-  process.exit(1);
+// Production environment mandatory security checks
+if (process.env.NODE_ENV === 'production') {
+  if (!process.env.JWT_SECRET) {
+    console.error('❌ FATAL: JWT_SECRET environment variable is missing in production. Exiting.');
+    process.exit(1);
+  }
+  if (!process.env.SPECIAL_ACCESS_KEY) {
+    console.error('❌ FATAL: SPECIAL_ACCESS_KEY environment variable is missing in production. Exiting.');
+    process.exit(1);
+  }
 }
 
 // Start server

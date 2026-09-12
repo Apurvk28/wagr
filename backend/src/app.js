@@ -26,9 +26,19 @@ const app = express();
 // Security HTTP headers
 app.use(helmet());
 
-// CORS configuration
+// CORS configuration with whitelist protection
+const allowedOrigins = process.env.CLIENT_URL
+  ? process.env.CLIENT_URL.split(',').map((url) => url.trim().replace(/\/$/, ''))
+  : ['http://localhost:3003', 'http://localhost:5173'];
+
 const corsOptions = {
-  origin: process.env.CLIENT_URL || 'http://localhost:5173',
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin.replace(/\/$/, ''))) {
+      callback(null, true);
+    } else {
+      callback(new Error('CORS policy: Origin not allowed by CLIENT_URL whitelist'));
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'X-Wagr-CSRF'],
@@ -98,13 +108,17 @@ app.get('/api/v1/health', (req, res) => {
   });
 });
 
-// Centralized error handling middleware
+// Centralized error handling middleware (sanitized for production)
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(err.status || 500).json({
+  console.error('[Unhandled Error]', err.stack || err.message);
+
+  const isProd = process.env.NODE_ENV === 'production';
+  const statusCode = err.status || err.statusCode || 500;
+
+  res.status(statusCode).json({
     success: false,
-    message: err.message || 'Internal Server Error',
-    errors: err.errors || [],
+    message: isProd && statusCode === 500 ? 'Internal Server Error' : (err.message || 'Internal Server Error'),
+    ...(isProd ? {} : { errors: err.errors || [] }),
   });
 });
 
