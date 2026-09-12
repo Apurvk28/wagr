@@ -36,7 +36,7 @@ const WalletPage: React.FC = () => {
 
   // Form State
   const [showRequestModal, setShowRequestModal] = useState(false);
-  const [amount, setAmount] = useState<number | ''>(5000);
+  const [amount, setAmount] = useState<number | ''>(500);
   const [reason, setReason] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -67,8 +67,8 @@ const WalletPage: React.FC = () => {
     setFormError(null);
     setFormSuccess(null);
 
-    if (!amount || Number(amount) < 100) {
-      setFormError('Please enter a valid amount (minimum 100 MXP).');
+    if (!amount || Number(amount) < 100 || Number(amount) > 500) {
+      setFormError('Please enter a valid amount (between 100 and 500 MXP).');
       return;
     }
     if (!reason.trim()) {
@@ -84,7 +84,7 @@ const WalletPage: React.FC = () => {
       });
       setFormSuccess('Your MXP request has been submitted to administrators for review!');
       setReason('');
-      setAmount(5000);
+      setAmount(500);
       await fetchWalletData();
       setTimeout(() => {
         setShowRequestModal(false);
@@ -340,10 +340,10 @@ const WalletPage: React.FC = () => {
                   <input
                     type="number"
                     min={100}
-                    max={100000}
+                    max={500}
                     value={amount}
                     onChange={(e) => setAmount(e.target.value ? Number(e.target.value) : '')}
-                    placeholder="e.g. 5000"
+                    placeholder="e.g. 500"
                     className="w-full bg-dark/60 border border-dark-border rounded-xl px-4 py-3 text-sm font-bold text-white focus:outline-none focus:border-brand-purple"
                   />
                   <span className="absolute right-4 top-3 text-xs font-bold text-brand-purple">MXP</span>

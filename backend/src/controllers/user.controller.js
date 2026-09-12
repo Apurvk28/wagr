@@ -682,11 +682,11 @@ export const getHomepageSummary = async (req, res, next) => {
  */
 export const requestMxp = async (req, res, next) => {
   try {
-    const { amount, reason } = req.body;
-    if (!amount || amount < 100 || !reason || !reason.trim()) {
+    const reqAmount = Number(amount);
+    if (!reqAmount || reqAmount < 100 || reqAmount > 500 || !reason || !reason.trim()) {
       return res.status(400).json({
         success: false,
-        message: 'Please provide a valid requested amount (min 100 MXP) and reason.',
+        message: 'Please provide a valid requested amount (between 100 and 500 MXP) and reason.',
       });
     }
 
