@@ -23,6 +23,9 @@ import { csrfProtection } from './middleware/csrf.middleware.js';
 
 const app = express();
 
+// Trust reverse proxy (1 hop for Render) so express-rate-limit receives real client IP
+app.set('trust proxy', 1);
+
 // Security HTTP headers
 app.use(helmet());
 
