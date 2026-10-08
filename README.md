@@ -32,6 +32,8 @@ Wagr.io is a state-of-the-art fintech prediction exchange platform that enables 
 - **Risk-Free Sandbox Trading**: New users start with **1,000 MXP**. Daily login streaks reward active predictors.
 - **MXP Credit Request Portal**: Users can submit formal MXP balance credit requests with custom justifications directly to system administrators for review.
 - **Transaction Audit Trail**: Detailed ledger tracking initial grants, trade purchases, early cashouts, contract payouts, daily streak bonuses, and admin credits.
+- hi
+- 
 
 ### 6. Client-Side PDF Export System
 - Formatted PDF report generation powered by `jspdf` for:
